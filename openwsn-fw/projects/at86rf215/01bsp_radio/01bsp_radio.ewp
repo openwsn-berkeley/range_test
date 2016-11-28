@@ -390,11 +390,10 @@
         </option>
         <option>
           <name>newCCIncludePaths</name>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\cc1200dk\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\bsp\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -756,7 +755,7 @@
         </option>
         <option>
           <name>SecondaryOutputFile</name>
-          <state></state>
+          <state>(None for the selected format)</state>
         </option>
         <option>
           <name>XDefines</name>
@@ -808,7 +807,7 @@
         </option>
         <option>
           <name>XclFile</name>
-          <state>lnk0t.xcl</state>
+          <state>$TOOLKIT_DIR$\config\linker\lnk430f5438a.xcl</state>
         </option>
         <option>
           <name>XclFileSlave</name>
@@ -896,7 +895,7 @@
         </option>
         <option>
           <name>xcProgramEntryLabel</name>
-          <state></state>
+          <state>__program_start</state>
         </option>
         <option>
           <name>DebugInformation</name>
@@ -936,7 +935,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state></state>
+          <state>01bsp_radio.a43</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
@@ -1101,7 +1100,11 @@
         <debug>1</debug>
         <option>
           <name>CUTest</name>
-          <state>###Uninitialized###</state>
+          <state>-I$TOOLKIT_DIR$\inc</state>
+          <state>-@$TOOLKIT_DIR$\bin\iar.cmd</state>
+          <state>-@$PROJ_DIR$\source.txt</state>
+          <state>-@$PROJ_DIR$\include.txt</state>
+          <state>--preinclude=$PROJ_DIR$\IAR_ULPAdvisor_Defs.h</state>
         </option>
         <option>
           <name>ULPRules</name>
@@ -1114,7 +1117,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state></state>
+          <state>$PROJ_FNAME$.ulp</state>
         </option>
         <option>
           <name>ULPStatus</name>
@@ -2253,11 +2256,17 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\01bsp_radio\01bsp_radio.c</name>
+      <name>$PROJ_DIR$\01bsp_radio.c</name>
     </file>
   </group>
   <group>
     <name>bsp</name>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\at86rf215.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\at86rf215.h</name>
+    </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\cc1200dk\board.c</name>
     </file>
@@ -2280,12 +2289,6 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc1200\cc1200.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc1200\cc1200.h</name>
-    </file>
-    <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\cc1200dk\debugpins.c</name>
     </file>
     <file>
@@ -2298,10 +2301,10 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc1200\radio.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\radio.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\radio.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\cc1200dk\radiotimer.c</name>
@@ -2310,10 +2313,10 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\cc1200dk\spi.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\spi.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\spi.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\spi.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\cc1200dk\uart.c</name>

@@ -1943,11 +1943,17 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\01bsp_radio_tx\01bsp_radio_tx.c</name>
+      <name>$PROJ_DIR$\01bsp_radio_tx.c</name>
     </file>
   </group>
   <group>
     <name>bsp</name>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\at86rf215.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\at86rf215.h</name>
+    </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\cc1200dk\board.c</name>
     </file>
@@ -1961,19 +1967,13 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\cc1200dk\bsp.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\bsp.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\cc1200dk\bsp.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\cc1200dk\bsp_timer.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc1200\cc1200.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc1200\cc1200.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\cc1200dk\debugpins.c</name>
@@ -1988,10 +1988,10 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc1200\radio.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\radio.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\radio.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\cc1200dk\radiotimer.c</name>
@@ -2000,10 +2000,10 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\cc1200dk\spi.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\spi.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\spi.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\spi.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\cc1200dk\uart.c</name>
