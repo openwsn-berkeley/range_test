@@ -1,0 +1,55 @@
+import os
+import distutils.sysconfig
+
+Import('env')
+
+localEnv = env.Clone()
+
+sources_h = [
+    'board.h',
+    'bsp_timer.h',
+    'crypto_engine.h',
+    'debugpins.h',
+    'eui64.h',
+    'leds.h',
+    'radio.h',
+    'radiotimer.h',
+    'uart.h',
+]
+
+#============================ SCons targets ===================================
+
+if localEnv['board']=='python':
+    
+    actions = []
+    
+    for s in sources_h:
+        action = localEnv.Objectify(
+            target = localEnv.ObjectifiedFilename(s),
+            source = s,
+        )
+        actions += [action]
+    
+    Alias('objectifybspheaders', actions)
+
+board = localEnv.SConscript(
+    os.path.join('#','bsp','boards',localEnv['board'],'SConscript'),
+    variant_dir = localEnv['board'],
+    exports     = {'env': env},
+)
+
+common = localEnv.SConscript(
+    os.path.join('#','bsp','boards','common','SConscript'),
+    variant_dir = 'common',
+    exports     = {'env': env},
+)
+
+source = [board, common]
+
+target = 'libbsp'
+
+libbsp = localEnv.Library(
+    target=target,
+    source=source,
+)
+Alias('libbsp', libbsp)
