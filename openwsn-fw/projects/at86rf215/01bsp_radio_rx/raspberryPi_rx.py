@@ -67,7 +67,7 @@ def gps():
             ser.flushInput()
         else:
             print GPS_frame
-            if GPS_frame[9:13] == '0000' or  GPS_frame[9:13] == '3000': # each 30 minutes sharp
+            if GPS_frame[9:13] == '4800' or  GPS_frame[9:13] == '5000': # each 30 minutes sharp
                 GPS_synchro = True
                 print "c'est parti" 
             else:
@@ -78,8 +78,12 @@ def gps():
 mote_msp = None
 gps()
 mote_msp = mote_msp430_at86()
-mote_msp.write('G') #make sure you get an answer TODO
-
+mote_msp.write('GO') #make sure you get an answer TODO
+asnwer = []
+ok = ['O','K']
+while answer != ok:
+    byte = mote_msp.read(1)
+    answer += [ord(byte)]
 #============================ read ============================================
 
 rawFrame = []
