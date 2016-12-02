@@ -35,8 +35,8 @@ def mote_connect(motename=None , serialport= None, baudrate='115200'):
         raw_input('Press Enter to close.')
         sys.exit(1)
 
-def mote_msp430_at86(serialport= '/dev/moteTRX', baudrate='115200'):
-
+def mote_msp430_at86(serialport= 'COM23', baudrate='115200'):
+    #linux serialport= '/dev/gps'
     mote_msp = serial.Serial(serialport, baudrate)
     return mote_msp
 
@@ -78,12 +78,10 @@ def gps():
 mote_msp = None
 gps()
 mote_msp = mote_msp430_at86()
-mote_msp.write('GO') #make sure you get an answer TODO
-asnwer = []
-ok = ['O','K']
-while answer != ok:
-    byte = mote_msp.read(1)
-    answer += [ord(byte)]
+#mote_msp.write('GO') #make sure you get an answer TODO
+mote_msp.write('G')
+mote_msp.write('O')
+
 #============================ read ============================================
 
 rawFrame = []
