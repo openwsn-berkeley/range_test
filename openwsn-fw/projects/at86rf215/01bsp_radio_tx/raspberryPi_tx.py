@@ -35,13 +35,12 @@ def mote_connect(motename=None , serialport= None, baudrate='115200'):
         raw_input('Press Enter to close.')
         sys.exit(1)
 
-def mote_msp430_at86(serialport= 'COM23', baudrate='115200'):
-    #linux serialport= '/dev/gps'
+def mote_msp430_at86(serialport= '/dev/moteTRX', baudrate='115200'):
+
     mote_msp = serial.Serial(serialport, baudrate)
     return mote_msp
 
 def gps():
-    GPS_location = []
     GPS_fix = False
     GPS_synchro = False
     ser = serial.Serial('/dev/gps', 9600)
@@ -53,7 +52,7 @@ def gps():
             print "not locked"
         else:
             print GPS_frame
-            if GPS_frame[57] != '280606': #when switched on, GPS provides this time meanwhile gets the current date
+            if GPS_frame[57] != '280606':
                 GPS_fix = True
                 print "valid time"
             else:
@@ -68,35 +67,33 @@ def gps():
             ser.flushInput()
         else:
             print GPS_frame
-            if GPS_frame[9:13] == '4800' or  GPS_frame[9:13] == '5000': # each 30 minutes sharp
+            if GPS_frame[9:13] == '5700' or  GPS_frame[9:13] == '5800':
                 GPS_synchro = True
                 print "c'est parti"
-                GPS_location = GPS_frame[20:42]              
             else:
                 ser.flushInput()
-    return GPS_location
+    return 1
 
 #============================ configuration and connection ===================================
 mote_msp = None
-location = gps()
+gps()
 mote_msp = mote_msp430_at86()
+print "ay caramba"
 mote_msp.write('G')
-mote_msp.write('O')
+print "muchacho"
 
 #============================ read ============================================
 
 rawFrame = []
 logging.basicConfig(filename='log.txt', filemode='w+', level=logging.DEBUG)
-latitude, longitude = location [:11], location[11:]
-logging.info('latitude={0:<11} longitude={1:<11}'.format(latitude, longitude))
 
 while True:
-    
+
     byte  = mote_msp.read(1)
     rawFrame += [ord(byte)]
-    
+
     if rawFrame[-3:]==[0xff]*3 and len(rawFrame)>=10:
-        
+
         (rxpk_len,rxpk_num,rxpk_rssi,rxpk_crc,rxpk_mcs) = \
             struct.unpack('>HHbBB', ''.join([chr(b) for b in rawFrame[-10:-3]]))
         print 'len={0:<4} num={1:<5} rssi={2:<4} crc={3}  mcs={4}'.format(
@@ -104,7 +101,7 @@ while True:
             rxpk_num,
             rxpk_rssi,
             rxpk_crc,
-			rxpk_mcs
+            rxpk_mcs
         )
         logging.info('len={0:<4} num={1:<5} rssi={2:<4} crc={3}  mcs={4}'.format(
             rxpk_len,
@@ -115,5 +112,6 @@ while True:
         ))
         if rxpk_len>2047:
             print "ERROR: frame too long.\a"
-        
+
         rawFrame = []
+
