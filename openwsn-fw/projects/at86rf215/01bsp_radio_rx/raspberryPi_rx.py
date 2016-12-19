@@ -35,7 +35,7 @@ def mote_connect(motename=None , serialport= None, baudrate='115200'):
         raw_input('Press Enter to close.')
         sys.exit(1)
 
-def mote_msp430_at86(serialport= 'COM23', baudrate='115200'):
+def mote_msp430_at86(serialport= 'COM8', baudrate='115200'):
     #linux serialport= '/dev/gps'
     mote_msp = serial.Serial(serialport, baudrate)
     return mote_msp
@@ -78,7 +78,8 @@ def gps():
 
 #============================ configuration and connection ===================================
 mote_msp = None
-location = gps()
+#location = gps()
+location = "123456789012345678901234"
 mote_msp = mote_msp430_at86()
 mote_msp.write('G')
 mote_msp.write('O')
@@ -87,8 +88,9 @@ mote_msp.write('O')
 
 rawFrame = []
 logging.basicConfig(filename='log.txt', filemode='w+', level=logging.DEBUG)
-latitude, longitude = location [:11], location[11:]
-logging.info('latitude={0:<11} longitude={1:<11}'.format(latitude, longitude))
+latitude, longitude = location [:11], location[13:]
+logging.info('location =  %s', location)
+print location
 
 while True:
     
