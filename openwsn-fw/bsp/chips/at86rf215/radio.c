@@ -60,8 +60,8 @@ void radio_init(void) {
       while(1); //UNKNOWN DEVICE, FINISH
     }
     // Write registers to radio
-    for(uint16_t i = 0; i < (sizeof(basic_settings_fsk_option2)/sizeof(registerSetting_t)); i++) {
-        at86rf215_spiWriteReg( basic_settings_fsk_option2[i].addr, basic_settings_fsk_option2[i].data);
+    for(uint16_t i = 0; i < (sizeof(basic_settings_fsk_option2_FEC)/sizeof(registerSetting_t)); i++) {
+        at86rf215_spiWriteReg( basic_settings_fsk_option2_FEC[i].addr, basic_settings_fsk_option2_FEC[i].data);
     };
     radio_read_isr(&radio_vars.rf09_isr);
 }
@@ -89,37 +89,6 @@ void radio_reprogram(const registerSetting_t* modulation, uint8_t size){
 
 void radio_change_modulation_rx(){
 
-    switch(PPS){
-        case (5):
-            radio_reprogram(basic_settings_ofdm_1_mcs0, sizeof(basic_settings_ofdm_1_mcs0)/sizeof(registerSetting_t));
-            break;
-        case (80):
-            radio_reprogram(basic_settings_ofdm_2_mcs0, sizeof(basic_settings_ofdm_2_mcs0)/sizeof(registerSetting_t));
-            break;
-        case (220):
-            radio_reprogram(basic_settings_ofdm_3_mcs1, sizeof(basic_settings_ofdm_3_mcs1)/sizeof(registerSetting_t));
-            break;
-        case (370):
-            radio_reprogram(basic_settings_ofdm_4_mcs2, sizeof(basic_settings_ofdm_4_mcs2)/sizeof(registerSetting_t));
-            break;
-        case (520):
-            radio_reprogram(basic_settings_fsk_option1_FEC, sizeof(basic_settings_fsk_option1_FEC)/sizeof(registerSetting_t));
-            break;
-        case (640):
-            radio_reprogram(basic_settings_fsk_option2_FEC, sizeof(basic_settings_fsk_option2_FEC)/sizeof(registerSetting_t));
-            break;
-        case (710):
-            radio_reprogram(basic_settings_fsk_option1, sizeof(basic_settings_fsk_option1)/sizeof(registerSetting_t));
-            break;
-        case (780):
-            radio_reprogram(basic_settings_fsk_option2, sizeof(basic_settings_fsk_option2)/sizeof(registerSetting_t));
-            break;
-        case (820):
-            radio_reprogram(basic_settings_oqpsk_rate1, sizeof(basic_settings_oqpsk_rate1)/sizeof(registerSetting_t));
-            break;
-        default:
-            break;
-    }
 }
 
 void radio_change_size(uint16_t* size){
@@ -127,17 +96,17 @@ void radio_change_size(uint16_t* size){
     *size = sizes[i%4];
     i++;
 }
-/*
+
 void radio_change_modulation(){
     static int mod_list = 1;
     at86rf215_spiStrobe(CMD_RF_TRXOFF);
     while(at86rf215_status() != RF_STATE_TRXOFF);
     for(uint16_t i = 0; i < (sizeof(basic_settings_fsk_option1)/sizeof(registerSetting_t)); i++) {
-        at86rf215_spiWriteReg( modulation_list[mod_list%5][i].addr, modulation_list[mod_list%5][i].data);
+        at86rf215_spiWriteReg( basic_settings_fsk_option1[mod_list%5][i].addr, basic_settings_fsk_option1[mod_list%5][i].data);
         };
     radio_read_isr(&radio_vars.rf09_isr);
     mod_list++;
-}*/
+}
 
 void radio_setOverflowCb(radiotimer_compare_cbt cb) {
     radiotimer_setOverflowCb(cb);
@@ -373,11 +342,11 @@ kick_scheduler_t radio_isr() {
             }
             break;
         case 12:
-            P1IFG &= ~(BIT5);
-            PPS++;
-            if (PPS == 5 || PPS == 75 || PPS == 215 || PPS == 365 || PPS == 515 || PPS == 635 || PPS == 705 || PPS == 775 || PPS == 815){
-                radio_vars.pps_check = TRUE;
-            }
+//            P1IFG &= ~(BIT5);
+//            PPS++;
+//            if (PPS == 5 || PPS == 75 || PPS == 215 || PPS == 365 || PPS == 515 || PPS == 635 || PPS == 705 || PPS == 775 || PPS == 815){
+//                radio_vars.pps_check = TRUE;
+//            }
             break;
         case 14:
             break;
