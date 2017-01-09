@@ -1,6 +1,7 @@
 import spidev
 import RPi.GPIO as GPIO
 import at86rf215 as at86
+SIZE_ITERATION = 0
 
 def init_spi():
     spi = spidev.SpiDev()
@@ -49,6 +50,8 @@ def set_frequency(channel_set_up):
 def modem_off():
     write_spi(at86.RG_RF09_CMD, at86.CMD_RF_TRXOFF)
 
+def change_pkt_size(sizes, size):
+    return sizes[size]
 
 # TX
 def load_packet(packet):
@@ -81,4 +84,7 @@ def get_received_frame():
     crc = (trx_spi(at86.RG_BBC0_PC)) >> 5
     mcs = trx_spi(at86.RG_BBC0_OFDMPHRRX) & at86.OFDMPHRRX_MCS_MASK
     return pkt_rcv, rssi, crc, mcs
+
+# GPS control modulation signal
+
 

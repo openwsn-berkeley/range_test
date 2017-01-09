@@ -1,5 +1,6 @@
 import radio_rpi as radio
 import at86rf215 as at86
+import time
 PACKET_LENGTH = 2047
 
 def main():
@@ -8,15 +9,22 @@ def main():
     radio.reset()
     pkt_nb = 0
     packet = [i&0xFF for i in range(PACKET_LENGTH)]
-    while(True):
+    for i in range(len(at86.frequencies_setup)):
         radio.modem_off()
-        radio.set_frequency(at86.frequencies_setup[0])
+        radio.set_frequency(at86.frequencies_setup[i])
         radio.modem_off()
         for i in at86.packet_sizes :
+            pkt_size = radio.change_pkt_size(at86.packet_sizes, i%4)
             for i in range(100):
                 pkt_nb += 1
                 packet = [pkt_nb&0xFF, pkt_nb>>8] + packet
+                radio.load_packet(packet[:pkt_size - 2] )
+                radio.tx_enable()
+                radio.tx_now()
+                #time sleep
+        radio.gps_next_mod()
 
 
 
-if __name__ == '__main__':
+
+#if __name__ == '__main__':
