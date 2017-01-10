@@ -1,11 +1,12 @@
 import spidev
 import RPi.GPIO as GPIO
 import at86rf215 as at86
-SIZE_ITERATION = 0
+
 
 def init_spi():
     spi = spidev.SpiDev()
     spi.open(0, 0)
+    return spi
 
 def init_GPIO():
     GPIO.setmode(GPIO.BOARD)
@@ -23,12 +24,14 @@ def trx_spi(address, bytes=0):
 def read_isr(channel):
     a = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
     isr = trx_spi(a)
+    print (isr[2:])
     return isr[2:]
 
 
 def write_spi(a, b):
     cmd = a[:]
     cmd.append(b)
+    cmd[0] |= 0x80
     trx_spi(cmd)
 
 
@@ -40,9 +43,10 @@ def reset():
 # channel number
 #def set_frequency(channel_spacing, frequency_0, channel):
 def set_frequency(channel_set_up):
+    frequency_0 = channel_set_up[1]/25
     write_spi(at86.RG_RF09_CS, channel_set_up[0] / 25)
-    write_spi(at86.RG_RF09_CCF0L, channel_set_up[1] & 0xFF)
-    write_spi(at86.RG_RF09_CCF0H, channel_set_up[1] >> 8)
+    write_spi(at86.RG_RF09_CCF0L, frequency_0 & 0xFF)
+    write_spi(at86.RG_RF09_CCF0H, frequency_0 >> 8)
     write_spi(at86.RG_RF09_CNL, channel_set_up[2] & 0xFF)
     write_spi(at86.RG_RF09_CNM, channel_set_up[2] >> 8)
 
@@ -55,11 +59,13 @@ def change_pkt_size(sizes, size):
 
 # TX
 def load_packet(packet):
-    # send the size of the packet
-    fifo_tx_len = at86.RG_BBC0_TXFLL + [(len(packet) & 0xFF), ((len(packet) >> 8) & 0x07)]
+    # send the size of the packet + size of the CRC (4 bytes)
+    fifo_tx_len = at86.RG_BBC0_TXFLL[:] + [((len(packet)+4) & 0xFF), (((len(packet)+4) >> 8) & 0x07)]
+    fifo_tx_len[0] |= 0x80
     trx_spi(fifo_tx_len)
     # send the packet to the modem tx fifo
-    pkt = at86.RG_BBC0_FBTXS + packet
+    pkt = at86.RG_BBC0_FBTXS[:] + packet
+    pkt[0] |= 0x80
     trx_spi(pkt)
 
 
@@ -68,7 +74,10 @@ def tx_enable():
 
 
 def tx_now():
+    #print(trx_spi([1,2],1))
     write_spi(at86.RG_RF09_CMD, at86.CMD_RF_TX)
+    #print(read_isr(3))
+    #print(trx_spi([1,2],1))
 
 
 # RX
@@ -85,6 +94,10 @@ def get_received_frame():
     mcs = trx_spi(at86.RG_BBC0_OFDMPHRRX) & at86.OFDMPHRRX_MCS_MASK
     return pkt_rcv, rssi, crc, mcs
 
+def write_config(settings):
+    for reg in settings:
+        write_spi(reg[0],reg[1])
+        
 # GPS control modulation signal
 
 
