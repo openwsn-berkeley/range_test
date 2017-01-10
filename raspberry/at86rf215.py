@@ -763,14 +763,14 @@ frequencies_setup = [
 ]
 
 modulation_list_rx = [
-    (ofdm_1_mcs0),
-    (ofdm_2_mcs0),
-    (ofdm_3_mcs1),
-    (ofdm_4_mcs2),
     (fsk_option1_FEC),
     (fsk_option2_FEC),
     (fsk_option1),
     (fsk_option2),
+    (ofdm_1_mcs0),
+    (ofdm_2_mcs0),
+    (ofdm_3_mcs1),
+    (ofdm_4_mcs2),
     (oqpsk_rate1)
 ]
 
