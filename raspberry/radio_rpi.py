@@ -1,7 +1,10 @@
 import spidev
 import RPi.GPIO as GPIO
 import at86rf215 as at86
-global at86_state
+import time
+global at86_state 
+
+
 RADIOSTATE_RFOFF = 0x00  # ///< Completely stopped.
 RADIOSTATE_FREQUENCY_SET = 0x01  # ///< Listening for commands, but RF chain is off.
 RADIOSTATE_PACKET_LOADED = 0x02  # ///< Configuring the frequency.
@@ -33,19 +36,35 @@ IRQS_TRXRDY_MASK = 0x02
 IRQS_RXFS_MASK = 0x01
 IRQS_RXFE_MASK = 0x02
 
+at86_state = RADIOSTATE_RFOFF
 
-def read_isr(channel):
+def read_isr(channel = 3):
+    global at86_state
+    print('GPIO 3 is %d'%GPIO.input(3))
+    time.sleep(0.05)
     a = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
     isr = trx_spi(at86.RG_RF09_IRQS, 4)
-    if isr[0] & IRQS_TRXRDY_MASK:
+    if isr[2] & IRQS_TRXRDY_MASK:
         at86_state = RADIOSTATE_TRX_ENABLED
-    if isr[2] & IRQS_RXFS_MASK:
+        print('mierda 1')
+        print('at86 state is %d' %at86_state )
+    if isr[4] & IRQS_RXFS_MASK:
         at86_state = RADIOSTATE_RECEIVING
-    if isr[2] & IRQS_TXFE_MASK:
+        print('mierda 2')
+        print('at86 state is %d' %at86_state )
+    if isr[4] & IRQS_TXFE_MASK:
         at86_state = RADIOSTATE_TXRX_DONE
-    if isr[2] & IRQS_RXFE_MASK:
+        print('mierda 3')
+        print('at86 state is %d' %at86_state )
+    if isr[4] & IRQS_RXFE_MASK:
         at86_state = RADIOSTATE_TXRX_DONE
-    #return isr[2:]
+        print('mierda 4')
+        print('at86 state is %d' %at86_state )
+    
+    time.sleep(0.05)
+    print( isr)
+    time.sleep(0.05)
+    print('GPIO 3 is %d'%GPIO.input(3))
 
 
 def init_spi():
@@ -114,7 +133,9 @@ def load_packet(packet):
 
 
 def tx_enable():
+    global at86_state
     write_spi(at86.RG_RF09_CMD, at86.CMD_RF_TXPREP)
+    print('Im sending %d'%at86.CMD_RF_TXPREP)
     while at86_state != RADIOSTATE_TRX_ENABLED:
         pass
 
