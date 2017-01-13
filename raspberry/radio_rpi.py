@@ -40,31 +40,25 @@ at86_state = RADIOSTATE_RFOFF
 
 def read_isr(channel = 3):
     global at86_state
-    print('GPIO 3 is %d'%GPIO.input(3))
-    time.sleep(0.05)
     a = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
     isr = trx_spi(at86.RG_RF09_IRQS, 4)
     if isr[2] & IRQS_TRXRDY_MASK:
         at86_state = RADIOSTATE_TRX_ENABLED
-        print('mierda 1')
         print('at86 state is %d' %at86_state )
     if isr[4] & IRQS_RXFS_MASK:
         at86_state = RADIOSTATE_RECEIVING
-        print('mierda 2')
         print('at86 state is %d' %at86_state )
     if isr[4] & IRQS_TXFE_MASK:
         at86_state = RADIOSTATE_TXRX_DONE
-        print('mierda 3')
         print('at86 state is %d' %at86_state )
     if isr[4] & IRQS_RXFE_MASK:
         at86_state = RADIOSTATE_TXRX_DONE
-        print('mierda 4')
         print('at86 state is %d' %at86_state )
     
-    time.sleep(0.05)
-    print( isr)
-    time.sleep(0.05)
-    print('GPIO 3 is %d'%GPIO.input(3))
+#    time.sleep(0.05)
+#    print( isr)
+#    time.sleep(0.05)
+#    print('GPIO 3 is %d'%GPIO.input(3))
 
 
 def init_spi():
