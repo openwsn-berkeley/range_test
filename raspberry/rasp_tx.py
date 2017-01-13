@@ -5,7 +5,7 @@ PACKET_LENGTH = 2047
 CRC_SIZE = 4
 
 def main():
-    spi = radio.init_spi()
+    radio.init_spi()
     radio.init_GPIO()
     radio.reset()
     pkt_nb = 0
@@ -25,8 +25,8 @@ def main():
                     radio.load_packet(packet[:pkt_size - CRC_SIZE])
                     radio.tx_enable()
                     radio.tx_now()
-                    #time sleep
-            radio.gps_next_mod()
+
+            #radio.gps_next_mod()
 
 GPIO.add_event_detect(3,GPIO.RISING,read_isr)
 
