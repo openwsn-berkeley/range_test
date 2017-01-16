@@ -10,10 +10,16 @@ Connections
 \author Jonathan Munoz (jonathan.munoz@inria.fr), January 2017
 '''
 
+import threading
+import time
+
 import spidev
 import RPi.GPIO as GPIO
+
 import at86rf215 as at86
-import time
+
+
+
 global at86_state 
 global rx_done
 
@@ -54,9 +60,6 @@ IRQS_RXFE_MASK = 0x02
 class At86rf215(object):
     var1 = 1
     var2 = 2
-    
-    def __init__(self):
-        pass
     
     #======================== public ==========================================
     
