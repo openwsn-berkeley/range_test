@@ -1,9 +1,12 @@
+
+
 import time
 import sys
 import logging
 
 import radio_rpi as radio
 import at86rf215 as at86
+import ieee802154g as ie154g
 
 PACKET_LENGTH = 2047
 CRC_SIZE = 4
@@ -25,10 +28,10 @@ class ExperimentRx(threading.Thread):
         radio.init_spi()
         radio.init_GPIO()
         radio.radio_reset()
-        radio.write_config(at86.modulation_list_rx[0])
+        radio.write_config(ie154g.modulation_list_rx[0])
         
         # switch to RX mode
-        radio.set_frequency(at86.frequencies_setup[0])
+        radio.set_frequency(ie154g.frequencies_setup[0])
         radio.trx_enable()
         radio.rx_now()
         

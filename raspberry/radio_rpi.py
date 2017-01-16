@@ -5,7 +5,13 @@ Connections
 
 | rPi pin | ATREB215-XPRO Extension Board pin |
 |---------|-----------------------------------|
-| TODO    | TODO                              |
+| 01- +3V |  20 - VCC                         |
+| 03-     |  09 - IRQ                         |
+| 09- GND |  19 - GND                         |
+| 19-     |  16 - SPI_MOSI                    |
+| 21-     |  17 - SPI_MISO                    |
+| 23-     |  18 - SPI_SCK                     |
+| 24-     |  15 - SPI_SS_A                    |
 
 \author Jonathan Munoz (jonathan.munoz@inria.fr), January 2017
 '''
@@ -124,8 +130,6 @@ def radio_init():
     init_spi()
     init_GPIO()
 
-
-# FIXME: rename to radio_reset
 def radio_reset():
     write_spi(at86.RG_RF_RST, at86.RST_CMD)
 
