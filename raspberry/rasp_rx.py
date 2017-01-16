@@ -7,24 +7,32 @@ import logging
 PACKET_LENGTH = 2047
 CRC_SIZE = 4
 
-##def main():
-#    spi = radio.init_spi()
-#    radio.init_GPIO()
-#    radio.reset()
-#    pkt_nb = 0
-#    packet = [i&0xFF for i in range(PACKET_LENGTH)]
+def main():
+    spi = radio.init_spi()
+    radio.init_GPIO()
+    radio.reset()
 
-#    for modulations_rx in at86.modulation_list_rx:
-#        radio.write_config(modulations_rx)
-#        for freq_setup in at86.frequencies_setup:
-#            radio.modem_off()
-#            radio.set_frequency(freq_setup)
-#            #while(!next_freq)
-#                radio.trx_enable()
-#                radio.rx_enable()
-#                #(isr receive packet)
-#                    (pkt_rcv, rssi, crc, mcs) = radio.get_received_frame()
+    radio.write_config(at86.modulation_list_rx[0])
+    radio.set_frequency(at86.frequencies_setup[0])
+    
+    radio.trx_enable()
+    print('radio enable')
+    radio.rx_now()
 
-spi = radio.init_spi()
-radio.init_GPIO()
-radio.reset()
+    while 1:
+        #global at86_state
+        radio.at86_state = 0
+        print (radio.at86_state)
+        radio.rx_done = 0
+        while radio.at86_state != radio.RADIOSTATE_TXRX_DONE:
+            pass
+        
+        print (radio.at86_state)
+        print('hola')
+        (pkt_rcv, rssi, crc, mcs) = radio.get_received_frame()
+        print(pkt_rcv, rssi, crc, mcs)
+        radio.rx_now()
+
+
+if __name__ == '__main__':
+    main()

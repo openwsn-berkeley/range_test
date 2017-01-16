@@ -3,7 +3,7 @@ import RPi.GPIO as GPIO
 import at86rf215 as at86
 import time
 global at86_state 
-
+global rx_done
 
 RADIOSTATE_RFOFF = 0x00  # ///< Completely stopped.
 RADIOSTATE_FREQUENCY_SET = 0x01  # ///< Listening for commands, but RF chain is off.
@@ -37,9 +37,10 @@ IRQS_RXFS_MASK = 0x01
 IRQS_RXFE_MASK = 0x02
 
 at86_state = RADIOSTATE_RFOFF
-
+rx_done = 0
 def read_isr(channel = 3):
     global at86_state
+    global rx_done
     a = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
     isr = trx_spi(at86.RG_RF09_IRQS, 4)
     if isr[2] & IRQS_TRXRDY_MASK:
@@ -53,6 +54,8 @@ def read_isr(channel = 3):
         print('at86 state is %d' %at86_state )
     if isr[4] & IRQS_RXFE_MASK:
         at86_state = RADIOSTATE_TXRX_DONE
+        rx_done = 1
+        
         print('at86 state is %d' %at86_state )
     
 #    time.sleep(0.05)
@@ -126,7 +129,7 @@ def load_packet(packet):
     trx_spi(pkt)
 
 
-def tx_enable():
+def trx_enable():
     global at86_state
     write_spi(at86.RG_RF09_CMD, at86.CMD_RF_TXPREP)
     print('Im sending %d'%at86.CMD_RF_TXPREP)
@@ -139,17 +142,19 @@ def tx_now():
         pass
 
 # RX
-def rx_enable():
+def rx_now():
     write_spi(at86.RG_RF09_CMD, at86.CMD_RF_RX)
 
 
 def get_received_frame():
     rcv = trx_spi(at86.RG_BBC0_RXFLL, 2)
-    len_pkt = rcv[0] | ((rcv[1] & 0x07) << 8)
+    len_pkt = rcv[2] + ((rcv[3] & 0x07) << 8)
+    print (type(len_pkt))
+    print('lenght is %03d' %len_pkt)
     pkt_rcv = trx_spi(at86.RG_BBC0_FBRXS, len_pkt)
-    rssi = trx_spi(at86.RG_RF09_EDV, 1)
-    crc = (trx_spi(at86.RG_BBC0_PC)) >> 5
-    mcs = trx_spi(at86.RG_BBC0_OFDMPHRRX) & at86.OFDMPHRRX_MCS_MASK
+    rssi = trx_spi(at86.RG_RF09_EDV, 1)[2]
+    crc = ((trx_spi(at86.RG_BBC0_PC, 1))[2] >> 5) & 0x01
+    mcs = trx_spi(at86.RG_BBC0_OFDMPHRRX, 1)[2] & at86.OFDMPHRRX_MCS_MASK
     return pkt_rcv, rssi, crc, mcs
 
 
