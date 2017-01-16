@@ -1,7 +1,12 @@
-# Register's values for the at86rf215 sub-GHz modem
+'''
+Register identifiers for the AT86RF215 sub-GHz radio
+
+\author Jonathan Munoz (jonathan.munoz@inria.fr), January 2017
+'''
 
 # MACROS
-# modem commands
+
+# commands
 CMD_RF_NOP = 0x0
 CMD_RF_SLEEP = 0x1
 CMD_RF_TRXOFF = 0x2
@@ -10,7 +15,7 @@ CMD_RF_TX = 0x4
 CMD_RF_RX = 0x5
 CMD_RF_RESET = 0x7
 
-# modem states
+# states
 RF_STATE_TRXOFF = 0x2
 RF_STATE_TXPREP = 0x3
 RF_STATE_TX = 0x4
@@ -26,7 +31,7 @@ IRQS_BATLOW = 0x08
 IRQS_TRXERR = 0x10
 IRQS_IQIFSF = 0x20
 
-# Baseband IRQ Status
+# baseband IRQ Status
 IRQS_RXFS = 0x01
 IRQS_RXFE = 0x02
 IRQS_RXAM = 0x04
@@ -36,10 +41,10 @@ IRQS_AGCH = 0x20
 IRQS_AGCR = 0x40
 IRQS_FBLI = 0x80
 
-# Reset command
+# reset command
 RST_CMD = 0x07
 
-# Addresses
+# register addresses (16-bit)
 
 RG_RF09_IRQS = [0x00, 0x00]
 RG_RF24_IRQS = [0x00, 0x01]
@@ -124,8 +129,8 @@ RG_BBC0_FBTXE = [0x2F, 0xFE]
 OFDMPHRRX_MCS_MASK = 0x07
 
 fsk_option1_FEC = [
-    (RG_RF09_CMD, 0x02),  # //we make sure we are in the trxoff state
-    (RG_RF09_IRQM, 0x1F),  # // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts enabled
+    (RG_RF09_CMD, 0x02),  # we make sure we are in the trxoff state
+    (RG_RF09_IRQM, 0x1F),  # TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts enabled
     (RG_RF24_IRQM, 0x00),
     (RG_RF09_RXBWC, 0x00),
     (RG_RF09_RXDFE, 0x1A),
@@ -133,8 +138,8 @@ fsk_option1_FEC = [
     (RG_RF09_EDD, 0x7A),
     (RG_RF09_TXCUTC, 0xC0),
     (RG_RF09_TXDFE, 0x98),
-    (RG_RF09_PAC, 0x64),  # // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
-    (RG_BBC0_IRQM, 0x1F),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
+    (RG_RF09_PAC, 0x64),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
+    (RG_BBC0_IRQM, 0x1F),  # TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
     (RG_BBC1_IRQM, 0x00),
     (RG_BBC0_PC, 0x1D),  # // No FCS filter, 32 bits FCS, FSK.
     (RG_BBC0_FSKDM, 0x01),  # //Direct modulation and preemphasis enabled.
@@ -283,9 +288,9 @@ oqpsk_rate1 = [
     (RG_BBC0_PC, 0x17),
     (RG_BBC0_OQPSKPHRTX, 0x00),  # MR-OQPSK, rate mode 0
     (RG_BBC0_OQPSKC0, 0x10),  # 100kchips/s, RC-0.8 shaping, direct-modulation enabled
-	# (RG_BBC0_OQPSKC1,   0x3F),#// MINIMUM preamble-detection sensitivities, rx-override disabled
-	# (RG_BBC0_OQPSKC2,   0x00),#// listen for MR-OQPSK frames only
-	# (RG_BBC0_OQPSKC3,   0x00),#// legacy OQPSK, search for SFD_1 only
+    # (RG_BBC0_OQPSKC1,   0x3F),#// MINIMUM preamble-detection sensitivities, rx-override disabled
+    # (RG_BBC0_OQPSKC2,   0x00),#// listen for MR-OQPSK frames only
+    # (RG_BBC0_OQPSKC3,   0x00),#// legacy OQPSK, search for SFD_1 only
     (RG_BBC0_IRQM, 0x13),  # // TXFE, RXFE, RXFS interrupts enabled
     (RG_BBC1_IRQM, 0x00),
     (RG_RF09_IRQM, 0x12),  # // TRXERR, TRXRDY interrupts enabled
@@ -304,9 +309,9 @@ oqpsk_rate2 = [
     (RG_BBC0_PC, 0x17),
     (RG_BBC0_OQPSKPHRTX, 0x02),  # // MR-OQPSK, rate mode 1
     (RG_BBC0_OQPSKC0, 0x10),  # // 100kchips/s, RC-0.8 shaping, direct-modulation enabled
-	# //  (RG_BBC0_OQPSKC1,   0x3F),  // MINIMUM preamble-detection sensitivities, rx-override disabled
-	# //  (RG_BBC0_OQPSKC2,   0x00),  // listen for MR-OQPSK frames only
-	# //  (RG_BBC0_OQPSKC3,   0x00),  // legacy OQPSK, search for SFD_1 only
+    # //  (RG_BBC0_OQPSKC1,   0x3F),  // MINIMUM preamble-detection sensitivities, rx-override disabled
+    # //  (RG_BBC0_OQPSKC2,   0x00),  // listen for MR-OQPSK frames only
+    # //  (RG_BBC0_OQPSKC3,   0x00),  // legacy OQPSK, search for SFD_1 only
     (RG_BBC0_IRQM, 0x13),  # // TXFE, RXFE, RXFS interrupts enabled
     (RG_BBC1_IRQM, 0x00),
     (RG_RF09_IRQM, 0x12),  # // TRXERR, TRXRDY interrupts enabled
@@ -325,9 +330,9 @@ oqpsk_rate3 = [
     (RG_BBC0_PC, 0x17),
     (RG_BBC0_OQPSKPHRTX, 0x04),  # // MR-OQPSK, rate mode 2
     (RG_BBC0_OQPSKC0, 0x10),  # // 100kchips/s, RC-0.8 shaping, direct-modulation enabled
-	# (RG_BBC0_OQPSKC1,   0x3F),  // MINIMUM preamble-detection sensitivities, rx-override disabled
-	# (RG_BBC0_OQPSKC2,   0x00),  // listen for MR-OQPSK frames only
-	# (RG_BBC0_OQPSKC3,   0x00),  // legacy OQPSK, search for SFD_1 only
+    # (RG_BBC0_OQPSKC1,   0x3F),  // MINIMUM preamble-detection sensitivities, rx-override disabled
+    # (RG_BBC0_OQPSKC2,   0x00),  // listen for MR-OQPSK frames only
+    # (RG_BBC0_OQPSKC3,   0x00),  // legacy OQPSK, search for SFD_1 only
     (RG_BBC0_IRQM, 0x13),  # // TXFE, RXFE, RXFS interrupts enabled
     (RG_BBC1_IRQM, 0x00),
     (RG_RF09_IRQM, 0x12),  # // TRXERR, TRXRDY interrupts enabled
@@ -346,9 +351,9 @@ oqpsk_rate4 = [
     (RG_BBC0_PC, 0x17),
     (RG_BBC0_OQPSKPHRTX, 0x06),  # # MR-OQPSK, rate mode 3
     (RG_BBC0_OQPSKC0, 0x10),  ## 100kchips/s, RC-0.8 shaping, direct-modulation enabled
-	# (RG_BBC0_OQPSKC1,   0x3F),  # MINIMUM preamble-detection sensitivities, rx-override disabled
-	# (RG_BBC0_OQPSKC2,   0x00),  # listen for MR-OQPSK frames only
-	# (RG_BBC0_OQPSKC3,   0x00),  # legacy OQPSK, search for SFD_1 only
+    # (RG_BBC0_OQPSKC1,   0x3F),  # MINIMUM preamble-detection sensitivities, rx-override disabled
+    # (RG_BBC0_OQPSKC2,   0x00),  # listen for MR-OQPSK frames only
+    # (RG_BBC0_OQPSKC3,   0x00),  # legacy OQPSK, search for SFD_1 only
     (RG_BBC0_IRQM, 0x13),  # # TXFE, RXFE, RXFS interrupts enabled
     (RG_BBC1_IRQM, 0x00),
     (RG_RF09_IRQM, 0x12),  # # TRXERR, TRXRDY interrupts enabled
@@ -743,7 +748,10 @@ ofdm_4_mcs6 = [
     (RG_BBC0_OFDMPHRTX, 0x06)
 ]
 
+# FIXME: move code below to application, does not belong in register definition file
+
 packet_sizes = [6, 127, 1000, 2047]
+
 # set_frequency(channel_spacing, frequency_0, channel)
 frequencies_setup = [
     (200, 863125, 0),  # fsk operating mode 1
