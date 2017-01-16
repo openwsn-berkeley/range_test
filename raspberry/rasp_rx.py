@@ -22,9 +22,9 @@ class ExperimentRx(threading.Thread):
         # FIXME: init driver, pass self._cb_rx_frame
         
         # initialize the radio
-        spi = radio.init_spi()
+        radio.init_spi()
         radio.init_GPIO()
-        radio.reset()
+        radio.radio_reset()
         radio.write_config(at86.modulation_list_rx[0])
         
         # switch to RX mode
@@ -34,16 +34,14 @@ class ExperimentRx(threading.Thread):
         
         # main loop
         while True:
-            #global at86_state
+
             radio.at86_state = 0
             print radio.at86_state
             radio.rx_done = 0
             # FIXME: using a Threading.Event() object
-            while radio.at86_state != radio.RADIOSTATE_TXRX_DONE:
+            while radio.done == 0:
                 pass
-            
-            print radio.at86_state
-            print 'hola'
+
             (pkt_rcv, rssi, crc, mcs) = radio.get_received_frame()
             print (pkt_rcv, rssi, crc, mcs)
             radio.rx_now()

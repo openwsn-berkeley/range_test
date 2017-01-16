@@ -12,6 +12,7 @@ Connections
 
 import threading
 import time
+import logging
 
 import spidev
 import RPi.GPIO as GPIO
@@ -86,24 +87,25 @@ def read_isr():
     '''
     global at86_state
     global rx_done
-    a   = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00] # FIXME: unused
+
     isr = trx_spi(at86.RG_RF09_IRQS, 4)
-    if isr[2] & IRQS_TRXRDY_MASK:
+    if isr[0] & IRQS_TRXRDY_MASK:
         at86_state = RADIOSTATE_TRX_ENABLED
         # FIXME: use logging module, see https://github.com/openwsn-berkeley/openwsn-sw/blob/develop/software/openvisualizer/openvisualizer/openTun/openTun.py#L6
         # debug, info, warning, error, critical
         print('at86 state is {0}'.format(at86_state)) #FIXME: change string formatting
-    if isr[4] & IRQS_RXFS_MASK:
+    if isr[2] & IRQS_RXFS_MASK:
         at86_state = RADIOSTATE_RECEIVING
-        print('at86 state is %d' %at86_state )
-    if isr[4] & IRQS_TXFE_MASK:
+        print('at86 state is {0}'.format(at86_state))
+    if isr[2] & IRQS_TXFE_MASK:
         at86_state = RADIOSTATE_TXRX_DONE
-        print('at86 state is %d' %at86_state )
-    if isr[4] & IRQS_RXFE_MASK:
+        print('at86 state is {0}'.format(at86_state))
+    if isr[2] & IRQS_RXFE_MASK:
+        rx_done = 1
+        print('at86 state is {0}'.format(at86_state))
         at86_state = RADIOSTATE_TXRX_DONE
         rx_done = 1
-        
-        print('at86 state is %d' %at86_state )
+
 
 def cb_gpio(channel = 3):
     read_isr()
@@ -118,24 +120,13 @@ def init_GPIO():
     GPIO.setup(3, GPIO.IN)
     GPIO.add_event_detect(3, GPIO.RISING, cb_gpio)
 
-def trx_spi(address, bytes=0):
-    '''
-    # address list e.g. [0x01,0x34]
-    # bytes quantity of bytes to receive after the address is given
-    '''
-    d  = address[:]
-    d += [0x00] * bytes
-    c  = spi.xfer(d)
-    return c
+def radio_init():
+    init_spi()
+    init_GPIO()
 
-def write_spi(a, b):
-    cmd = a[:]
-    cmd.append(b)
-    cmd[0] |= 0x80
-    trx_spi(cmd)
 
 # FIXME: rename to radio_reset
-def reset():
+def radio_reset():
     write_spi(at86.RG_RF_RST, at86.RST_CMD)
 
 def set_frequency(channel_set_up):
@@ -153,7 +144,7 @@ def set_frequency(channel_set_up):
     write_spi(at86.RG_RF09_CNM, channel_set_up[2] >> 8)
 
 # FIXME: rename to radio_off
-def modem_off():
+def radio_off():
     write_spi(at86.RG_RF09_CMD, at86.CMD_RF_TRXOFF)
 
 # FIXME: unclear what this is used for
@@ -169,12 +160,11 @@ def load_packet(packet):
     # send the packet to the modem tx fifo
     pkt = at86.RG_BBC0_FBTXS[:] + packet
     pkt[0] |= 0x80
-    trx_spi(pkt)
+    write_spi(pkt)
 
 def trx_enable():
     global at86_state
     write_spi(at86.RG_RF09_CMD, at86.CMD_RF_TXPREP)
-    print('Im sending %d'%at86.CMD_RF_TXPREP)
     while at86_state != RADIOSTATE_TRX_ENABLED:
         pass
 
@@ -189,22 +179,38 @@ def rx_now():
 
 def get_received_frame():
     # get the length of the frame
-    rcv     = trx_spi(at86.RG_BBC0_RXFLL, 2)
-    len_pkt = rcv[2] + ((rcv[3] & 0x07) << 8)
-    
-    print (type(len_pkt))
-    print('length is %03d' %len_pkt)
+    rcv     = read_spi(at86.RG_BBC0_RXFLL, 2)
+    len_pkt = rcv[0] + ((rcv[1] & 0x07) << 8)
+
+    print('length is {0}'.format(len_pkt))
     
     # read the packet
-    pkt_rcv = trx_spi(at86.RG_BBC0_FBRXS, len_pkt)
+    pkt_rcv = read_spi(at86.RG_BBC0_FBRXS, len_pkt)
     
     # read from metadata
-    rssi    = trx_spi(at86.RG_RF09_EDV, 1)[2]
-    crc     = ((trx_spi(at86.RG_BBC0_PC, 1))[2] >> 5) & 0x01
-    mcs     = trx_spi(at86.RG_BBC0_OFDMPHRRX, 1)[2] & at86.OFDMPHRRX_MCS_MASK
+    rssi    = read_spi(at86.RG_RF09_EDV, 1)[0]
+    crc     = ((read_spi(at86.RG_BBC0_PC, 1))[0] >> 5) & 0x01
+    mcs     = read_spi(at86.RG_BBC0_OFDMPHRRX, 1)[0] & at86.OFDMPHRRX_MCS_MASK
     
     return (pkt_rcv,rssi,crc,mcs)
 
 def write_config(settings):
     for reg in settings:
         write_spi(reg[0], reg[1])
+
+def read_spi(address, bytes):
+    '''
+    # address list e.g. [0x01,0x34]
+    # bytes quantity of bytes to receive after the address is given
+    '''
+    d  = address[:]
+    d += [0x00] * bytes
+    c  = spi.xfer(d)
+    return c[2:]
+
+def write_spi(a, b = None):
+    cmd = a[:]
+    if b is not None:
+        cmd.append(b)
+    cmd[0] |= 0x80
+    spi.xfer(cmd)
