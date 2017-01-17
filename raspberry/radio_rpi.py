@@ -79,10 +79,11 @@ class At86rf215(object):
         if isr[2] & at86.IRQS_RXFE_MASK:
             self.at86_state = RADIOSTATE_TXRX_DONE
             print('at86 state is {0}'.format(self.at86_state))
-            (pkt_rcv, rssi, crc, mcs) = radio_driver.radio_get_received_frame()
-            self.cb((pkt_rcv, rssi, crc, mcs))
+            (pkt_rcv, rssi, crc, mcs) = self.radio_get_received_frame()
+            self.cb(pkt_rcv, rssi, crc, mcs)
+            self.radio_rx_now()
 
-    def cb_gpio(self):
+    def cb_gpio(self, channel = 3):
         self.read_isr()
 
     def radio_init(self, channel=3):
