@@ -1,3 +1,9 @@
+'''
+Lists of frequencies and modulations to be used in the range test.
+
+\author Jonathan Munoz (jonathan.munoz@inria.fr), January 2017
+'''
+
 # set_frequency(channel_spacing, frequency_0, channel)
 frequencies_setup = [
     (200, 863125, 0),  # fsk operating mode 1

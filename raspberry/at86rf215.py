@@ -6,6 +6,10 @@ Register identifiers for the AT86RF215 sub-GHz radio
 
 # MACROS
 
+IRQS_TXFE_MASK = 0x10
+IRQS_TRXRDY_MASK = 0x02
+IRQS_RXFS_MASK = 0x01
+IRQS_RXFE_MASK = 0x02
 # commands
 CMD_RF_NOP = 0x0
 CMD_RF_SLEEP = 0x1

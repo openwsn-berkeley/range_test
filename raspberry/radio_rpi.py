@@ -1,4 +1,4 @@
-'''
+"""
 Radio driver for the AT86RF215, for the rPi 3.
 
 Connections
@@ -14,7 +14,7 @@ Connections
 | 24-     |  15 - SPI_SS_A                    |
 
 \author Jonathan Munoz (jonathan.munoz@inria.fr), January 2017
-'''
+"""
 
 import threading
 import time
@@ -25,11 +25,6 @@ import RPi.GPIO as GPIO
 
 import at86rf215 as at86
 
-
-
-global at86_state 
-global rx_done
-
 RADIOSTATE_RFOFF = 0x00  # ///< Completely stopped.
 RADIOSTATE_FREQUENCY_SET = 0x01  # ///< Listening for commands, but RF chain is off.
 RADIOSTATE_PACKET_LOADED = 0x02  # ///< Configuring the frequency.
@@ -37,184 +32,196 @@ RADIOSTATE_TRX_ENABLED = 0x03  # ///< Done configuring the frequency.
 RADIOSTATE_RECEIVING = 0x04  # ///< Loading packet into the radio's TX buffer.
 RADIOSTATE_TXRX_DONE = 0x05  # ///< Packet is fully loaded in the radio's TX buffer.
 
-# FIXME: remove those lines
-
-# modem states
-RF_STATE_TRXOFF = 0x2
-RF_STATE_TXPREP = 0x3
-RF_STATE_TX = 0x4
-RF_STATE_RX = 0x5
-RF_STATE_TRANSITION = 0x6
-RF_STATE_RESET = 0x7
-
-# Baseband IRQ Status
-IRQS_RXFS = 0x01
-IRQS_RXFE = 0x02
-IRQS_RXAM = 0x04
-IRQS_RXEM = 0x08
-IRQS_TXFE = 0x10
-IRQS_AGCH = 0x20
-IRQS_AGCR = 0x40
-IRQS_FBLI = 0x80
-
-IRQS_TXFE_MASK = 0x10
-IRQS_TRXRDY_MASK = 0x02
-IRQS_RXFS_MASK = 0x01
-IRQS_RXFE_MASK = 0x02
 
 # FIXME: turn code in this file into a class
 
 class At86rf215(object):
-    var1 = 1
-    var2 = 2
-    
-    #======================== public ==========================================
-    
-    def method1(self,param1):
-        pass
-    
-    #======================== private =========================================
-    
-    def _method2(self,param1):
+    at86_state = RADIOSTATE_RFOFF
+    rx_done = 0
+    spi = 0
+
+    # ======================== public ==========================================
+
+    def method1(self, param1):
         pass
 
-at86_state = RADIOSTATE_RFOFF
-rx_done    = 0
+    # ======================== private =========================================
 
-def read_isr():
-    '''
-    Read the interruption source from the radio.
-    
-    This function is called typically after the interrupt pin triggers.
-    The CPU then called this function the read the 4 RG_RFXX_IRQS registers
-    to figure out the reason for the interrupt.
-    
-    FIXME: document parameter "channel"
-    '''
-    global at86_state
-    global rx_done
-
-    isr = trx_spi(at86.RG_RF09_IRQS, 4)
-    if isr[0] & IRQS_TRXRDY_MASK:
-        at86_state = RADIOSTATE_TRX_ENABLED
-        # FIXME: use logging module, see https://github.com/openwsn-berkeley/openwsn-sw/blob/develop/software/openvisualizer/openvisualizer/openTun/openTun.py#L6
-        # debug, info, warning, error, critical
-        print('at86 state is {0}'.format(at86_state)) #FIXME: change string formatting
-    if isr[2] & IRQS_RXFS_MASK:
-        at86_state = RADIOSTATE_RECEIVING
-        print('at86 state is {0}'.format(at86_state))
-    if isr[2] & IRQS_TXFE_MASK:
-        at86_state = RADIOSTATE_TXRX_DONE
-        print('at86 state is {0}'.format(at86_state))
-    if isr[2] & IRQS_RXFE_MASK:
-        rx_done = 1
-        print('at86 state is {0}'.format(at86_state))
-        at86_state = RADIOSTATE_TXRX_DONE
-        rx_done = 1
-
-
-def cb_gpio(channel = 3):
-    read_isr()
-
-def init_spi():
-    global spi
-    spi = spidev.SpiDev()
-    spi.open(0, 0)
-
-def init_GPIO():
-    GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(3, GPIO.IN)
-    GPIO.add_event_detect(3, GPIO.RISING, cb_gpio)
-
-def radio_init():
-    init_spi()
-    init_GPIO()
-
-def radio_reset():
-    write_spi(at86.RG_RF_RST, at86.RST_CMD)
-
-def set_frequency(channel_set_up):
-    '''
-    # channel_spacing in kHz
-    # frequency_0 in kHz
-    # channel number
-    # def set_frequency(channel_spacing, frequency_0, channel):
-    '''
-    frequency_0 = channel_set_up[1] / 25
-    write_spi(at86.RG_RF09_CS, channel_set_up[0] / 25)
-    write_spi(at86.RG_RF09_CCF0L, frequency_0 & 0xFF)
-    write_spi(at86.RG_RF09_CCF0H, frequency_0 >> 8)
-    write_spi(at86.RG_RF09_CNL, channel_set_up[2] & 0xFF)
-    write_spi(at86.RG_RF09_CNM, channel_set_up[2] >> 8)
-
-# FIXME: rename to radio_off
-def radio_off():
-    write_spi(at86.RG_RF09_CMD, at86.CMD_RF_TRXOFF)
-
-# FIXME: unclear what this is used for
-def change_pkt_size(sizes, size):
-    return sizes[size]
-
-# TX
-def load_packet(packet):
-    # send the size of the packet + size of the CRC (4 bytes)
-    fifo_tx_len = at86.RG_BBC0_TXFLL[:] + [((len(packet) + 4) & 0xFF), (((len(packet) + 4) >> 8) & 0x07)]
-    fifo_tx_len[0] |= 0x80
-    trx_spi(fifo_tx_len)
-    # send the packet to the modem tx fifo
-    pkt = at86.RG_BBC0_FBTXS[:] + packet
-    pkt[0] |= 0x80
-    write_spi(pkt)
-
-def trx_enable():
-    global at86_state
-    write_spi(at86.RG_RF09_CMD, at86.CMD_RF_TXPREP)
-    while at86_state != RADIOSTATE_TRX_ENABLED:
+    def _method2(self, param1):
         pass
 
-def tx_now():
-    write_spi(at86.RG_RF09_CMD, at86.CMD_RF_TX)
-    while at86_state != RADIOSTATE_TXRX_DONE:
-        pass
+    def read_isr(self):
+        """
+        Read the interruption source from the radio.
 
-# RX
-def rx_now():
-    write_spi(at86.RG_RF09_CMD, at86.CMD_RF_RX)
+        This function is called typically after the interrupt pin triggers.
+        The CPU then called this function the read the 4 RG_RFXX_IRQS registers
+        to figure out the reason for the interrupt.
 
-def get_received_frame():
-    # get the length of the frame
-    rcv     = read_spi(at86.RG_BBC0_RXFLL, 2)
-    len_pkt = rcv[0] + ((rcv[1] & 0x07) << 8)
+        FIXME: document parameter "channel"
+        """
 
-    print('length is {0}'.format(len_pkt))
-    
-    # read the packet
-    pkt_rcv = read_spi(at86.RG_BBC0_FBRXS, len_pkt)
-    
-    # read from metadata
-    rssi    = read_spi(at86.RG_RF09_EDV, 1)[0]
-    crc     = ((read_spi(at86.RG_BBC0_PC, 1))[0] >> 5) & 0x01
-    mcs     = read_spi(at86.RG_BBC0_OFDMPHRRX, 1)[0] & at86.OFDMPHRRX_MCS_MASK
-    
-    return (pkt_rcv,rssi,crc,mcs)
+        isr = self.radio_read_spi(at86.RG_RF09_IRQS, 4)
+        if isr[0] & at86.IRQS_TRXRDY_MASK:
+            self.at86_state = RADIOSTATE_TRX_ENABLED
+            # FIXME: use logging module, see https://github.com/openwsn-berkeley/openwsn-sw/blob/develop/software/openvisualizer/openvisualizer/openTun/openTun.py#L6
+            # debug, info, warning, error, critical
+            print('at86 state is {0}'.format(self.at86_state))  # FIXME: change string formatting
+        if isr[2] & at86.IRQS_RXFS_MASK:
+            self.at86_state = RADIOSTATE_RECEIVING
+            print('at86 state is {0}'.format(self.at86_state))
+        if isr[2] & at86.IRQS_TXFE_MASK:
+            self.at86_state = RADIOSTATE_TXRX_DONE
+            print('at86 state is {0}'.format(self.at86_state))
+        if isr[2] & at86.IRQS_RXFE_MASK:
+            self.at86_state = RADIOSTATE_TXRX_DONE
+            print('at86 state is {0}'.format(self.at86_state))
+            self.rx_done = 1
 
-def write_config(settings):
-    for reg in settings:
-        write_spi(reg[0], reg[1])
+    def cb_gpio(self):
+        self.read_isr()
 
-def read_spi(address, bytes):
-    '''
-    # address list e.g. [0x01,0x34]
-    # bytes quantity of bytes to receive after the address is given
-    '''
-    d  = address[:]
-    d += [0x00] * bytes
-    c  = spi.xfer(d)
-    return c[2:]
+    def radio_init(self, channel=3):
+        """
+        Initialize the GPIO and SPI modules.
+        :param channel: the number of the GPIO-pin which receives the IRQ pin from the radio.
+        :return:
+        """
 
-def write_spi(a, b = None):
-    cmd = a[:]
-    if b is not None:
-        cmd.append(b)
-    cmd[0] |= 0x80
-    spi.xfer(cmd)
+        self.spi = spidev.SpiDev()
+        self.spi.open(0, 0)
+
+        GPIO.setmode(GPIO.BOARD)
+        GPIO.setup(channel, GPIO.IN)
+        GPIO.add_event_detect(channel, GPIO.RISING, self.cb_gpio)
+
+    def radio_reset(self):
+        """
+        It reset the radio.
+        :return: Nothing
+        """
+        self.radio_write_spi(at86.RG_RF_RST, at86.RST_CMD)
+
+    def radio_set_frequency(self, channel_set_up):
+        """
+        # channel_spacing in kHz
+        # frequency_0 in kHz
+        # channel number
+        # def set_frequency(channel_spacing, frequency_0, channel):
+        """
+        frequency_0 = channel_set_up[1] / 25
+        self.radio_write_spi(at86.RG_RF09_CS, channel_set_up[0] / 25)
+        self.radio_write_spi(at86.RG_RF09_CCF0L, frequency_0 & 0xFF)
+        self.radio_write_spi(at86.RG_RF09_CCF0H, frequency_0 >> 8)
+        self.radio_write_spi(at86.RG_RF09_CNL, channel_set_up[2] & 0xFF)
+        self.radio_write_spi(at86.RG_RF09_CNM, channel_set_up[2] >> 8)
+
+    # FIXME: rename to radio_off
+    def radio_off(self):
+        """
+        Puts the radio in the TRXOFF mode.
+        :return: Nothing
+        """
+        self.radio_write_spi(at86.RG_RF09_CMD, at86.CMD_RF_TRXOFF)
+
+    # FIXME: unclear what this is used for
+    def change_pkt_size(sizes, size):
+        return sizes[size]
+
+    # TX
+    def radio_load_packet(self, packet):
+        """
+        Sends a packet to the buffer of the radio.
+        :param packet: the packet to be sent.
+        :return: Nothing
+        """
+        # send the size of the packet + size of the CRC (4 bytes)
+        fifo_tx_len = at86.RG_BBC0_TXFLL[:] + [((len(packet) + 4) & 0xFF), (((len(packet) + 4) >> 8) & 0x07)]
+        fifo_tx_len[0] |= 0x80
+        self.radio_write_spi(fifo_tx_len)
+        # send the packet to the modem tx fifo
+        pkt = at86.RG_BBC0_FBTXS[:] + packet
+        pkt[0] |= 0x80
+        self.radio_write_spi(pkt)
+
+    def radio_trx_enable(self):
+        """
+        Puts the radio in the TRXPREP, previous state to send/receive. It waits until receives a signal from the radio.
+        :return: Nothing
+        """
+        self.radio_write_spi(at86.RG_RF09_CMD, at86.CMD_RF_TXPREP)
+        while self.at86_state != RADIOSTATE_TRX_ENABLED:
+            pass
+
+    def radio_tx_now(self):
+        """
+        Commands the radio to send a previous loaded packet. It waits until the radio confirms the success.
+        :return: Nothing
+        """
+        write_spi(at86.RG_RF09_CMD, at86.CMD_RF_TX)
+        while self.at86_state != RADIOSTATE_TXRX_DONE:
+            pass
+        #TODO: foreseen the case when there is a failure in the tx -TXRERR.
+
+    # RX
+    def radio_rx_now(self):
+        """
+        Puts the radio in reception mode, listening for packets.
+        :return:
+        """
+        self.radio_write_spi(at86.RG_RF09_CMD, at86.CMD_RF_RX)
+
+    def radio_get_received_frame(self):
+        """
+        Demands to the radio the received packet
+        :return: a tuple with 1) packet received, 2) rssi, 3) crc(boolean) 4) mcs (valid for OFDM).
+        """
+        # get the length of the frame
+        rcv = self.radio_read_spi(at86.RG_BBC0_RXFLL, 2)
+        len_pkt = rcv[0] + ((rcv[1] & 0x07) << 8)
+
+        print('length is {0}'.format(len_pkt))
+
+        # read the packet
+        pkt_rcv = self.radio_read_spi(at86.RG_BBC0_FBRXS, len_pkt)
+
+        # read from metadata
+        rssi = self.radio_read_spi(at86.RG_RF09_EDV, 1)[0]
+        crc = ((self.radio_read_spi(at86.RG_BBC0_PC, 1))[0] >> 5) & 0x01
+        mcs = self.radio_read_spi(at86.RG_BBC0_OFDMPHRRX, 1)[0] & at86.OFDMPHRRX_MCS_MASK
+
+        return (pkt_rcv, rssi, crc, mcs)
+
+    def radio_write_config(self, settings):
+        """
+        It writes a given configuration to the radio, contained in the list of tuples passed as parameters.
+        :param settings: a list of tuples containing the address of the registers [0] and the value to write [1]
+        :return: nothing
+        """
+        for reg in settings:
+            self.radio_write_spi(reg[0], reg[1])
+
+    def radio_read_spi(self, address, bytes):
+        """
+        It gets a value or values of the registers starting at the address given.
+        :param address: the register to be read
+        :param bytes: the amount of bytes to read starting at that address
+        :return: the value(s) of the register(s)
+        """
+        reg = address[:]
+        reg += [0x00] * bytes
+        data = self.spi.xfer(reg)
+        return data[2:]
+
+    def radio_write_spi(self, address, value=None):
+        """
+        It writes a value to a register.
+        :param address: the register to be written
+        :param value: the value to be written
+        :return: nothing
+        """
+        reg = address[:]
+        if value is not None:
+            reg = address[:] + [b]
+        reg[0] |= 0x80
+        self.spi.xfer(reg)
