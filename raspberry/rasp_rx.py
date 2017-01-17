@@ -18,8 +18,7 @@ CRC_SIZE = 4
 
 class ExperimentRx(threading.Thread):
     def __init__(self):
-        self.pkt_rcv = pkt_rcv
-
+        
         # start the thread
         threading.Thread.__init__(self)
         self.name = 'ExperimentRx'
@@ -44,9 +43,8 @@ class ExperimentRx(threading.Thread):
             radio_driver.radio_trx_enable()
             radio_driver.radio_rx_now()
             time.sleep(10)
-
-            #(pkt_rcv, rssi, crc, mcs) = radio_driver.radio_get_received_frame()
-
+            #radio_driver.radio_rx_now()
+            print('SUCCESS')
 
 
     # ======================== public ==========================================
@@ -57,10 +55,10 @@ class ExperimentRx(threading.Thread):
     # ======================== private =========================================
 
     def _cb_rx_frame(self, pkt_rcv, rssi, crc, mcs):
-        print frame
+        print ('packet {0}'.format(pkt_rcv))
         #TODO: FIX THIS printing
         self.event.set()
-        self.radio_driver.radio_rx_now()
+        #radio_driver.radio_rx_now()
 
 
 
@@ -72,7 +70,9 @@ def main():
         input = raw_input('>')
         if input == 's':
             print experimentRx.getStats()
-
+        elif input == 'q':
+            sys.exit(0)
+            
 
 if __name__ == '__main__':
     main()
