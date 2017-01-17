@@ -130,7 +130,7 @@ class At86rf215(object):
         self.radio_write_spi(at86.RG_RF09_CMD, at86.CMD_RF_TRXOFF)
 
     # FIXME: unclear what this is used for
-    def change_pkt_size(sizes, size):
+    def change_pkt_size(self, sizes, size):
         return sizes[size]
 
     # TX
@@ -163,7 +163,7 @@ class At86rf215(object):
         Commands the radio to send a previous loaded packet. It waits until the radio confirms the success.
         :return: Nothing
         """
-        write_spi(at86.RG_RF09_CMD, at86.CMD_RF_TX)
+        self.radio_write_spi(at86.RG_RF09_CMD, at86.CMD_RF_TX)
         while self.at86_state != RADIOSTATE_TXRX_DONE:
             pass
             # TODO: foreseen the case when there is a failure in the tx -TXRERR.

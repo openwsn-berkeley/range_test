@@ -32,6 +32,7 @@ class ExperimentRx(threading.Thread):
         # initialize the radio
         radio_driver.radio_init(3)
         radio_driver.radio_reset()
+        radio_driver.read_isr()
 
 
         # main loop

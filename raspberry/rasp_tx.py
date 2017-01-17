@@ -6,6 +6,7 @@ Transmission script of the range test.
 
 import time
 import logging
+import threading
 
 import radio_rpi as radio
 import at86rf215 as at86
@@ -25,7 +26,7 @@ class ExperimentTx(threading.Thread):
 
     def run(self):
 
-        radio_driver = radio.At86rf215()
+        radio_driver = radio.At86rf215(self._cb_rx_frame)
         radio_driver.radio_init(3)
         radio_driver.radio_reset()
         radio_driver.read_isr()
@@ -49,6 +50,14 @@ class ExperimentTx(threading.Thread):
                         radio_driver.radio_tx_now()
                         print('packet sent')
 
+
+    # ======================== private =========================================
+
+    def _cb_rx_frame(self, pkt_rcv, rssi, crc, mcs):
+        print ('packet {0}'.format(pkt_rcv))
+        #TODO: FIX THIS printing
+        self.event.set()
+        #radio_driver.radio_rx_now()
 
 def main():
 
