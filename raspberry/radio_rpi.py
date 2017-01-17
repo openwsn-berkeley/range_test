@@ -37,8 +37,8 @@ RADIOSTATE_TXRX_DONE = 0x05  # ///< Packet is fully loaded in the radio's TX buf
 
 class At86rf215(object):
     at86_state = RADIOSTATE_RFOFF
-    rx_done = 0
-    spi = 0
+    #rx_done = 0
+    #spi = 0
 
     def __init__(self, cb):
         self.cb = cb
