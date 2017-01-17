@@ -40,6 +40,9 @@ class At86rf215(object):
     rx_done = 0
     spi = 0
 
+    def __init__(self, cb):
+        self.cb = cb
+
     # ======================== public ==========================================
 
     def method1(self, param1):
@@ -76,7 +79,8 @@ class At86rf215(object):
         if isr[2] & at86.IRQS_RXFE_MASK:
             self.at86_state = RADIOSTATE_TXRX_DONE
             print('at86 state is {0}'.format(self.at86_state))
-            self.rx_done = 1
+            (pkt_rcv, rssi, crc, mcs) = radio_driver.radio_get_received_frame()
+            self.cb((pkt_rcv, rssi, crc, mcs))
 
     def cb_gpio(self):
         self.read_isr()
@@ -161,7 +165,7 @@ class At86rf215(object):
         write_spi(at86.RG_RF09_CMD, at86.CMD_RF_TX)
         while self.at86_state != RADIOSTATE_TXRX_DONE:
             pass
-        #TODO: foreseen the case when there is a failure in the tx -TXRERR.
+            # TODO: foreseen the case when there is a failure in the tx -TXRERR.
 
     # RX
     def radio_rx_now(self):
@@ -190,7 +194,7 @@ class At86rf215(object):
         crc = ((self.radio_read_spi(at86.RG_BBC0_PC, 1))[0] >> 5) & 0x01
         mcs = self.radio_read_spi(at86.RG_BBC0_OFDMPHRRX, 1)[0] & at86.OFDMPHRRX_MCS_MASK
 
-        return (pkt_rcv, rssi, crc, mcs)
+        return pkt_rcv, rssi, crc, mcs
 
     def radio_write_config(self, settings):
         """
@@ -201,15 +205,15 @@ class At86rf215(object):
         for reg in settings:
             self.radio_write_spi(reg[0], reg[1])
 
-    def radio_read_spi(self, address, bytes):
+    def radio_read_spi(self, address, nb_bytes):
         """
         It gets a value or values of the registers starting at the address given.
         :param address: the register to be read
-        :param bytes: the amount of bytes to read starting at that address
+        :param nb_bytes: the amount of bytes to read starting at that address
         :return: the value(s) of the register(s)
         """
         reg = address[:]
-        reg += [0x00] * bytes
+        reg += [0x00] * nb_bytes
         data = self.spi.xfer(reg)
         return data[2:]
 
@@ -222,6 +226,6 @@ class At86rf215(object):
         """
         reg = address[:]
         if value is not None:
-            reg = address[:] + [b]
+            reg = address[:] + [value]
         reg[0] |= 0x80
         self.spi.xfer(reg)

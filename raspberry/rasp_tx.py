@@ -34,12 +34,12 @@ class ExperimentTx(threading.Thread):
 
         for modulations_tx in ie154g.modulation_list_tx:
             radio_driver.radio_write_config(modulations_tx)
-            for i in range(len(ie154g.frequencies_setup)):
+            for frequency_setup in ie154g.frequencies_setup:
                 radio_driver.radio_off()
-                radio_driver.radio_set_frequency(ie154g.frequencies_setup[i])
+                radio_driver.radio_set_frequency(frequency_setup)
                 radio_driver.radio_off()
-                for i in at86.packet_sizes :
-                    pkt_size = radio_driver.change_pkt_size(at86.packet_sizes, i%4)
+                for j in range(len(ie154g.packet_sizes)):
+                    pkt_size = radio_driver.change_pkt_size(ie154g.packet_sizes, (j%4))
                     for i in range(100):
                         pkt_nb += 1
                         packet = [pkt_nb&0xFF, pkt_nb>>8] + packet

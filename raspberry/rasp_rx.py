@@ -7,6 +7,7 @@ Reception script of the range test.
 import time
 import sys
 import logging
+import threading
 
 import radio_rpi as radio
 import ieee802154g as ie154g
@@ -17,40 +18,36 @@ CRC_SIZE = 4
 
 class ExperimentRx(threading.Thread):
     def __init__(self):
+        self.pkt_rcv = pkt_rcv
 
         # start the thread
         threading.Thread.__init__(self)
         self.name = 'ExperimentRx'
+        self.event = threading.Event()
+        self.event.clear()
         self.start()
 
     def run(self):
 
-        # initialization
-        # FIXME: init driver, pass self._cb_rx_frame
-        radio_driver = radio.At86rf215()
+        radio_driver = radio.At86rf215(self._cb_rx_frame)
         # initialize the radio
         radio_driver.radio_init(3)
         radio_driver.radio_reset()
-        radio_driver.radio_write_config(ie154g.modulation_list_rx[0])
 
-        # switch to RX mode
-        radio_driver.radio_set_frequency(ie154g.frequencies_setup[0])
-        radio_driver.radio_trx_enable()
-        radio_driver.radio_rx_now()
 
         # main loop
         while True:
+            radio_driver.radio_write_config(ie154g.modulation_list_rx[0])
 
-            radio_driver.at86_state = 0
-            print radio_driver.at86_state
-            radio_driver.rx_done = 0
-            # FIXME: using a Threading.Event() object
-            while radio_driver.rx_done == 0:
-                pass
-
-            (pkt_rcv, rssi, crc, mcs) = radio_driver.radio_get_received_frame()
-            print (pkt_rcv, rssi, crc, mcs)
+            # switch to RX mode
+            radio_driver.radio_set_frequency(ie154g.frequencies_setup[0])
+            radio_driver.radio_trx_enable()
             radio_driver.radio_rx_now()
+            time.sleep(10)
+
+            #(pkt_rcv, rssi, crc, mcs) = radio_driver.radio_get_received_frame()
+
+
 
     # ======================== public ==========================================
 
@@ -59,8 +56,12 @@ class ExperimentRx(threading.Thread):
 
     # ======================== private =========================================
 
-    def _cb_rx_frame(self, frame):
+    def _cb_rx_frame(self, pkt_rcv, rssi, crc, mcs):
         print frame
+        #TODO: FIX THIS printing
+        self.event.set()
+        self.radio_driver.radio_rx_now()
+
 
 
 # ============================ main ============================================
