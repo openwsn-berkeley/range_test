@@ -752,7 +752,7 @@ ofdm_4_mcs6 = [
     (RG_BBC0_OFDMPHRTX, 0x06)
 ]
 
-# FIXME: move code below to application, does not belong in register definition file
 
-packet_sizes = [6, 127, 1000, 2047]
+
+
 

@@ -67,3 +67,5 @@ modulation_list_tx = [
     (fsk_option3_FEC),  # 30
     (fsk_option3),  # 31
 ]
+
+packet_sizes = [6, 127, 1000, 2047]
