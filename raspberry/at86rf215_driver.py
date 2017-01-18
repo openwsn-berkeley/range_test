@@ -23,7 +23,7 @@ import logging
 import spidev
 import RPi.GPIO as GPIO
 
-import at86rf215 as at86
+import at86rf215_defs as defs
 
 RADIOSTATE_RFOFF = 0x00  # ///< Completely stopped.
 RADIOSTATE_FREQUENCY_SET = 0x01  # ///< Listening for commands, but RF chain is off.
@@ -57,24 +57,24 @@ class At86rf215(object):
         FIXME: document parameter "channel"
         """
 
-        isr = self.radio_read_spi(at86.RG_RF09_IRQS, 4)
-        if isr[0] & at86.IRQS_TRXRDY_MASK:
+        isr = self.radio_read_spi(defs.RG_RF09_IRQS, 4)
+        if isr[0] & defs.IRQS_TRXRDY_MASK:
             self.at86_state = RADIOSTATE_TRX_ENABLED
             # FIXME: use logging module, see https://github.com/openwsn-berkeley/openwsn-sw/blob/develop/software/openvisualizer/openvisualizer/openTun/openTun.py#L6
             # debug, info, warning, error, critical
-            print('at86 state is {0}'.format(self.at86_state))  # FIXME: change string formatting
+            print('defs state is {0}'.format(self.at86_state))  # FIXME: change string formatting
             print('RADIOSTATE_TRX_ENABLED')
-        if isr[2] & at86.IRQS_RXFS_MASK:
+        if isr[2] & defs.IRQS_RXFS_MASK:
             self.at86_state = RADIOSTATE_RECEIVING
-            print('at86 state is {0}'.format(self.at86_state))
+            print('defs state is {0}'.format(self.at86_state))
             print('RADIOSTATE_RECEIVING')
-        if isr[2] & at86.IRQS_TXFE_MASK:
+        if isr[2] & defs.IRQS_TXFE_MASK:
             self.at86_state = RADIOSTATE_TXRX_DONE
-            print('at86 state is {0}'.format(self.at86_state))
+            print('defs state is {0}'.format(self.at86_state))
             print('RADIOSTATE_TXRX_DONE')
-        if isr[2] & at86.IRQS_RXFE_MASK:
+        if isr[2] & defs.IRQS_RXFE_MASK:
             self.at86_state = RADIOSTATE_TXRX_DONE
-            print('at86 state is {0}'.format(self.at86_state))
+            print('defs state is {0}'.format(self.at86_state))
             print('RADIOSTATE_TXRX_DONE')
             (pkt_rcv, rssi, crc, mcs) = self.radio_get_received_frame()
             self.cb(pkt_rcv, rssi, crc, mcs)
@@ -102,7 +102,7 @@ class At86rf215(object):
         It reset the radio.
         :return: Nothing
         """
-        self.radio_write_spi(at86.RG_RF_RST, at86.RST_CMD)
+        self.radio_write_spi(defs.RG_RF_RST, defs.RST_CMD)
 
     def radio_set_frequency(self, channel_set_up):
         """
@@ -112,11 +112,11 @@ class At86rf215(object):
         # def set_frequency(channel_spacing, frequency_0, channel):
         """
         frequency_0 = channel_set_up[1] / 25
-        self.radio_write_spi(at86.RG_RF09_CS, channel_set_up[0] / 25)
-        self.radio_write_spi(at86.RG_RF09_CCF0L, frequency_0 & 0xFF)
-        self.radio_write_spi(at86.RG_RF09_CCF0H, frequency_0 >> 8)
-        self.radio_write_spi(at86.RG_RF09_CNL, channel_set_up[2] & 0xFF)
-        self.radio_write_spi(at86.RG_RF09_CNM, channel_set_up[2] >> 8)
+        self.radio_write_spi(defs.RG_RF09_CS, channel_set_up[0] / 25)
+        self.radio_write_spi(defs.RG_RF09_CCF0L, frequency_0 & 0xFF)
+        self.radio_write_spi(defs.RG_RF09_CCF0H, frequency_0 >> 8)
+        self.radio_write_spi(defs.RG_RF09_CNL, channel_set_up[2] & 0xFF)
+        self.radio_write_spi(defs.RG_RF09_CNM, channel_set_up[2] >> 8)
 
     # FIXME: rename to radio_off
     def radio_off(self):
@@ -124,7 +124,7 @@ class At86rf215(object):
         Puts the radio in the TRXOFF mode.
         :return: Nothing
         """
-        self.radio_write_spi(at86.RG_RF09_CMD, at86.CMD_RF_TRXOFF)
+        self.radio_write_spi(defs.RG_RF09_CMD, defs.CMD_RF_TRXOFF)
 
     # FIXME: unclear what this is used for
     def change_pkt_size(self, sizes, size):
@@ -138,11 +138,11 @@ class At86rf215(object):
         :return: Nothing
         """
         # send the size of the packet + size of the CRC (4 bytes)
-        fifo_tx_len = at86.RG_BBC0_TXFLL[:] + [((len(packet) + 4) & 0xFF), (((len(packet) + 4) >> 8) & 0x07)]
+        fifo_tx_len = defs.RG_BBC0_TXFLL[:] + [((len(packet) + 4) & 0xFF), (((len(packet) + 4) >> 8) & 0x07)]
         fifo_tx_len[0] |= 0x80
         self.radio_write_spi(fifo_tx_len)
         # send the packet to the modem tx fifo
-        pkt = at86.RG_BBC0_FBTXS[:] + packet
+        pkt = defs.RG_BBC0_FBTXS[:] + packet
         pkt[0] |= 0x80
         self.radio_write_spi(pkt)
 
@@ -151,7 +151,7 @@ class At86rf215(object):
         Puts the radio in the TRXPREP, previous state to send/receive. It waits until receives a signal from the radio.
         :return: Nothing
         """
-        self.radio_write_spi(at86.RG_RF09_CMD, at86.CMD_RF_TXPREP)
+        self.radio_write_spi(defs.RG_RF09_CMD, defs.CMD_RF_TXPREP)
         while self.at86_state != RADIOSTATE_TRX_ENABLED:
             pass
 
@@ -160,7 +160,7 @@ class At86rf215(object):
         Commands the radio to send a previous loaded packet. It waits until the radio confirms the success.
         :return: Nothing
         """
-        self.radio_write_spi(at86.RG_RF09_CMD, at86.CMD_RF_TX)
+        self.radio_write_spi(defs.RG_RF09_CMD, defs.CMD_RF_TX)
         while self.at86_state != RADIOSTATE_TXRX_DONE:
             pass
             # TODO: foreseen the case when there is a failure in the tx -TXRERR.
@@ -171,7 +171,7 @@ class At86rf215(object):
         Puts the radio in reception mode, listening for packets.
         :return:
         """
-        self.radio_write_spi(at86.RG_RF09_CMD, at86.CMD_RF_RX)
+        self.radio_write_spi(defs.RG_RF09_CMD, defs.CMD_RF_RX)
 
     def radio_get_received_frame(self):
         """
@@ -179,18 +179,18 @@ class At86rf215(object):
         :return: a tuple with 1) packet received, 2) rssi, 3) crc(boolean) 4) mcs (valid for OFDM).
         """
         # get the length of the frame
-        rcv = self.radio_read_spi(at86.RG_BBC0_RXFLL, 2)
+        rcv = self.radio_read_spi(defs.RG_BBC0_RXFLL, 2)
         len_pkt = rcv[0] + ((rcv[1] & 0x07) << 8)
 
         print('length is {0}'.format(len_pkt))
 
         # read the packet
-        pkt_rcv = self.radio_read_spi(at86.RG_BBC0_FBRXS, len_pkt)
+        pkt_rcv = self.radio_read_spi(defs.RG_BBC0_FBRXS, len_pkt)
 
         # read from metadata
-        rssi = self.radio_read_spi(at86.RG_RF09_EDV, 1)[0]
-        crc = ((self.radio_read_spi(at86.RG_BBC0_PC, 1))[0] >> 5) & 0x01
-        mcs = self.radio_read_spi(at86.RG_BBC0_OFDMPHRRX, 1)[0] & at86.OFDMPHRRX_MCS_MASK
+        rssi = self.radio_read_spi(defs.RG_RF09_EDV, 1)[0]
+        crc = ((self.radio_read_spi(defs.RG_BBC0_PC, 1))[0] >> 5) & 0x01
+        mcs = self.radio_read_spi(defs.RG_BBC0_OFDMPHRRX, 1)[0] & defs.OFDMPHRRX_MCS_MASK
 
         return pkt_rcv, rssi, crc, mcs
 

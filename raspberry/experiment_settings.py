@@ -4,7 +4,7 @@ Lists of frequencies and modulations to be used in the range test.
 \author Jonathan Munoz (jonathan.munoz@inria.fr), January 2017
 """
 
-import at86rf215 as at86
+import at86rf215_defs as defs
 
 frame_lengths = [6, 127, 1000, 2047]
 BURST_SIZE    = 100

@@ -9,8 +9,8 @@ import logging
 import threading
 import sys
 
-import radio_rpi   as radio
-import ieee802154g as ie154g
+import at86rf215_driver      as radio
+import experiment_settings   as settings
 
 FRAME_LENGTH  = 2047
 CRC_SIZE      = 4
@@ -39,14 +39,14 @@ class ExperimentTx(threading.Thread):
         frame_counter = 0
         
         # loop radio configurations
-        for radio_config in ie154g.radio_configs_tx:
+        for radio_config in settings.radio_configs_tx:
             
             # re-configure the radio
             self.radio_driver.radio_write_config(radio_config)
             print("radio config: {0}".format(radio_config))
             
             # loop through frequencies
-            for frequency_setup in ie154g.radio_frequencies:
+            for frequency_setup in settings.radio_frequencies:
                 
                 # switch frequency
                 self.radio_driver.radio_off()
@@ -55,10 +55,10 @@ class ExperimentTx(threading.Thread):
                 print("frequencies: {0}".format(frequency_setup))
                 
                 # loop through packet lengths
-                for frame_length in ie154g.frame_lengths:
+                for frame_length in settings.frame_lengths:
                     
                     # send burst of frames
-                    for i in range(ie154g.BURST_SIZE):
+                    for i in range(settings.BURST_SIZE):
                     
                         # increment the frame counter
                         frame_counter += 1
@@ -74,7 +74,7 @@ class ExperimentTx(threading.Thread):
                         print('sent.')
                         
                         # wait for IFS (to allow the receiver to handle the RX'ed frame)
-                        time.sleep(ie154g.IFS_S)
+                        time.sleep(settings.IFS_S)
     
     #======================== private =========================================
     

@@ -9,8 +9,8 @@ import sys
 import logging
 import threading
 
-import radio_rpi   as radio
-import ieee802154g as ie154g
+import at86rf215_driver      as radio
+import experiment_settings   as settings
 
 PACKET_LENGTH = 2047
 CRC_SIZE      = 4
@@ -38,8 +38,8 @@ class ExperimentRx(threading.Thread):
         while True: # main loop
             
             # re-configure the radio
-            self.radio_driver.radio_write_config(ie154g.radio_configs_rx[0])
-            self.radio_driver.radio_set_frequency(ie154g.radio_frequencies[0])
+            self.radio_driver.radio_write_config(settings.radio_configs_rx[0])
+            self.radio_driver.radio_set_frequency(settings.radio_frequencies[0])
             self.radio_driver.radio_trx_enable()
             self.radio_driver.radio_rx_now()
             
