@@ -1,5 +1,5 @@
 '''
-Register identifiers for the AT86RF215 sub-GHz radio
+Register identifiers for the AT86RF215 sub-GHz radio.
 
 \author Jonathan Munoz (jonathan.munoz@inria.fr), January 2017
 '''

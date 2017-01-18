@@ -13,7 +13,7 @@ Connections
 | 23-     |  18 - SPI_SCK                     |
 | 24-     |  15 - SPI_SS_A                    |
 
-\author Jonathan Munoz (jonathan.munoz@inria.fr), January 2017
+\author Jonathan Munoz (jonathan.munoz@inria.fr), January 2017.
 """
 
 import threading
@@ -32,28 +32,21 @@ RADIOSTATE_TRX_ENABLED = 0x03  # ///< Done configuring the frequency.
 RADIOSTATE_RECEIVING = 0x04  # ///< Loading packet into the radio's TX buffer.
 RADIOSTATE_TXRX_DONE = 0x05  # ///< Packet is fully loaded in the radio's TX buffer.
 
-
-# FIXME: turn code in this file into a class
-
 class At86rf215(object):
-    at86_state = RADIOSTATE_RFOFF
-    #rx_done = 0
-    #spi = 0
-
+    
     def __init__(self, cb):
+        
+        # store params
         self.cb = cb
-
+        
+        # local variables
+        self.at86_state = RADIOSTATE_RFOFF
+    
     # ======================== public ==========================================
-
-    def method1(self, param1):
-        pass
-
+    
     # ======================== private =========================================
-
-    def _method2(self, param1):
-        pass
-
-    def read_isr(self):
+    
+    def read_isr_source(self):
         """
         Read the interruption source from the radio.
 
@@ -88,7 +81,7 @@ class At86rf215(object):
             self.radio_rx_now()
 
     def cb_gpio(self, channel = 3):
-        self.read_isr()
+        self.read_isr_source()
 
     def radio_init(self, channel=3):
         """

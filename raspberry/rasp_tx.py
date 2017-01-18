@@ -9,61 +9,81 @@ import logging
 import threading
 import sys
 
-import radio_rpi as radio
+import radio_rpi   as radio
 import ieee802154g as ie154g
 
-PACKET_LENGTH = 2047
-CRC_SIZE = 4
-
+FRAME_LENGTH  = 2047
+CRC_SIZE      = 4
 
 class ExperimentTx(threading.Thread):
+    
     def __init__(self):
+        
+        # local variables
+        self.radio_driver = None
+        
         # start the thread
         threading.Thread.__init__(self)
         self.name = 'ExperimentTx'
         self.start()
-
+    
     def run(self):
-
-        radio_driver = radio.At86rf215(self._cb_rx_frame)
-        radio_driver.radio_init(3)
-        radio_driver.radio_reset()
-        radio_driver.read_isr()
-        pkt_nb = 0
-        packet = [i & 0xFF for i in range(PACKET_LENGTH)]
-
-        for modulations_tx in ie154g.modulation_list_tx:
-            radio_driver.radio_write_config(modulations_tx)
-            print("modulation: {0}".format(modulations_tx))
-            for frequency_setup in ie154g.frequencies_setup:
-                radio_driver.radio_off()
-                radio_driver.radio_set_frequency(frequency_setup)
+        
+        # initialize the radio driver
+        self.radio_driver = radio.At86rf215(self._cb_rx_frame)
+        self.radio_driver.radio_init(3)
+        self.radio_driver.radio_reset()
+        self.radio_driver.read_isr_source() # no functional role, just clear the pending interrupt flag
+        
+        # initialize the frame counter
+        frame_counter = 0
+        
+        # loop radio configurations
+        for radio_config in ie154g.radio_configs_tx:
+            
+            # re-configure the radio
+            self.radio_driver.radio_write_config(radio_config)
+            print("radio config: {0}".format(radio_config))
+            
+            # loop through frequencies
+            for frequency_setup in ie154g.radio_frequencies:
+                
+                # switch frequency
+                self.radio_driver.radio_off()
+                self.radio_driver.radio_set_frequency(frequency_setup)
+                self.radio_driver.radio_off() # FIXME: why?
                 print("frequencies: {0}".format(frequency_setup))
-                radio_driver.radio_off()
-                for size in ie154g.packet_sizes:
-                    pkt_size = size
-                    for i in range(100):
-                        pkt_nb += 1
-                        pkt = [pkt_nb>>8, pkt_nb&0xFF] + packet[2:]
-                        print('tamano del pkt: {0}'.format(len(pkt[:pkt_size - CRC_SIZE])))
-                        radio_driver.radio_load_packet(pkt[:pkt_size - CRC_SIZE])
-                        radio_driver.radio_trx_enable()
-                        print('radio enabled')
-                        time.sleep(0.5)
-                        radio_driver.radio_tx_now()
-                        print('packet sent')
-
-
-    # ======================== private =========================================
-
+                
+                # loop through packet lengths
+                for frame_length in ie154g.frame_lengths:
+                    
+                    # send burst of frames
+                    for i in range(ie154g.BURST_SIZE):
+                    
+                        # increment the frame counter
+                        frame_counter += 1
+                        print('sending frame {0}...'.format(frame_counter)),
+                        
+                        # create frame
+                        frameToSend = [frame_counter>>8, frame_counter&0xFF] + [i & 0xFF for i in range(FRAME_LENGTH-2)]
+                        
+                        # send frame
+                        self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE])
+                        self.radio_driver.radio_trx_enable()
+                        self.radio_driver.radio_tx_now()
+                        print('sent.')
+                        
+                        # wait for IFS (to allow the receiver to handle the RX'ed frame)
+                        time.sleep(ie154g.IFS_S)
+    
+    #======================== private =========================================
+    
     def _cb_rx_frame(self, pkt_rcv, rssi, crc, mcs):
-        print ('packet {0}'.format(pkt_rcv))
-        #TODO: FIX THIS printing
-        self.event.set()
-        #radio_driver.radio_rx_now()
+        raise SystemError("frame received on transmitting mote")
+
+#============================ main ============================================
 
 def main():
-
     experimentTx = ExperimentTx()
     while True:
         input = raw_input('>')
