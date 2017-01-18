@@ -8,7 +8,7 @@ import at86rf215_defs as defs
 
 frame_lengths = [6, 127, 1000, 2047]
 BURST_SIZE    = 100
-ie154g.IFS_S  = 0.5
+IFS_S  = 0.5
 
 radio_frequencies = [
     #(channel_spacing, frequency_0, channel)
@@ -29,47 +29,47 @@ radio_frequencies = [
 ]
 
 radio_configs_tx = [
-    at86.fsk_option1_FEC,
-    at86.fsk_option2_FEC,
-    at86.fsk_option1,
-    at86.fsk_option2,
-    at86.ofdm_1_mcs0,
-    at86.ofdm_2_mcs0,
-    at86.ofdm_1_mcs1,
-    at86.ofdm_2_mcs1,
-    at86.ofdm_3_mcs1,
-    at86.ofdm_1_mcs2,
-    at86.ofdm_2_mcs2,
-    at86.ofdm_3_mcs2,
-    at86.ofdm_4_mcs2,
-    at86.ofdm_1_mcs3,
-    at86.ofdm_2_mcs3,
-    at86.ofdm_3_mcs3,
-    at86.ofdm_4_mcs3,
-    at86.ofdm_2_mcs4,
-    at86.ofdm_3_mcs4,
-    at86.ofdm_4_mcs4,
-    at86.ofdm_2_mcs5,
-    at86.ofdm_3_mcs5,
-    at86.ofdm_4_mcs5,
-    at86.ofdm_3_mcs6,
-    at86.ofdm_4_mcs6,
-    at86.oqpsk_rate1,
-    at86.oqpsk_rate2,
-    at86.oqpsk_rate3,
-    at86.oqpsk_rate4,
-    at86.fsk_option3_FEC,
-    at86.fsk_option3,
+    defs.fsk_option1_FEC,
+    defs.fsk_option2_FEC,
+    defs.fsk_option1,
+    defs.fsk_option2,
+    defs.ofdm_1_mcs0,
+    defs.ofdm_2_mcs0,
+    defs.ofdm_1_mcs1,
+    defs.ofdm_2_mcs1,
+    defs.ofdm_3_mcs1,
+    defs.ofdm_1_mcs2,
+    defs.ofdm_2_mcs2,
+    defs.ofdm_3_mcs2,
+    defs.ofdm_4_mcs2,
+    defs.ofdm_1_mcs3,
+    defs.ofdm_2_mcs3,
+    defs.ofdm_3_mcs3,
+    defs.ofdm_4_mcs3,
+    defs.ofdm_2_mcs4,
+    defs.ofdm_3_mcs4,
+    defs.ofdm_4_mcs4,
+    defs.ofdm_2_mcs5,
+    defs.ofdm_3_mcs5,
+    defs.ofdm_4_mcs5,
+    defs.ofdm_3_mcs6,
+    defs.ofdm_4_mcs6,
+    defs.oqpsk_rate1,
+    defs.oqpsk_rate2,
+    defs.oqpsk_rate3,
+    defs.oqpsk_rate4,
+    defs.fsk_option3_FEC,
+    defs.fsk_option3,
 ]
 
 radio_configs_rx = [
-    at86.fsk_option1_FEC,
-    at86.fsk_option2_FEC,
-    at86.fsk_option1,
-    at86.fsk_option2,
-    at86.ofdm_1_mcs0,
-    at86.ofdm_2_mcs0,
-    at86.ofdm_3_mcs1,
-    at86.ofdm_4_mcs2,
-    at86.oqpsk_rate1
+    defs.fsk_option1_FEC,
+    defs.fsk_option2_FEC,
+    defs.fsk_option1,
+    defs.fsk_option2,
+    defs.ofdm_1_mcs0,
+    defs.ofdm_2_mcs0,
+    defs.ofdm_3_mcs1,
+    defs.ofdm_4_mcs2,
+    defs.oqpsk_rate1
 ]
