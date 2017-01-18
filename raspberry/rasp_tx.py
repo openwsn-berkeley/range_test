@@ -7,14 +7,13 @@ Transmission script of the range test.
 import time
 import logging
 import threading
+import sys
 
 import radio_rpi as radio
-import at86rf215 as at86
 import ieee802154g as ie154g
 
 PACKET_LENGTH = 2047
 CRC_SIZE = 4
-radio.at86_state = 0
 
 
 class ExperimentTx(threading.Thread):
@@ -35,18 +34,22 @@ class ExperimentTx(threading.Thread):
 
         for modulations_tx in ie154g.modulation_list_tx:
             radio_driver.radio_write_config(modulations_tx)
+            print("modulation: {0}".format(modulations_tx))
             for frequency_setup in ie154g.frequencies_setup:
                 radio_driver.radio_off()
                 radio_driver.radio_set_frequency(frequency_setup)
+                print("frequencies: {0}".format(frequency_setup))
                 radio_driver.radio_off()
-                for j in range(len(ie154g.packet_sizes)):
-                    pkt_size = radio_driver.change_pkt_size(ie154g.packet_sizes, (j%4))
+                for size in ie154g.packet_sizes:
+                    pkt_size = size
                     for i in range(100):
                         pkt_nb += 1
-                        packet = [pkt_nb&0xFF, pkt_nb>>8] + packet
-                        radio_driver.radio_load_packet(packet[:pkt_size - CRC_SIZE])
+                        pkt = [pkt_nb>>8, pkt_nb&0xFF] + packet[2:]
+                        print('tamano del pkt: {0}'.format(len(pkt[:pkt_size - CRC_SIZE])))
+                        radio_driver.radio_load_packet(pkt[:pkt_size - CRC_SIZE])
                         radio_driver.radio_trx_enable()
                         print('radio enabled')
+                        time.sleep(0.5)
                         radio_driver.radio_tx_now()
                         print('packet sent')
 

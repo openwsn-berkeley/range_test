@@ -18,7 +18,9 @@ CRC_SIZE = 4
 
 class ExperimentRx(threading.Thread):
     def __init__(self):
-        
+        #local variables
+        self.radio_driver = None
+
         # start the thread
         threading.Thread.__init__(self)
         self.name = 'ExperimentRx'
@@ -28,24 +30,24 @@ class ExperimentRx(threading.Thread):
 
     def run(self):
 
-        radio_driver = radio.At86rf215(self._cb_rx_frame)
+        self.radio_driver = radio.At86rf215(self._cb_rx_frame)
         # initialize the radio
-        radio_driver.radio_init(3)
-        radio_driver.radio_reset()
-        radio_driver.read_isr()
+        self.radio_driver.radio_init(3)
+        self.radio_driver.radio_reset()
+        self.radio_driver.read_isr()
 
 
         # main loop
         while True:
-            radio_driver.radio_write_config(ie154g.modulation_list_rx[0])
+            self.radio_driver.radio_write_config(ie154g.modulation_list_rx[0])
 
             # switch to RX mode
-            radio_driver.radio_set_frequency(ie154g.frequencies_setup[0])
-            radio_driver.radio_trx_enable()
-            radio_driver.radio_rx_now()
+            self.radio_driver.radio_set_frequency(ie154g.frequencies_setup[0])
+            self.radio_driver.radio_trx_enable()
+            self.radio_driver.radio_rx_now()
             time.sleep(10)
             #radio_driver.radio_rx_now()
-            print('SUCCESS')
+            print('TIMER 10 Seconds triggers')
 
 
     # ======================== public ==========================================
@@ -59,7 +61,7 @@ class ExperimentRx(threading.Thread):
         print ('packet {0}'.format(pkt_rcv))
         #TODO: FIX THIS printing
         self.event.set()
-        #radio_driver.radio_rx_now()
+        self.radio_driver.radio_rx_now()
 
 
 

@@ -70,15 +70,19 @@ class At86rf215(object):
             # FIXME: use logging module, see https://github.com/openwsn-berkeley/openwsn-sw/blob/develop/software/openvisualizer/openvisualizer/openTun/openTun.py#L6
             # debug, info, warning, error, critical
             print('at86 state is {0}'.format(self.at86_state))  # FIXME: change string formatting
+            print('RADIOSTATE_TRX_ENABLED')
         if isr[2] & at86.IRQS_RXFS_MASK:
             self.at86_state = RADIOSTATE_RECEIVING
             print('at86 state is {0}'.format(self.at86_state))
+            print('RADIOSTATE_RECEIVING')
         if isr[2] & at86.IRQS_TXFE_MASK:
             self.at86_state = RADIOSTATE_TXRX_DONE
             print('at86 state is {0}'.format(self.at86_state))
+            print('RADIOSTATE_TXRX_DONE')
         if isr[2] & at86.IRQS_RXFE_MASK:
             self.at86_state = RADIOSTATE_TXRX_DONE
             print('at86 state is {0}'.format(self.at86_state))
+            print('RADIOSTATE_TXRX_DONE')
             (pkt_rcv, rssi, crc, mcs) = self.radio_get_received_frame()
             self.cb(pkt_rcv, rssi, crc, mcs)
             self.radio_rx_now()
