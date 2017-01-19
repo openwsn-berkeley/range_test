@@ -41,6 +41,9 @@ class At86rf215(object):
         
         # local variables
         self.at86_state = RADIOSTATE_RFOFF
+
+        # configure the logging module
+        logging.basicConfig(stream= sys.__stdout__, level=logging.DEBUG)
     
     # ======================== public ==========================================
     
@@ -62,20 +65,20 @@ class At86rf215(object):
             self.at86_state = RADIOSTATE_TRX_ENABLED
             # FIXME: use logging module, see https://github.com/openwsn-berkeley/openwsn-sw/blob/develop/software/openvisualizer/openvisualizer/openTun/openTun.py#L6
             # debug, info, warning, error, critical
-            print('defs state is {0}'.format(self.at86_state))  # FIXME: change string formatting
-            print('RADIOSTATE_TRX_ENABLED')
+            logging.info('defs state is {0}, ready to send/receive'.format(self.at86_state))  # FIXME: change string formatting
+            logging.info('RADIOSTATE_TRX_ENABLED')
         if isr[2] & defs.IRQS_RXFS_MASK:
             self.at86_state = RADIOSTATE_RECEIVING
-            print('defs state is {0}'.format(self.at86_state))
-            print('RADIOSTATE_RECEIVING')
+            logging.info('defs state is {0}, start of frame'.format(self.at86_state))
+            logging.info('RADIOSTATE_RECEIVING')
         if isr[2] & defs.IRQS_TXFE_MASK:
             self.at86_state = RADIOSTATE_TXRX_DONE
-            print('defs state is {0}'.format(self.at86_state))
-            print('RADIOSTATE_TXRX_DONE')
+            logging.info('defs state is {0}, end of tx '.format(self.at86_state))
+            logging.info('RADIOSTATE_TXRX_DONE')
         if isr[2] & defs.IRQS_RXFE_MASK:
             self.at86_state = RADIOSTATE_TXRX_DONE
-            print('defs state is {0}'.format(self.at86_state))
-            print('RADIOSTATE_TXRX_DONE')
+            logging.info('defs state is {0}, end of the rx frame'.format(self.at86_state))
+            logging.info('RADIOSTATE_TXRX_DONE')
             (pkt_rcv, rssi, crc, mcs) = self.radio_get_received_frame()
             self.cb(pkt_rcv, rssi, crc, mcs)
             self.radio_rx_now()
@@ -125,10 +128,6 @@ class At86rf215(object):
         :return: Nothing
         """
         self.radio_write_spi(defs.RG_RF09_CMD, defs.CMD_RF_TRXOFF)
-
-    # FIXME: unclear what this is used for
-    def change_pkt_size(self, sizes, size):
-        return sizes[size]
 
     # TX
     def radio_load_packet(self, packet):
@@ -182,7 +181,7 @@ class At86rf215(object):
         rcv = self.radio_read_spi(defs.RG_BBC0_RXFLL, 2)
         len_pkt = rcv[0] + ((rcv[1] & 0x07) << 8)
 
-        print('length is {0}'.format(len_pkt))
+        logging.info('length is {0}'.format(len_pkt))
 
         # read the packet
         pkt_rcv = self.radio_read_spi(defs.RG_BBC0_FBRXS, len_pkt)

@@ -1,8 +1,8 @@
-'''
+"""
 Reception script of the range test.
 
 \author Jonathan Munoz (jonathan.munoz@inria.fr), January 2017
-'''
+"""
 
 import time
 import sys
@@ -15,6 +15,7 @@ import experiment_settings   as settings
 PACKET_LENGTH = 2047
 CRC_SIZE      = 4
 
+
 class ExperimentRx(threading.Thread):
     
     def __init__(self):
@@ -26,6 +27,9 @@ class ExperimentRx(threading.Thread):
         threading.Thread.__init__(self)
         self.name = 'ExperimentRx'
         self.start()
+
+        # configure the logging module
+        logging.basicConfig(stream= sys.__stdout__, level=logging.DEBUG)
 
     def run(self):
 
@@ -57,12 +61,13 @@ class ExperimentRx(threading.Thread):
     def _cb_rx_frame(self, pkt_rcv, rssi, crc, mcs):
         
         # handle the received frame
-        print ('packet {0}'.format(pkt_rcv)) # FIXME: replace by logging
+        logging.info('frame size: {0}, RSSI: {1},  CRC: {2}, MCS: {3} '.format(len(pkt_rcv), rssi, crc, mcs))
         
         # re-arm the radio in RX mode
         self.radio_driver.radio_rx_now()
 
 #============================ main ============================================
+
 
 def main():
     experimentRx = ExperimentRx()

@@ -26,6 +26,9 @@ class ExperimentTx(threading.Thread):
         threading.Thread.__init__(self)
         self.name = 'ExperimentTx'
         self.start()
+
+        # configure the logging module
+        logging.basicConfig(stream= sys.__stdout__, level=logging.DEBUG)
     
     def run(self):
         
@@ -43,16 +46,14 @@ class ExperimentTx(threading.Thread):
             
             # re-configure the radio
             self.radio_driver.radio_write_config(radio_config)
-            print("radio config: {0}".format(radio_config))
-            
+
             # loop through frequencies
             for frequency_setup in settings.radio_frequencies:
                 
                 # switch frequency
                 self.radio_driver.radio_off()
                 self.radio_driver.radio_set_frequency(frequency_setup)
-                self.radio_driver.radio_off() # FIXME: why?
-                print("frequencies: {0}".format(frequency_setup))
+                logging.info("frequencies: {0}".format(frequency_setup))
                 
                 # loop through packet lengths
                 for frame_length in settings.frame_lengths:
@@ -62,7 +63,7 @@ class ExperimentTx(threading.Thread):
                     
                         # increment the frame counter
                         frame_counter += 1
-                        print('sending frame {0}...'.format(frame_counter)),
+                        logging.info('sending frame {0}...'.format(frame_counter)),
                         
                         # create frame
                         frameToSend = [frame_counter>>8, frame_counter&0xFF] + [i & 0xFF for i in range(FRAME_LENGTH-2)]
@@ -71,7 +72,7 @@ class ExperimentTx(threading.Thread):
                         self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE])
                         self.radio_driver.radio_trx_enable()
                         self.radio_driver.radio_tx_now()
-                        print('sent.')
+                        logging.info('sent.')
                         
                         # wait for IFS (to allow the receiver to handle the RX'ed frame)
                         time.sleep(settings.IFS_S)
@@ -82,6 +83,7 @@ class ExperimentTx(threading.Thread):
         raise SystemError("frame received on transmitting mote")
 
 #============================ main ============================================
+
 
 def main():
     experimentTx = ExperimentTx()
