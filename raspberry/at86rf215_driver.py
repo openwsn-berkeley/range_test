@@ -19,6 +19,7 @@ Connections
 import threading
 import time
 import logging
+import sys
 
 import spidev
 import RPi.GPIO as GPIO
