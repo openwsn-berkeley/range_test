@@ -62,7 +62,7 @@ class ExperimentRx(threading.Thread):
     def _cb_rx_frame(self, pkt_rcv, rssi, crc, mcs):
         
         # handle the received frame
-        logging.info('frame size: {0}, RSSI: {1},  CRC: {2}, MCS: {3} '.format(len(pkt_rcv), rssi, crc, mcs))
+        logging.info('frame number: {0}, frame size: {1}, RSSI: {2},  CRC: {3}, MCS: {4} '.format((pkt_rcv[0]*256 + pkt_rcv[1]),len(pkt_rcv), rssi, crc, mcs))
         
         # re-arm the radio in RX mode
         self.radio_driver.radio_rx_now()
