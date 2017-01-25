@@ -92,6 +92,8 @@ def main():
         input = raw_input('>')
         if input=='s':
             print experimentTx.getStats()
+        if input=='q':
+            sys.exit(0)
 
 if __name__ == '__main__':
     main()
