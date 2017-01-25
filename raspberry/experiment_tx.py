@@ -25,6 +25,7 @@ class ExperimentTx(threading.Thread):
         # start the thread
         threading.Thread.__init__(self)
         self.name = 'ExperimentTx'
+        self.daemon = True
         self.start()
 
         # configure the logging module
