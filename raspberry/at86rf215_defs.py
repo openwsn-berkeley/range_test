@@ -199,7 +199,7 @@ fsk_option3_FEC = [
     (RG_BBC1_IRQM, 0x00),
     (RG_BBC0_PC, 0x15),  # // No FCS filter, 32 bits FCS, FSK.
     (RG_BBC0_FSKDM, 0x03),  # //Direct modulation and Preemphasis enabled.
-    (RG_BBC0_FSKC0, 0xC1),
+    (RG_BBC0_FSKC0, 0x97),
     (RG_BBC0_FSKC1, 0x03),
     (RG_BBC0_FSKC2, 0x00),
     (RG_BBC0_FSKC3, 0x85),
@@ -277,7 +277,7 @@ fsk_option3 = [
     (RG_BBC1_IRQM, 0x00),
     (RG_BBC0_PC, 0x15),  # // No FCS filter, 32 bits FCS, FSK.
     (RG_BBC0_FSKDM, 0x03),  # //Direct modulation and Preemphasis enabled.
-    (RG_BBC0_FSKC0, 0xC1),
+    (RG_BBC0_FSKC0, 0x97),
     (RG_BBC0_FSKC1, 0x03),
     (RG_BBC0_FSKC2, 0x00),
     (RG_BBC0_FSKC3, 0x85),
