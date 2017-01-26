@@ -229,7 +229,7 @@ fsk_option1 = [
     (RG_BBC0_FSKC1, 0x00),
     (RG_BBC0_FSKC2, 0x40),
     (RG_BBC0_FSKC3, 0x85),
-    (RG_BBC0_FSKC4, 0x00),  # //FEC enabled. IEEE MODE
+    (RG_BBC0_FSKC4, 0x00),  # //FEC disabled. IEEE MODE
     (RG_BBC0_FSKPE0, 0x02),
     (RG_BBC0_FSKPE1, 0x03),
     (RG_BBC0_FSKPE2, 0xFC),
@@ -255,7 +255,7 @@ fsk_option2 = [
     (RG_BBC0_FSKC1, 0x01),
     (RG_BBC0_FSKC2, 0x40),
     (RG_BBC0_FSKC3, 0x85),
-    (RG_BBC0_FSKC4, 0x00),  # //FEC enabled. IEEE MODE
+    (RG_BBC0_FSKC4, 0x00),  # //FEC disabled. IEEE MODE
     (RG_BBC0_FSKPE0, 0x0E),
     (RG_BBC0_FSKPE1, 0x0F),
     (RG_BBC0_FSKPE2, 0xF0),
@@ -281,7 +281,7 @@ fsk_option3 = [
     (RG_BBC0_FSKC1, 0x03),
     (RG_BBC0_FSKC2, 0x00),
     (RG_BBC0_FSKC3, 0x85),
-    (RG_BBC0_FSKC4, 0x00),
+    (RG_BBC0_FSKC4, 0x00),  # FEC disabled
     (RG_BBC0_FSKPE0, 0x74),
     (RG_BBC0_FSKPE1, 0x7F),
     (RG_BBC0_FSKPE2, 0x80),
