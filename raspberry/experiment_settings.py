@@ -18,7 +18,7 @@ radio_frequencies = [
     (             800,      863425,       0),  # ofdm option 2
     (             400,      863225,       0),  # ofdm option 3
     (             200,      863125,       0),  # ofdm option 4
-    (             600,     868300,        0),  # oqpsk
+    (             600,      868300,       0),  # oqpsk
     (             200,      863125,      17),  # fsk operating mode 1
     (             400,      863225,       9),  # fsk operating mode 2-3
     (            1200,      863625,       2),  # ofdm option 1

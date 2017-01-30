@@ -38,9 +38,9 @@ class ExperimentRx(threading.Thread):
         self.radio_driver = radio.At86rf215(self._cb_rx_frame)
         self.radio_driver.radio_init(3)
         self.radio_driver.radio_reset()
-        self.radio_driver.read_isr_source() # no functional role, just clear the pending interrupt flag
+        self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
         
-        while True: # main loop
+        while True:  # main loop
             
             # re-configure the radio
             self.radio_driver.radio_write_config(settings.radio_configs_rx[0])
@@ -52,12 +52,12 @@ class ExperimentRx(threading.Thread):
             time.sleep(10) # FIXME: replace by an event from the GPS thread
             print('TIMER 10 Seconds triggers')
     
-    #======================== public ==========================================
+    #  ======================== public ========================================
     
     def getStats(self):
         raise NotImplementedError()
 
-    #======================== private =========================================
+    #  ====================== private =========================================
 
     def _cb_rx_frame(self, pkt_rcv, rssi, crc, mcs):
         
@@ -67,14 +67,14 @@ class ExperimentRx(threading.Thread):
         # re-arm the radio in RX mode
         self.radio_driver.radio_rx_now()
 
-#============================ main ============================================
+#  ========================== main ============================================
 
 
 def main():
     experimentRx = ExperimentRx()
     while True:
         input = raw_input('>')
-        if   input == 's':
+        if input == 's':
             print experimentRx.getStats()
         elif input == 'q':
             sys.exit(0)

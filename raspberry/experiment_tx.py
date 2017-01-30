@@ -67,7 +67,7 @@ class ExperimentTx(threading.Thread):
                         logging.info('sending frame {0}...'.format(frame_counter)),
                         
                         # create frame
-                        frameToSend = [frame_counter>>8, frame_counter&0xFF] + [i & 0xFF for i in range(FRAME_LENGTH-2)]
+                        frameToSend = [frame_counter >> 8, frame_counter & 0xFF] + [i & 0xFF for i in range(FRAME_LENGTH - 2)]
                         
                         # send frame
                         self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE])
