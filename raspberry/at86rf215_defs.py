@@ -215,8 +215,8 @@ fsk_option1 = [
     (RG_RF09_CMD, 0x02),  # //we make sure we are in the trxoff state
     (RG_RF09_IRQM, 0x1F),  # // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts enabled
     (RG_RF24_IRQM, 0x00),
-    (RG_RF09_RXBWC, 0x00),
-    (RG_RF09_RXDFE, 0x1A),
+    (RG_RF09_RXBWC, 0x00), # 0 IFS, 50 kHz symbol rate
+    (RG_RF09_RXDFE, 0x2A), # RCUT = 1 , SR = 10
     (RG_RF09_AGCC, 0x01),
     (RG_RF09_EDD, 0x7A),
     (RG_RF09_TXCUTC, 0xC0),
@@ -241,8 +241,8 @@ fsk_option2 = [
     (RG_RF09_CMD, 0x02),  # //we make sure we are in the trxoff state
     (RG_RF09_IRQM, 0x1F),  # // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts enabled
     (RG_RF24_IRQM, 0x00),
-    (RG_RF09_RXBWC, 0x03),
-    (RG_RF09_RXDFE, 0x15),
+    (RG_RF09_RXBWC, 0x03),  # 0 IFS, 100 kHz symbol rate
+    (RG_RF09_RXDFE, 0x25),  # RCUT = 1 , SR = 5
     (RG_RF09_AGCC, 0x01),
     (RG_RF09_EDD, 0x7A),
     (RG_RF09_TXCUTC, 0x83),
@@ -267,8 +267,8 @@ fsk_option3 = [
     (RG_RF09_CMD, 0x02),  # //we make sure we are in the trxoff state
     (RG_RF09_IRQM, 0x1F),  # // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts enabled
     (RG_RF24_IRQM, 0x00),
-    (RG_RF09_RXBWC, 0x03),  # //IF shift, 200 kHz bandwidth
-    (RG_RF09_RXDFE, 0x24),  # //find the right values
+    (RG_RF09_RXBWC, 0x15),  # //IFS 1, 200 kHz
+    (RG_RF09_RXDFE, 0x44),  # # RCUT = 2 , SR = 4
     (RG_RF09_AGCC, 0x01),
     (RG_RF09_EDD, 0x7A),
     (RG_RF09_TXCUTC, 0x84),  # //find the right values

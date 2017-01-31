@@ -68,7 +68,7 @@ class At86rf215(object):
             logging.info('defs state is {0}, ready to send/receive'.format(self.at86_state))
             logging.info('RADIOSTATE_TRX_ENABLED')
         if isr[0] & defs.IRQS_TRXERR:
-            logging.info('ERROR IN RX')
+            logging.info('ERROR IN TRX')
             self.radio_rx_now()
         if isr[2] & defs.IRQS_RXFS_MASK:
             self.at86_state = RADIOSTATE_RECEIVING
