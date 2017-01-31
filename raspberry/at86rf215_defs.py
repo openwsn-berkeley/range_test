@@ -10,6 +10,7 @@ IRQS_TXFE_MASK = 0x10
 IRQS_TRXRDY_MASK = 0x02
 IRQS_RXFS_MASK = 0x01
 IRQS_RXFE_MASK = 0x02
+
 # commands
 CMD_RF_NOP = 0x0
 CMD_RF_SLEEP = 0x1
@@ -199,7 +200,7 @@ fsk_option3_FEC = [
     (RG_BBC1_IRQM, 0x00),
     (RG_BBC0_PC, 0x15),  # // No FCS filter, 32 bits FCS, FSK.
     (RG_BBC0_FSKDM, 0x03),  # //Direct modulation and Preemphasis enabled.
-    (RG_BBC0_FSKC0, 0x97),
+    (RG_BBC0_FSKC0, 0xD7),
     (RG_BBC0_FSKC1, 0x03),
     (RG_BBC0_FSKC2, 0x00),
     (RG_BBC0_FSKC3, 0x85),
@@ -277,7 +278,7 @@ fsk_option3 = [
     (RG_BBC1_IRQM, 0x00),
     (RG_BBC0_PC, 0x15),  # // No FCS filter, 32 bits FCS, FSK.
     (RG_BBC0_FSKDM, 0x03),  # //Direct modulation and Preemphasis enabled.
-    (RG_BBC0_FSKC0, 0x97),
+    (RG_BBC0_FSKC0, 0xD7),
     (RG_BBC0_FSKC1, 0x03),
     (RG_BBC0_FSKC2, 0x00),
     (RG_BBC0_FSKC3, 0x85),
@@ -288,13 +289,13 @@ fsk_option3 = [
     (RG_BBC0_FSKPHRTX, 0x00)
 ]
 
-oqpsk_rate1 = [
+oqpsk_rate0 = [
     (RG_BBC0_PC, 0x17),
     (RG_BBC0_OQPSKPHRTX, 0x00),  # MR-OQPSK, rate mode 0
     (RG_BBC0_OQPSKC0, 0x10),  # 100kchips/s, RC-0.8 shaping, direct-modulation enabled
-    # (RG_BBC0_OQPSKC1,   0x3F),#// MINIMUM preamble-detection sensitivities, rx-override disabled
-    # (RG_BBC0_OQPSKC2,   0x00),#// listen for MR-OQPSK frames only
-    # (RG_BBC0_OQPSKC3,   0x00),#// legacy OQPSK, search for SFD_1 only
+    (RG_BBC0_OQPSKC1,   0xB8),#// MINIMUM preamble-detection sensitivity for SUN-O-QPSK, MAXIMUM for LEGACY OQPSK, rx-override enabled
+    (RG_BBC0_OQPSKC2,   0x04),#// listen for MR-OQPSK frames only
+    (RG_BBC0_OQPSKC3,   0x00),#// legacy OQPSK, search for SFD_1 only
     (RG_BBC0_IRQM, 0x13),  # // TXFE, RXFE, RXFS interrupts enabled
     (RG_BBC1_IRQM, 0x00),
     (RG_RF09_IRQM, 0x12),  # // TRXERR, TRXRDY interrupts enabled
@@ -309,13 +310,13 @@ oqpsk_rate1 = [
     (RG_RF09_PAC, 0x64)
 ]
 
-oqpsk_rate2 = [
+oqpsk_rate1 = [
     (RG_BBC0_PC, 0x17),
-    (RG_BBC0_OQPSKPHRTX, 0x02),  # // MR-OQPSK, rate mode 1
-    (RG_BBC0_OQPSKC0, 0x10),  # // 100kchips/s, RC-0.8 shaping, direct-modulation enabled
-    # //  (RG_BBC0_OQPSKC1,   0x3F),  // MINIMUM preamble-detection sensitivities, rx-override disabled
-    # //  (RG_BBC0_OQPSKC2,   0x00),  // listen for MR-OQPSK frames only
-    # //  (RG_BBC0_OQPSKC3,   0x00),  // legacy OQPSK, search for SFD_1 only
+    (RG_BBC0_OQPSKPHRTX, 0x02),  #  MR-OQPSK, rate mode 1
+    (RG_BBC0_OQPSKC0, 0x10),  #  100kchips/s, RC-0.8 shaping, direct-modulation enabled
+    (RG_BBC0_OQPSKC1, 0xB8),#// MINIMUM preamble-detection sensitivity for SUN-O-QPSK, MAXIMUM for LEGACY OQPSK, rx-override enabled
+    (RG_BBC0_OQPSKC2, 0x00),  # listen for MR-OQPSK frames only
+    (RG_BBC0_OQPSKC3, 0x00), #  legacy OQPSK, search for SFD_1 only
     (RG_BBC0_IRQM, 0x13),  # // TXFE, RXFE, RXFS interrupts enabled
     (RG_BBC1_IRQM, 0x00),
     (RG_RF09_IRQM, 0x12),  # // TRXERR, TRXRDY interrupts enabled
@@ -330,13 +331,13 @@ oqpsk_rate2 = [
     (RG_RF09_PAC, 0x64)
 ]
 
-oqpsk_rate3 = [
+oqpsk_rate2 = [
     (RG_BBC0_PC, 0x17),
     (RG_BBC0_OQPSKPHRTX, 0x04),  # // MR-OQPSK, rate mode 2
     (RG_BBC0_OQPSKC0, 0x10),  # // 100kchips/s, RC-0.8 shaping, direct-modulation enabled
-    # (RG_BBC0_OQPSKC1,   0x3F),  // MINIMUM preamble-detection sensitivities, rx-override disabled
-    # (RG_BBC0_OQPSKC2,   0x00),  // listen for MR-OQPSK frames only
-    # (RG_BBC0_OQPSKC3,   0x00),  // legacy OQPSK, search for SFD_1 only
+    (RG_BBC0_OQPSKC1,   0xB8),  #// MINIMUM preamble-detection sensitivities, rx-override disabled
+    (RG_BBC0_OQPSKC2,   0x04), # // listen for MR-OQPSK frames only
+    (RG_BBC0_OQPSKC3,   0x00), # // legacy OQPSK, search for SFD_1 only
     (RG_BBC0_IRQM, 0x13),  # // TXFE, RXFE, RXFS interrupts enabled
     (RG_BBC1_IRQM, 0x00),
     (RG_RF09_IRQM, 0x12),  # // TRXERR, TRXRDY interrupts enabled
@@ -351,13 +352,13 @@ oqpsk_rate3 = [
     (RG_RF09_PAC, 0x64)
 ]
 
-oqpsk_rate4 = [
+oqpsk_rate3 = [
     (RG_BBC0_PC, 0x17),
     (RG_BBC0_OQPSKPHRTX, 0x06),  # # MR-OQPSK, rate mode 3
     (RG_BBC0_OQPSKC0, 0x10),  ## 100kchips/s, RC-0.8 shaping, direct-modulation enabled
-    # (RG_BBC0_OQPSKC1,   0x3F),  # MINIMUM preamble-detection sensitivities, rx-override disabled
-    # (RG_BBC0_OQPSKC2,   0x00),  # listen for MR-OQPSK frames only
-    # (RG_BBC0_OQPSKC3,   0x00),  # legacy OQPSK, search for SFD_1 only
+    (RG_BBC0_OQPSKC1,   0xB8),  # MINIMUM preamble-detection sensitivities, rx-override disabled
+    (RG_BBC0_OQPSKC2,   0x00),  # listen for MR-OQPSK frames only
+    (RG_BBC0_OQPSKC3,   0x00),  # legacy OQPSK, search for SFD_1 only
     (RG_BBC0_IRQM, 0x13),  # # TXFE, RXFE, RXFS interrupts enabled
     (RG_BBC1_IRQM, 0x00),
     (RG_RF09_IRQM, 0x12),  # # TRXERR, TRXRDY interrupts enabled

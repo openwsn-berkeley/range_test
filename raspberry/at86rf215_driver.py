@@ -64,10 +64,12 @@ class At86rf215(object):
         isr = self.radio_read_spi(defs.RG_RF09_IRQS, 4)
         if isr[0] & defs.IRQS_TRXRDY_MASK:
             self.at86_state = RADIOSTATE_TRX_ENABLED
-            # FIXME: use logging module, see https://github.com/openwsn-berkeley/openwsn-sw/blob/develop/software/openvisualizer/openvisualizer/openTun/openTun.py#L6
             # debug, info, warning, error, critical
-            logging.info('defs state is {0}, ready to send/receive'.format(self.at86_state))  # FIXME: change string formatting
+            logging.info('defs state is {0}, ready to send/receive'.format(self.at86_state))
             logging.info('RADIOSTATE_TRX_ENABLED')
+        if isr[0] & defs.IRQS_TRXERR:
+            logging.info('ERROR IN RX')
+            self.radio_rx_now()
         if isr[2] & defs.IRQS_RXFS_MASK:
             self.at86_state = RADIOSTATE_RECEIVING
             logging.info('defs state is {0}, start of frame'.format(self.at86_state))

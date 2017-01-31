@@ -37,62 +37,67 @@ class ExperimentTx(threading.Thread):
         self.radio_driver = radio.At86rf215(self._cb_rx_frame)
         self.radio_driver.radio_init(3)
         self.radio_driver.radio_reset()
-        self.radio_driver.read_isr_source() # no functional role, just clear the pending interrupt flag
+        self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
         
         # initialize the frame counter
         frame_counter = 0
+
+        # match up a modulation with a frequency setup (frequency_0, bandwidth, channel)
+        freq_mod_tech = zip(settings.radio_configs_tx, settings.radio_frequencies)
         
         # loop radio configurations
-        for radio_config in settings.radio_configs_tx:
-            
+        #for radio_config in settings.radio_configs_tx:
+        for fmt in freq_mod_tech:
             # re-configure the radio
-            self.radio_driver.radio_write_config(radio_config)
+            #self.radio_driver.radio_write_config(radio_config)
+            self.radio_driver.radio_write_config(freq_mod_tech[2][0])
 
             # loop through frequencies
-            for frequency_setup in settings.radio_frequencies:
+            #for frequency_setup in settings.radio_frequencies:
                 
-                # switch frequency
-                self.radio_driver.radio_off()
-                self.radio_driver.radio_set_frequency(frequency_setup)
-                logging.info("frequencies: {0}".format(frequency_setup))
+            # switch frequency
+            self.radio_driver.radio_off()
+            #self.radio_driver.radio_set_frequency(frequency_setup)
+            self.radio_driver.radio_set_frequency(freq_mod_tech[2][1])
+            logging.info("frequencies: {0}".format(fmt[1]))
                 
-                # loop through packet lengths
-                for frame_length in settings.frame_lengths:
+            # loop through packet lengths
+            for frame_length in settings.frame_lengths:
                     
-                    # send burst of frames
-                    for i in range(settings.BURST_SIZE):
-                    
-                        # increment the frame counter
-                        frame_counter += 1
-                        logging.info('sending frame {0}...'.format(frame_counter)),
+                # send burst of frames
+                for i in range(settings.BURST_SIZE):
+
+                    # increment the frame counter
+                    frame_counter += 1
+                    logging.info('sending frame {0}...'.format(frame_counter)),
                         
-                        # create frame
-                        frameToSend = [frame_counter >> 8, frame_counter & 0xFF] + [i & 0xFF for i in range(FRAME_LENGTH - 2)]
+                    # create frame
+                    frameToSend = [frame_counter >> 8, frame_counter & 0xFF] + [i & 0xFF for i in range(FRAME_LENGTH - 2)]
                         
-                        # send frame
-                        self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE])
-                        self.radio_driver.radio_trx_enable()
-                        self.radio_driver.radio_tx_now()
-                        logging.info('sent.')
+                    # send frame
+                    self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE])
+                    self.radio_driver.radio_trx_enable()
+                    self.radio_driver.radio_tx_now()
+                    logging.info('sent.')
                         
-                        # wait for IFS (to allow the receiver to handle the RX'ed frame)
-                        time.sleep(settings.IFS_S)
+                    # wait for IFS (to allow the receiver to handle the RX'ed frame)
+                    time.sleep(settings.IFS_S)
     
-    #======================== private =========================================
+    #  ======================== private =======================================
     
     def _cb_rx_frame(self, pkt_rcv, rssi, crc, mcs):
         raise SystemError("frame received on transmitting mote")
 
-#============================ main ============================================
+#  ============================ main ==========================================
 
 
 def main():
     experimentTx = ExperimentTx()
     while True:
         input = raw_input('>')
-        if input=='s':
+        if input == 's':
             print experimentTx.getStats()
-        if input=='q':
+        if input == 'q':
             sys.exit(0)
 
 if __name__ == '__main__':

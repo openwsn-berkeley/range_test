@@ -43,13 +43,13 @@ class ExperimentRx(threading.Thread):
         while True:  # main loop
             
             # re-configure the radio
-            self.radio_driver.radio_write_config(settings.radio_configs_rx[0])
-            self.radio_driver.radio_set_frequency(settings.radio_frequencies[0])
+            self.radio_driver.radio_write_config(settings.radio_configs_rx[2])
+            self.radio_driver.radio_set_frequency(settings.radio_frequencies[2])
             self.radio_driver.radio_trx_enable()
             self.radio_driver.radio_rx_now()
             
             # wait for the GPS thread to indicate it's time to move to the next configuration
-            time.sleep(10) # FIXME: replace by an event from the GPS thread
+            time.sleep(100) # FIXME: replace by an event from the GPS thread
             print('TIMER 10 Seconds triggers')
     
     #  ======================== public ========================================

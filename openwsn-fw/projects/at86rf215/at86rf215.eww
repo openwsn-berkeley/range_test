@@ -10,12 +10,6 @@
   <project>
     <path>$WS_DIR$\01bsp_radio_tx\01bsp_radio_tx.ewp</path>
   </project>
-  <project>
-    <path>$WS_DIR$\..\..\..\test_range\test_range.ewp</path>
-  </project>
-  <project>
-    <path>$WS_DIR$\..\..\..\test_range\test_range_rx.ewp</path>
-  </project>
   <batchBuild/>
 </workspace>
 
