@@ -123,6 +123,11 @@ RG_BBC0_FSKDM = [0x03, 0x72]
 RG_BBC0_FSKPE0 = [0x03, 0x73]
 RG_BBC0_FSKPE1 = [0x03, 0x74]
 RG_BBC0_FSKPE2 = [0x03, 0x75]
+RG_BBC0_FSKSDF0L = [0x03, 0x66]
+RG_BBC0_FSKSDF0H = [0x03, 0x67]
+RG_BBC0_FSKSDF1L = [0x03, 0x68]
+RG_BBC0_FSKSDF1H = [0x03, 0x69]
+
 
 RG_BBC1_IRQM = [0x04, 0x00]
 
@@ -147,7 +152,7 @@ fsk_option1_FEC = [
     (RG_BBC0_IRQM, 0x1F),  # TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
     (RG_BBC1_IRQM, 0x00),
     (RG_BBC0_PC, 0x1D),  # // No FCS filter, 32 bits FCS, FSK.
-    (RG_BBC0_FSKDM, 0x01),  # //Direct modulation and preemphasis enabled.
+    (RG_BBC0_FSKDM, 0x03),  # //Direct modulation and preemphasis enabled.
     (RG_BBC0_FSKC0, 0xD6),
     (RG_BBC0_FSKC1, 0x00),
     (RG_BBC0_FSKC2, 0x40),
@@ -186,29 +191,33 @@ fsk_option2_FEC = [
 ]
 
 fsk_option3_FEC = [
-    (RG_RF09_CMD, 0x02),  # //we make sure we are in the trxoff state
-    (RG_RF09_IRQM, 0x1F),  # // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts enabled
-    (RG_RF24_IRQM, 0x00),
-    (RG_RF09_RXBWC, 0x03),  # //IF shift, 200 kHz bandwidth
-    (RG_RF09_RXDFE, 0x24),  # //find the right values
-    (RG_RF09_AGCC, 0x01),
-    (RG_RF09_EDD, 0x7A),
-    (RG_RF09_TXCUTC, 0x84),  # //find the right values
-    (RG_RF09_TXDFE, 0x12),  # //find the right values
-    (RG_RF09_PAC, 0x64),  # // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
-    (RG_BBC0_IRQM, 0x1F),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
-    (RG_BBC1_IRQM, 0x00),
-    (RG_BBC0_PC, 0x15),  # // No FCS filter, 32 bits FCS, FSK.
-    (RG_BBC0_FSKDM, 0x03),  # //Direct modulation and Preemphasis enabled.
-    (RG_BBC0_FSKC0, 0xD7),
-    (RG_BBC0_FSKC1, 0x03),
-    (RG_BBC0_FSKC2, 0x00),
-    (RG_BBC0_FSKC3, 0x85),
-    (RG_BBC0_FSKC4, 0x0A),
-    (RG_BBC0_FSKPE0, 0x74),
-    (RG_BBC0_FSKPE1, 0x7F),
-    (RG_BBC0_FSKPE2, 0x80),
-    (RG_BBC0_FSKPHRTX, 0x00)
+    (RG_RF09_CMD,       0x02),  # //we make sure we are in the trxoff state
+    (RG_RF09_IRQM,      0x1F),  # // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts enabled
+    (RG_RF24_IRQM,      0x00),
+    (RG_RF09_RXBWC,     0x03),  # //IF shift, 200 kHz bandwidth
+    (RG_RF09_RXDFE,     0x24),  # //find the right values
+    (RG_RF09_AGCC,      0x01),
+    (RG_RF09_EDD,       0x7A),
+    (RG_RF09_TXCUTC,    0x83),  #
+    (RG_RF09_TXDFE,     0x94),  # //find the right values
+    (RG_RF09_PAC,       0x64),  # // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
+    (RG_BBC0_IRQM,      0x1F),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
+    (RG_BBC1_IRQM,      0x00),
+    (RG_BBC0_PC,        0x15),  # // No FCS filter, 32 bits FCS, FSK.
+    (RG_BBC0_FSKDM,     0x03),  # //Direct modulation and Preemphasis enabled.
+    (RG_BBC0_FSKSDF0L,  0xBE),
+    (RG_BBC0_FSKSDF0H,  0xFF),
+    (RG_BBC0_FSKSDF1L,  0xAE),
+    (RG_BBC0_FSKSDF1H,  0xBF),
+    (RG_BBC0_FSKC0,     0xD7),
+    (RG_BBC0_FSKC1,     0x01),
+    (RG_BBC0_FSKC2,     0x40),
+    (RG_BBC0_FSKC3,     0x85),
+    (RG_BBC0_FSKC4,     0x2A),
+    (RG_BBC0_FSKPE0,    0x0E),
+    (RG_BBC0_FSKPE1,    0x0F),
+    (RG_BBC0_FSKPE2,    0xF0),
+    (RG_BBC0_FSKPHRTX,  0x00)
 ]
 
 fsk_option1 = [
@@ -225,7 +234,7 @@ fsk_option1 = [
     (RG_BBC0_IRQM, 0x1F),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
     (RG_BBC1_IRQM, 0x00),
     (RG_BBC0_PC, 0x1D),  # // No FCS filter, 32 bits FCS, FSK.
-    (RG_BBC0_FSKDM, 0x01),  # //Direct modulation and preemphasis enabled.
+    (RG_BBC0_FSKDM, 0x03),  # //Direct modulation and preemphasis enabled.
     (RG_BBC0_FSKC0, 0xD6),
     (RG_BBC0_FSKC1, 0x00),
     (RG_BBC0_FSKC2, 0x40),
@@ -238,154 +247,158 @@ fsk_option1 = [
 ]
 
 fsk_option2 = [
-    (RG_RF09_CMD, 0x02),  # //we make sure we are in the trxoff state
-    (RG_RF09_IRQM, 0x1F),  # // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts enabled
-    (RG_RF24_IRQM, 0x00),
-    (RG_RF09_RXBWC, 0x03),  # 0 IFS, 100 kHz symbol rate
-    (RG_RF09_RXDFE, 0x25),  # RCUT = 1 , SR = 5
-    (RG_RF09_AGCC, 0x01),
-    (RG_RF09_EDD, 0x7A),
-    (RG_RF09_TXCUTC, 0x83),
-    (RG_RF09_TXDFE, 0x94),
-    (RG_RF09_PAC, 0x64),  # // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.//
-    (RG_BBC0_IRQM, 0x1F),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
-    (RG_BBC1_IRQM, 0x00),
-    (RG_BBC0_PC, 0x1D),  # // No FCS filter, 32 bits FCS, FSK.
-    (RG_BBC0_FSKDM, 0x03),  # //Direct modulation and Preemphasis enabled.
-    (RG_BBC0_FSKC0, 0xD6),
-    (RG_BBC0_FSKC1, 0x01),
-    (RG_BBC0_FSKC2, 0x40),
-    (RG_BBC0_FSKC3, 0x85),
-    (RG_BBC0_FSKC4, 0x00),  # //FEC disabled. IEEE MODE
-    (RG_BBC0_FSKPE0, 0x0E),
-    (RG_BBC0_FSKPE1, 0x0F),
-    (RG_BBC0_FSKPE2, 0xF0),
-    (RG_BBC0_FSKPHRTX, 0x00)
+    (RG_RF09_CMD,           0x02),  # //we make sure we are in the trxoff state
+    (RG_RF09_IRQM,          0x1F),  # // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts enabled
+    (RG_RF24_IRQM,          0x00),
+    (RG_RF09_RXBWC,         0x03),  # 0 IFS, 100 kHz symbol rate
+    (RG_RF09_RXDFE,         0x25),  # RCUT = 1 , SR = 5
+    (RG_RF09_AGCC,          0x01),
+    (RG_RF09_EDD,           0x7A),
+    (RG_RF09_TXCUTC,        0x83),
+    (RG_RF09_TXDFE,         0x94),
+    (RG_RF09_PAC,           0x64),  # // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.//
+    (RG_BBC0_IRQM,          0x1F),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
+    (RG_BBC1_IRQM,          0x00),
+    (RG_BBC0_PC,            0x1D),  # // No FCS filter, 32 bits FCS, FSK.
+    (RG_BBC0_FSKDM,         0x03),  # //Direct modulation and Preemphasis enabled.
+    (RG_BBC0_FSKC0,         0xD6),
+    (RG_BBC0_FSKC1,         0x01),
+    (RG_BBC0_FSKC2,         0x40),
+    (RG_BBC0_FSKC3,         0x85),
+    (RG_BBC0_FSKC4,         0x00),  # //FEC disabled. IEEE MODE
+    (RG_BBC0_FSKPE0,        0x0E),
+    (RG_BBC0_FSKPE1,        0x0F),
+    (RG_BBC0_FSKPE2,        0xF0),
+    (RG_BBC0_FSKPHRTX,      0x00)
 ]
 
 fsk_option3 = [
-    (RG_RF09_CMD, 0x02),  # //we make sure we are in the trxoff state
-    (RG_RF09_IRQM, 0x1F),  # // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts enabled
-    (RG_RF24_IRQM, 0x00),
-    (RG_RF09_RXBWC, 0x15),  # //IFS 1, 200 kHz
-    (RG_RF09_RXDFE, 0x44),  # # RCUT = 2 , SR = 4
-    (RG_RF09_AGCC, 0x01),
-    (RG_RF09_EDD, 0x7A),
-    (RG_RF09_TXCUTC, 0x84),  # //find the right values
-    (RG_RF09_TXDFE, 0x12),  # //find the right values
-    (RG_RF09_PAC, 0x64),  # // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
-    (RG_BBC0_IRQM, 0x1F),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
-    (RG_BBC1_IRQM, 0x00),
-    (RG_BBC0_PC, 0x15),  # // No FCS filter, 32 bits FCS, FSK.
-    (RG_BBC0_FSKDM, 0x03),  # //Direct modulation and Preemphasis enabled.
-    (RG_BBC0_FSKC0, 0xD7),
-    (RG_BBC0_FSKC1, 0x03),
-    (RG_BBC0_FSKC2, 0x00),
-    (RG_BBC0_FSKC3, 0x85),
-    (RG_BBC0_FSKC4, 0x00),  # FEC disabled
-    (RG_BBC0_FSKPE0, 0x74),
-    (RG_BBC0_FSKPE1, 0x7F),
-    (RG_BBC0_FSKPE2, 0x80),
-    (RG_BBC0_FSKPHRTX, 0x00)
+    (RG_RF09_CMD,           0x02),  # //we make sure we are in the trxoff state
+    (RG_RF09_IRQM,          0x1F),  # // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts enabled
+    (RG_RF24_IRQM,          0x00),
+    (RG_RF09_RXBWC,         0x15),  # //IFS 1, 200 kHz
+    (RG_RF09_RXDFE,         0x44),  # # RCUT = 2 , SR = 4
+    (RG_RF09_AGCC,          0x01),
+    (RG_RF09_EDD,           0x7A),
+    (RG_RF09_TXCUTC,        0x83),  #
+    (RG_RF09_TXDFE,         0x94),  # //find the right values
+    (RG_RF09_PAC,           0x64),  # // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
+    (RG_BBC0_IRQM,          0x1F),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
+    (RG_BBC1_IRQM,          0x00),
+    (RG_BBC0_PC,            0x15),  # // No FCS filter, 32 bits FCS, FSK.
+    (RG_BBC0_FSKDM,         0x03),  # //Direct modulation and Preemphasis enabled.
+    (RG_BBC0_FSKSDF0L,      0xEB),
+    (RG_BBC0_FSKSDF0H,      0xAA),
+    (RG_BBC0_FSKSDF1L,      0xAE),
+    (RG_BBC0_FSKSDF1H,      0xBF),
+    (RG_BBC0_FSKC0,         0xD7),
+    (RG_BBC0_FSKC1,         0x01),
+    (RG_BBC0_FSKC2,         0x40),
+    (RG_BBC0_FSKC3,         0x85),
+    (RG_BBC0_FSKC4,         0x20),  # FEC disabled
+    (RG_BBC0_FSKPE0,        0x0E),
+    (RG_BBC0_FSKPE1,        0x0F),
+    (RG_BBC0_FSKPE2,        0xF0),
+    (RG_BBC0_FSKPHRTX,      0x00)
 ]
 
 oqpsk_rate0 = [
-    (RG_BBC0_PC, 0x17),
-    (RG_BBC0_OQPSKPHRTX, 0x00),  # MR-OQPSK, rate mode 0
-    (RG_BBC0_OQPSKC0, 0x10),  # 100kchips/s, RC-0.8 shaping, direct-modulation enabled
-    (RG_BBC0_OQPSKC1,   0xB8),#// MINIMUM preamble-detection sensitivity for SUN-O-QPSK, MAXIMUM for LEGACY OQPSK, rx-override enabled
-    (RG_BBC0_OQPSKC2,   0x04),#// listen for MR-OQPSK frames only
-    (RG_BBC0_OQPSKC3,   0x00),#// legacy OQPSK, search for SFD_1 only
-    (RG_BBC0_IRQM, 0x13),  # // TXFE, RXFE, RXFS interrupts enabled
-    (RG_BBC1_IRQM, 0x00),
-    (RG_RF09_IRQM, 0x12),  # // TRXERR, TRXRDY interrupts enabled
-    (RG_RF24_IRQM, 0x00),
-    (RG_RF09_RXBWC, 0x00),  # Rx BW 160kHz, IF 250kHz
-    (RG_RF09_RXDFE, 0x2A),  # //
-    (RG_RF09_AGCC, 0x21),
-    (RG_RF09_EDD, 0x2B),
-    (RG_RF09_AGCS, 0x77),
-    (RG_RF09_TXCUTC, 0xC7),  # .PARAMP = 3, .LPFCUT = 7
-    (RG_RF09_TXDFE, 0x7A),  # // .SR = 0xA, .RCUT = 3
-    (RG_RF09_PAC, 0x64)
+    (RG_BBC0_PC,            0x17),
+    (RG_BBC0_OQPSKPHRTX,    0x00),  # MR-OQPSK, rate mode 0
+    (RG_BBC0_OQPSKC0,       0x10),  # 100kchips/s, RC-0.8 shaping, direct-modulation enabled
+    (RG_BBC0_OQPSKC1,       0xB8),#// MINIMUM preamble-detection sensitivity for SUN-O-QPSK, MAXIMUM for LEGACY OQPSK, rx-override enabled
+    (RG_BBC0_OQPSKC2,       0x04),#// listen for MR-OQPSK frames only
+    (RG_BBC0_OQPSKC3,       0x00),#// legacy OQPSK, search for SFD_1 only
+    (RG_BBC0_IRQM,          0x13),  # // TXFE, RXFE, RXFS interrupts enabled
+    (RG_BBC1_IRQM,          0x00),
+    (RG_RF09_IRQM,          0x12),  # // TRXERR, TRXRDY interrupts enabled
+    (RG_RF24_IRQM,          0x00),
+    (RG_RF09_RXBWC,         0x00),  # Rx BW 160kHz, IF 250kHz
+    (RG_RF09_RXDFE,         0x2A),  # //
+    (RG_RF09_AGCC,          0x21),
+    (RG_RF09_EDD,           0x2B),
+    (RG_RF09_AGCS,          0x77),
+    (RG_RF09_TXCUTC,        0xC7),  # .PARAMP = 3, .LPFCUT = 7
+    (RG_RF09_TXDFE,         0x7A),  # // .SR = 0xA, .RCUT = 3
+    (RG_RF09_PAC,           0x64)
 ]
 
 oqpsk_rate1 = [
-    (RG_BBC0_PC, 0x17),
-    (RG_BBC0_OQPSKPHRTX, 0x02),  #  MR-OQPSK, rate mode 1
-    (RG_BBC0_OQPSKC0, 0x10),  #  100kchips/s, RC-0.8 shaping, direct-modulation enabled
-    (RG_BBC0_OQPSKC1, 0xB8),#// MINIMUM preamble-detection sensitivity for SUN-O-QPSK, MAXIMUM for LEGACY OQPSK, rx-override enabled
-    (RG_BBC0_OQPSKC2, 0x00),  # listen for MR-OQPSK frames only
-    (RG_BBC0_OQPSKC3, 0x00), #  legacy OQPSK, search for SFD_1 only
-    (RG_BBC0_IRQM, 0x13),  # // TXFE, RXFE, RXFS interrupts enabled
-    (RG_BBC1_IRQM, 0x00),
-    (RG_RF09_IRQM, 0x12),  # // TRXERR, TRXRDY interrupts enabled
-    (RG_RF24_IRQM, 0x00),
-    (RG_RF09_RXBWC, 0x00),  # //  Rx BW 160kHz, IF 250kHz
-    (RG_RF09_RXDFE, 0x2A),  # //
-    (RG_RF09_AGCC, 0x21),
-    (RG_RF09_EDD, 0x2B),
-    (RG_RF09_AGCS, 0x77),
-    (RG_RF09_TXCUTC, 0xC7),  # // .PARAMP = 3, .LPFCUT = 7
-    (RG_RF09_TXDFE, 0x7A),  # // .SR = 0xA, .RCUT = 3
-    (RG_RF09_PAC, 0x64)
+    (RG_BBC0_PC,            0x17),
+    (RG_BBC0_OQPSKPHRTX,    0x02),  #  MR-OQPSK, rate mode 1
+    (RG_BBC0_OQPSKC0,       0x10),  #  100kchips/s, RC-0.8 shaping, direct-modulation enabled
+    (RG_BBC0_OQPSKC1,       0xB8),#// MINIMUM preamble-detection sensitivity for SUN-O-QPSK, MAXIMUM for LEGACY OQPSK, rx-override enabled
+    (RG_BBC0_OQPSKC2,       0x00),  # listen for MR-OQPSK frames only
+    (RG_BBC0_OQPSKC3,       0x00), #  legacy OQPSK, search for SFD_1 only
+    (RG_BBC0_IRQM,          0x13),  # // TXFE, RXFE, RXFS interrupts enabled
+    (RG_BBC1_IRQM,          0x00),
+    (RG_RF09_IRQM,          0x12),  # // TRXERR, TRXRDY interrupts enabled
+    (RG_RF24_IRQM,          0x00),
+    (RG_RF09_RXBWC,         0x00),  # //  Rx BW 160kHz, IF 250kHz
+    (RG_RF09_RXDFE,         0x2A),  # //
+    (RG_RF09_AGCC,          0x21),
+    (RG_RF09_EDD,           0x2B),
+    (RG_RF09_AGCS,          0x77),
+    (RG_RF09_TXCUTC,        0xC7),  # // .PARAMP = 3, .LPFCUT = 7
+    (RG_RF09_TXDFE,         0x7A),  # // .SR = 0xA, .RCUT = 3
+    (RG_RF09_PAC,           0x64)
 ]
 
 oqpsk_rate2 = [
-    (RG_BBC0_PC, 0x17),
-    (RG_BBC0_OQPSKPHRTX, 0x04),  # // MR-OQPSK, rate mode 2
-    (RG_BBC0_OQPSKC0, 0x10),  # // 100kchips/s, RC-0.8 shaping, direct-modulation enabled
-    (RG_BBC0_OQPSKC1,   0xB8),  #// MINIMUM preamble-detection sensitivities, rx-override disabled
-    (RG_BBC0_OQPSKC2,   0x04), # // listen for MR-OQPSK frames only
-    (RG_BBC0_OQPSKC3,   0x00), # // legacy OQPSK, search for SFD_1 only
-    (RG_BBC0_IRQM, 0x13),  # // TXFE, RXFE, RXFS interrupts enabled
-    (RG_BBC1_IRQM, 0x00),
-    (RG_RF09_IRQM, 0x12),  # // TRXERR, TRXRDY interrupts enabled
-    (RG_RF24_IRQM, 0x00),
-    (RG_RF09_RXBWC, 0x00),  # //  Rx BW 160kHz, IF 250kHz
-    (RG_RF09_RXDFE, 0x2A),  # //
-    (RG_RF09_AGCC, 0x21),
-    (RG_RF09_EDD, 0x2B),
-    (RG_RF09_AGCS, 0x77),
-    (RG_RF09_TXCUTC, 0xC7),  # # .PARAMP = 3, .LPFCUT = 7
-    (RG_RF09_TXDFE, 0x7A),  # # .SR = 0xA, .RCUT = 3
-    (RG_RF09_PAC, 0x64)
+    (RG_BBC0_PC,            0x17),
+    (RG_BBC0_OQPSKPHRTX,    0x04),  # // MR-OQPSK, rate mode 2
+    (RG_BBC0_OQPSKC0,       0x10),  # // 100kchips/s, RC-0.8 shaping, direct-modulation enabled
+    (RG_BBC0_OQPSKC1,       0xB8),  #// MINIMUM preamble-detection sensitivities, rx-override disabled
+    (RG_BBC0_OQPSKC2,       0x04), # // listen for MR-OQPSK frames only
+    (RG_BBC0_OQPSKC3,       0x00), # // legacy OQPSK, search for SFD_1 only
+    (RG_BBC0_IRQM,          0x13),  # // TXFE, RXFE, RXFS interrupts enabled
+    (RG_BBC1_IRQM,          0x00),
+    (RG_RF09_IRQM,          0x12),  # // TRXERR, TRXRDY interrupts enabled
+    (RG_RF24_IRQM,          0x00),
+    (RG_RF09_RXBWC,         0x00),  # //  Rx BW 160kHz, IF 250kHz
+    (RG_RF09_RXDFE,         0x2A),  # //
+    (RG_RF09_AGCC,          0x21),
+    (RG_RF09_EDD,           0x2B),
+    (RG_RF09_AGCS,          0x77),
+    (RG_RF09_TXCUTC,        0xC7),  # # .PARAMP = 3, .LPFCUT = 7
+    (RG_RF09_TXDFE,         0x7A),  # # .SR = 0xA, .RCUT = 3
+    (RG_RF09_PAC,           0x64)
 ]
 
 oqpsk_rate3 = [
-    (RG_BBC0_PC, 0x17),
-    (RG_BBC0_OQPSKPHRTX, 0x06),  # # MR-OQPSK, rate mode 3
-    (RG_BBC0_OQPSKC0, 0x10),  ## 100kchips/s, RC-0.8 shaping, direct-modulation enabled
-    (RG_BBC0_OQPSKC1,   0xB8),  # MINIMUM preamble-detection sensitivities, rx-override disabled
-    (RG_BBC0_OQPSKC2,   0x00),  # listen for MR-OQPSK frames only
-    (RG_BBC0_OQPSKC3,   0x00),  # legacy OQPSK, search for SFD_1 only
-    (RG_BBC0_IRQM, 0x13),  # # TXFE, RXFE, RXFS interrupts enabled
-    (RG_BBC1_IRQM, 0x00),
-    (RG_RF09_IRQM, 0x12),  # # TRXERR, TRXRDY interrupts enabled
-    (RG_RF24_IRQM, 0x00),
-    (RG_RF09_RXBWC, 0x00),  # #  Rx BW 160kHz, IF 250kHz
-    (RG_RF09_RXDFE, 0x2A),  # #
-    (RG_RF09_AGCC, 0x21),
-    (RG_RF09_EDD, 0x2B),
-    (RG_RF09_AGCS, 0x77),
-    (RG_RF09_TXCUTC, 0xC7),  # # .PARAMP = 3, .LPFCUT = 7
-    (RG_RF09_TXDFE, 0x7A),  # # .SR = 0xA, .RCUT = 3
-    (RG_RF09_PAC, 0x64)
+    (RG_BBC0_PC,            0x17),
+    (RG_BBC0_OQPSKPHRTX,    0x06),  # # MR-OQPSK, rate mode 3
+    (RG_BBC0_OQPSKC0,       0x10),  ## 100kchips/s, RC-0.8 shaping, direct-modulation enabled
+    (RG_BBC0_OQPSKC1,       0xB8),  # MINIMUM preamble-detection sensitivities, rx-override disabled
+    (RG_BBC0_OQPSKC2,       0x00),  # listen for MR-OQPSK frames only
+    (RG_BBC0_OQPSKC3,       0x00),  # legacy OQPSK, search for SFD_1 only
+    (RG_BBC0_IRQM,          0x13),  # # TXFE, RXFE, RXFS interrupts enabled
+    (RG_BBC1_IRQM,          0x00),
+    (RG_RF09_IRQM,          0x12),  # # TRXERR, TRXRDY interrupts enabled
+    (RG_RF24_IRQM,          0x00),
+    (RG_RF09_RXBWC,         0x00),  # #  Rx BW 160kHz, IF 250kHz
+    (RG_RF09_RXDFE,         0x2A),  # #
+    (RG_RF09_AGCC,          0x21),
+    (RG_RF09_EDD,           0x2B),
+    (RG_RF09_AGCS,          0x77),
+    (RG_RF09_TXCUTC,        0xC7),  # # .PARAMP = 3, .LPFCUT = 7
+    (RG_RF09_TXDFE,         0x7A),  # # .SR = 0xA, .RCUT = 3
+    (RG_RF09_PAC,           0x64)
 ]
 
 # OFDM
 
 ofdm_1_mcs0 = [
-    (RG_RF09_CMD, 0x02),
-    (RG_RF09_IRQM, 0x1F),
-    (RG_RF24_IRQM, 0x00),
-    (RG_RF09_RXBWC, 0x19),
-    (RG_RF09_RXDFE, 0x83),
-    (RG_RF09_AGCC, 0x11),
-    (RG_RF09_EDD, 0x7A),
-    (RG_RF09_TXCUTC, 0x0A),  # recommended value (0x0B)
-    (RG_RF09_TXDFE, 0x83),
-    (RG_RF09_PAC, 0x64),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x64 - 0dBm  mettre 0x7F
+    (RG_RF09_CMD,           0x02),
+    (RG_RF09_IRQM,          0x1F),
+    (RG_RF24_IRQM,          0x00),
+    (RG_RF09_RXBWC,         0x19),
+    (RG_RF09_RXDFE,         0x83),
+    (RG_RF09_AGCC,          0x11),
+    (RG_RF09_EDD,           0x7A),
+    (RG_RF09_TXCUTC,        0x0A),  # recommended value (0x0B)
+    (RG_RF09_TXDFE,         0x83),
+    (RG_RF09_PAC,           0x64),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x64 - 0dBm  mettre 0x7F
     (RG_BBC0_IRQM, 0x1F),
     (RG_BBC1_IRQM, 0x00),
     (RG_BBC0_PC, 0x16),  # NO FCS FILTER
