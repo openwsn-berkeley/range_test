@@ -81,7 +81,7 @@ class At86rf215(object):
         if isr[2] & defs.IRQS_RXFE_MASK:
             self.at86_state = RADIOSTATE_TXRX_DONE
             logging.info('defs state is {0}, end of the rx frame'.format(self.at86_state))
-            logging.info('RADIOSTATE_TXRX_DONE')
+            logging.info('RADIOSTATE_TXRX_DONE\n')
             (pkt_rcv, rssi, crc, mcs) = self.radio_get_received_frame()
             self.cb(pkt_rcv, rssi, crc, mcs)
             self.radio_rx_now()

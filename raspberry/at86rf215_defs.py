@@ -112,7 +112,7 @@ RG_BBC0_OQPSKC2 =           [0x03, 0x12]
 RG_BBC0_OQPSKC3 =           [0x03, 0x13]
 RG_BBC0_OQPSKPHRTX =        [0x03, 0x14]
 RG_BBC0_OQPSKPHRRX =        [0x03, 0x15]
-RG_BBC0_FSKC0 =              [0x03, 0x60]
+RG_BBC0_FSKC0 =             [0x03, 0x60]
 RG_BBC0_FSKC1 =             [0x03, 0x61]
 RG_BBC0_FSKC2 =             [0x03, 0x62]
 RG_BBC0_FSKC3 =             [0x03, 0x63]
@@ -210,7 +210,7 @@ fsk_option3_FEC = [
 #    (RG_BBC0_FSKSDF1L,     0xAE),
 #    (RG_BBC0_FSKSDF1H,     0xBF),
     (RG_BBC0_FSKC0,         0xD7),
-    (RG_BBC0_FSKC1,         0x03),
+    (RG_BBC0_FSKC1,         0x03),  #  1 = 200 kHz symbol rate, 3 = 400 kHz
     (RG_BBC0_FSKC2,         0x40),
     (RG_BBC0_FSKC3,         0x85),
     (RG_BBC0_FSKC4,         0x0A),
@@ -292,7 +292,7 @@ fsk_option3 = [
 #    (RG_BBC0_FSKSDF1L,      0xAE),
 #    (RG_BBC0_FSKSDF1H,      0xBF),
     (RG_BBC0_FSKC0,         0xD7),
-    (RG_BBC0_FSKC1,         0x03),
+    (RG_BBC0_FSKC1,         0x03),  #  1 = 200 kHz symbol rate, 3 = 400 kHz
     (RG_BBC0_FSKC2,         0x40),
     (RG_BBC0_FSKC3,         0x85),
     (RG_BBC0_FSKC4,         0x00),  # FEC disabled
