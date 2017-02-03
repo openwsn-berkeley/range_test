@@ -54,7 +54,7 @@ class ExperimentTx(threading.Thread):
 
             # re-configure the radio
             #self.radio_driver.radio_write_config(radio_config)
-            self.radio_driver.radio_write_config(freq_mod_tech[2][0])
+            self.radio_driver.radio_write_config(freq_mod_tech[0][0])
 
             # loop through frequencies
             #for frequency_setup in settings.radio_frequencies:
@@ -62,8 +62,8 @@ class ExperimentTx(threading.Thread):
             # switch frequency
             self.radio_driver.radio_off()
             #self.radio_driver.radio_set_frequency(frequency_setup)
-            self.radio_driver.radio_set_frequency(freq_mod_tech[2][1])
-            logging.info("frequencies: {0}".format(freq_mod_tech[2][1]))
+            self.radio_driver.radio_set_frequency(freq_mod_tech[0][1])
+            logging.info("frequencies: {0}".format(freq_mod_tech[0][1]))
                 
             # loop through packet lengths
             for frame_length in settings.frame_lengths:
@@ -82,7 +82,7 @@ class ExperimentTx(threading.Thread):
                     self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE])
                     self.radio_driver.radio_trx_enable()
                     self.radio_driver.radio_tx_now()
-                    logging.info('sent.')
+                    logging.info('sent.\n')
                         
                     # wait for IFS (to allow the receiver to handle the RX'ed frame)
                     time.sleep(settings.IFS_S)
