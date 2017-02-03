@@ -41,16 +41,16 @@ class ExperimentRx(threading.Thread):
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
 
         # re-configure the radio
-        self.radio_driver.radio_write_config(settings.radio_configs_rx[5])
-        self.radio_driver.radio_set_frequency(settings.radio_frequencies[5])
-        
+        self.radio_driver.radio_write_config(settings.radio_configs_rx[2])
+        self.radio_driver.radio_set_frequency(settings.radio_frequencies[2])
+
+        self.radio_driver.radio_trx_enable()
+        self.radio_driver.radio_rx_now()
+
         while True:  # main loop
-            
-            self.radio_driver.radio_trx_enable()
-            self.radio_driver.radio_rx_now()
-            
+
             # wait for the GPS thread to indicate it's time to move to the next configuration
-            time.sleep(100) # FIXME: replace by an event from the GPS thread
+            time.sleep(10) # FIXME: replace by an event from the GPS thread
             print('TIMER 10 Seconds triggers')
     
     #  ======================== public ========================================
@@ -63,7 +63,7 @@ class ExperimentRx(threading.Thread):
     def _cb_rx_frame(self, pkt_rcv, rssi, crc, mcs):
         
         # handle the received frame
-        logging.info('frame number: {0}, frame size: {1}, RSSI: {2},  CRC: {3}, MCS: {4} '.format((pkt_rcv[0]*256 + pkt_rcv[1]),len(pkt_rcv), rssi, crc, mcs))
+        logging.info('frame number: {0}, frame size: {1}, RSSI: {2} dBm,  CRC: {3}, MCS: {4} '.format((pkt_rcv[0]*256 + pkt_rcv[1]),len(pkt_rcv), rssi, crc, mcs))
         
         # re-arm the radio in RX mode
         self.radio_driver.radio_rx_now()

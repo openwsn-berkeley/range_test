@@ -72,7 +72,7 @@ class At86rf215(object):
             self.radio_rx_now()
         if isr[2] & defs.IRQS_RXFS_MASK:
             self.at86_state = RADIOSTATE_RECEIVING
-            logging.info('defs state is {0}, start of frame'.format(self.at86_state))
+            #  logging.info('defs state is {0}, start of frame'.format(self.at86_state))
             logging.info('RADIOSTATE_RECEIVING')
         if isr[2] & defs.IRQS_TXFE_MASK:
             self.at86_state = RADIOSTATE_TXRX_DONE
@@ -193,6 +193,13 @@ class At86rf215(object):
         rssi = self.radio_read_spi(defs.RG_RF09_EDV, 1)[0]
         crc = ((self.radio_read_spi(defs.RG_BBC0_PC, 1))[0] >> 5) & 0x01
         mcs = self.radio_read_spi(defs.RG_BBC0_OFDMPHRRX, 1)[0] & defs.OFDMPHRRX_MCS_MASK
+
+        # representing the RSSI value in dBm
+        if rssi == 127:
+            rssi = 'not valid'
+
+        if rssi >= 128:
+            rssi = (((~rssi)& 0xFF) + 1) * -1
 
         return pkt_rcv, rssi, crc, mcs
 

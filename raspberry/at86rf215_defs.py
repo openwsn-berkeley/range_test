@@ -152,7 +152,7 @@ fsk_option1_FEC = [
     (RG_BBC0_IRQM,          0x1F),  # TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x1D),  # // No FCS filter, 32 bits FCS, FSK.
-    (RG_BBC0_FSKDM,         0x03),  # //Direct modulation and preemphasis enabled.
+    (RG_BBC0_FSKDM,         0x01),  # //Direct modulation enabled and Pre-emphasis disabled.
     (RG_BBC0_FSKC0,         0xD6),
     (RG_BBC0_FSKC1,         0x00),
     (RG_BBC0_FSKC2,         0x40),
@@ -178,7 +178,7 @@ fsk_option2_FEC = [
     (RG_BBC0_IRQM,          0x1F),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x1D),  # // No FCS filter, 32 bits FCS, FSK.
-    (RG_BBC0_FSKDM,         0x03),  # //Direct modulation and Preemphasis enabled.
+    (RG_BBC0_FSKDM,         0x01),  # //Direct modulation enabled and Pre-emphasis disabled.
     (RG_BBC0_FSKC0,         0xD6),
     (RG_BBC0_FSKC1,         0x01),
     (RG_BBC0_FSKC2,         0x40),
@@ -204,7 +204,7 @@ fsk_option3_FEC = [
     (RG_BBC0_IRQM,          0x7F),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x15),  # // No FCS filter, 32 bits FCS, FSK.
-    (RG_BBC0_FSKDM,         0x03),  # //Direct modulation and Preemphasis enabled.
+    (RG_BBC0_FSKDM,         0x01),  # //Direct modulation enabled and Pre-emphasis disabled.
 #    (RG_BBC0_FSKSDF0L,     0xBE),
 #    (RG_BBC0_FSKSDF0H,     0xFF),
 #    (RG_BBC0_FSKSDF1L,     0xAE),
@@ -234,7 +234,7 @@ fsk_option1 = [
     (RG_BBC0_IRQM,          0x1F),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x1D),  # // No FCS filter, 32 bits FCS, FSK.
-    (RG_BBC0_FSKDM,         0x03),  # //Direct modulation and preemphasis enabled.
+    (RG_BBC0_FSKDM,         0x01),  # //Direct modulation enabled and Pre-emphasis disabled.
     (RG_BBC0_FSKC0,         0xD6),
     (RG_BBC0_FSKC1,         0x00),
     (RG_BBC0_FSKC2,         0x40),
@@ -260,7 +260,7 @@ fsk_option2 = [
     (RG_BBC0_IRQM,          0x1F),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x1D),  # // No FCS filter, 32 bits FCS, FSK.
-    (RG_BBC0_FSKDM,         0x03),  # //Direct modulation and Preemphasis enabled.
+    (RG_BBC0_FSKDM,         0x01),  # //Direct modulation enabled and Pre-emphasis disabled.
     (RG_BBC0_FSKC0,         0xD6),
     (RG_BBC0_FSKC1,         0x01),
     (RG_BBC0_FSKC2,         0x40),
@@ -286,7 +286,7 @@ fsk_option3 = [
     (RG_BBC0_IRQM,          0x1F),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x15),  # // No FCS filter, 32 bits FCS, FSK.
-    (RG_BBC0_FSKDM,         0x03),  # //Direct modulation and Preemphasis enabled.
+    (RG_BBC0_FSKDM,         0x01),  # //Direct modulation enabled and Preemphasis disabled.
 #    (RG_BBC0_FSKSDF0L,      0xEB),
 #    (RG_BBC0_FSKSDF0H,      0xAA),
 #    (RG_BBC0_FSKSDF1L,      0xAE),
