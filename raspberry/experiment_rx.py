@@ -41,8 +41,8 @@ class ExperimentRx(threading.Thread):
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
 
         # re-configure the radio
-        self.radio_driver.radio_write_config(settings.radio_configs_rx[0])
-        self.radio_driver.radio_set_frequency(settings.radio_frequencies[0])
+        self.radio_driver.radio_write_config(settings.radio_configs_rx[5])
+        self.radio_driver.radio_set_frequency(settings.radio_frequencies[5])
 
         self.radio_driver.radio_trx_enable()
         self.radio_driver.radio_rx_now()

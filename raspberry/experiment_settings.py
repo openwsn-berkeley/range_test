@@ -8,7 +8,7 @@ import at86rf215_defs as defs
 
 frame_lengths = [8, 127, 1000, 2047]
 BURST_SIZE    = 100
-IFS_S         = 0.5
+IFS_S         = 0.1
 
 radio_frequencies = [
     #(channel_spacing, frequency_0, channel)
