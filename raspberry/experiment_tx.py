@@ -15,6 +15,29 @@ import experiment_settings   as settings
 FRAME_LENGTH  = 2047
 CRC_SIZE      = 4
 
+
+class TxTimer(threading.Thread):
+
+    TIMER_PERIOD = 0.100
+    def __init__(self, event):
+
+        # store parameters
+        self.event = event
+
+        # local variables
+
+
+        # start the thread
+        threading.Thread.__init__(self)
+        self.name = 'TxTimer'
+        self.daemon = True
+        self.start()
+
+    def run(self):
+        while True:
+            time.sleep(self.TIMER_PERIOD)
+            self.event.set()
+
 class ExperimentTx(threading.Thread):
     
     def __init__(self):
@@ -28,6 +51,10 @@ class ExperimentTx(threading.Thread):
         self.daemon = True
         self.start()
 
+        self.txEvent = threading.Event()
+        self.txEvent.clear()
+
+        self.txTimer = TxTimer(self.txEvent)
         # configure the logging module
         logging.basicConfig(stream= sys.__stdout__, level=logging.DEBUG)
     
@@ -88,7 +115,8 @@ class ExperimentTx(threading.Thread):
                 #    print threading.enumerate()
 
                     # wait for IFS (to allow the receiver to handle the RX'ed frame)
-                    time.sleep(settings.IFS_S)
+                    self.txEvent.wait()
+                    self.txEvent.clear()
 
                 print time.time() - now
     

@@ -44,10 +44,12 @@ class At86rf215(object):
         self.at86_state = RADIOSTATE_RFOFF
         self.state_trx_prep = threading.Event()
         self.state_tx_now = threading.Event()
+        self.state_IFS = threading.Event()
 
         self.state = {'state_TRXprep': self.state_trx_prep, 'state_TXnow': self.state_tx_now}
         self.state['state_TRXprep'].clear()
         self.state['state_TXnow'].clear()
+
 
         # configure the logging module
         logging.basicConfig(stream= sys.__stdout__, level=logging.DEBUG)
