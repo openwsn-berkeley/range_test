@@ -276,12 +276,12 @@ fsk_option3 = [
     (RG_RF09_CMD,           0x02),  # //we make sure we are in the trxoff state
     (RG_RF09_IRQM,          0x1F),  # // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts enabled
     (RG_RF24_IRQM,          0x00),
-    (RG_RF09_RXBWC,         0x15),  # //IFS 1, 200 kHz
-    (RG_RF09_RXDFE,         0x44),  # # RCUT = 2 , SR = 4
+    (RG_RF09_RXBWC,         0x03),  # //IFS 1, 200 kHz
+    (RG_RF09_RXDFE,         0x25),  # # RCUT = 2 , SR = 4
     (RG_RF09_AGCC,          0x01),
     (RG_RF09_EDD,           0x7A),
     (RG_RF09_TXCUTC,        0x83),  #
-    (RG_RF09_TXDFE,         0x94),  # //find the right values
+    (RG_RF09_TXDFE,         0x94),  #
     (RG_RF09_PAC,           0x7F),  # // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
     (RG_BBC0_IRQM,          0x1F),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
     (RG_BBC1_IRQM,          0x00),
@@ -292,7 +292,7 @@ fsk_option3 = [
 #    (RG_BBC0_FSKSDF1L,      0xAE),
 #    (RG_BBC0_FSKSDF1H,      0xBF),
     (RG_BBC0_FSKC0,         0xD7),
-    (RG_BBC0_FSKC1,         0x03),  #  1 = 200 kHz symbol rate, 3 = 400 kHz
+    (RG_BBC0_FSKC1,         0x01),  #  1 = 200 kHz symbol rate, 3 = 400 kHz
     (RG_BBC0_FSKC2,         0x40),
     (RG_BBC0_FSKC3,         0x85),
     (RG_BBC0_FSKC4,         0x00),  # FEC disabled

@@ -43,8 +43,8 @@ class ExperimentRx(threading.Thread):
         while True:  # main loop
             
             # re-configure the radio
-            self.radio_driver.radio_write_config(settings.radio_configs_rx[2])
-            self.radio_driver.radio_set_frequency(settings.radio_frequencies[2])
+            self.radio_driver.radio_write_config(settings.radio_configs_rx[5])
+            self.radio_driver.radio_set_frequency(settings.radio_frequencies[5])
             self.radio_driver.radio_trx_enable()
             self.radio_driver.radio_rx_now()
             

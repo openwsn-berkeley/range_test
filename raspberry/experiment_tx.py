@@ -54,7 +54,7 @@ class ExperimentTx(threading.Thread):
 
             # re-configure the radio
             #self.radio_driver.radio_write_config(radio_config)
-            self.radio_driver.radio_write_config(freq_mod_tech[2][0])
+            self.radio_driver.radio_write_config(freq_mod_tech[5][0])
 
             # loop through frequencies
             #for frequency_setup in settings.radio_frequencies:
@@ -62,8 +62,8 @@ class ExperimentTx(threading.Thread):
             # switch frequency
             self.radio_driver.radio_off()
             #self.radio_driver.radio_set_frequency(frequency_setup)
-            self.radio_driver.radio_set_frequency(freq_mod_tech[2][1])
-            logging.info("frequencies: {0}".format(freq_mod_tech[2][1]))
+            self.radio_driver.radio_set_frequency(freq_mod_tech[5][1])
+            logging.info("frequencies: {0}".format(freq_mod_tech[5][1]))
                 
             # loop through packet lengths
             for frame_length in settings.frame_lengths:
