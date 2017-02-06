@@ -20,6 +20,7 @@ import threading
 import time
 import logging
 import sys
+import Queue
 
 import spidev
 import RPi.GPIO as GPIO
@@ -33,23 +34,52 @@ RADIOSTATE_TRX_ENABLED = 0x03  # ///< Done configuring the frequency.
 RADIOSTATE_RECEIVING = 0x04  # ///< Loading packet into the radio's TX buffer.
 RADIOSTATE_TXRX_DONE = 0x05  # ///< Packet is fully loaded in the radio's TX buffer.
 
+
+class Processing(threading.Thread):
+
+    def __init__(self, queue):
+
+        # store parameters
+        self.queue = queue
+
+        # local variables
+
+        # start the thread
+        threading.Thread.__init__(self)
+        self.name = 'processRx'
+        self.daemon = True
+        self.start()
+
+    def run(self):
+
+        while True:
+            item = self.queue.get()
+            if type(item) is tuple:
+                logging.info('FRAME number: {0}, frame size: {1}, RSSI: {2} dBm,  CRC: {3}, MCS: {4}\n'.
+                            format((item[0][0] * 256 + item[0][1]), len(item[0]), item[1], item[2], item[3]))
+            else:
+                print item
+
+
 class At86rf215(object):
     
     def __init__(self, cb):
         
         # store params
         self.cb = cb
+        self.queue = Queue.Queue()
         
         # local variables
         self.at86_state = RADIOSTATE_RFOFF
         self.state_trx_prep = threading.Event()
         self.state_tx_now = threading.Event()
         self.state_IFS = threading.Event()
+        self.processing = Processing(self.queue)
+        self.count = 0
 
         self.state = {'state_TRXprep': self.state_trx_prep, 'state_TXnow': self.state_tx_now}
         self.state['state_TRXprep'].clear()
         self.state['state_TXnow'].clear()
-
 
         # configure the logging module
         logging.basicConfig(stream= sys.__stdout__, level=logging.DEBUG)
@@ -68,35 +98,41 @@ class At86rf215(object):
 
         FIXME: document parameter "channel"
         """
-
+        now = time.time()
         isr = self.radio_read_spi(defs.RG_RF09_IRQS, 4)
         if isr[0] & defs.IRQS_TRXRDY_MASK:
             self.at86_state = RADIOSTATE_TRX_ENABLED
             self.state['state_TRXprep'].set()
             # debug, info, warning, error, critical
-         #   logging.info('defs state is {0}, ready to send/receive'.format(self.at86_state))
-        #    logging.info('RADIOSTATE_TRX_ENABLED')
+        #   logging.info('defs state is {0}, ready to send/receive'.format(self.at86_state))
+        #   logging.info('RADIOSTATE_TRX_ENABLED')
         if isr[0] & defs.IRQS_TRXERR:
-            logging.info('ERROR IN TRX')
+        #   logging.info('ERROR IN TRX')
             self.radio_rx_now()
         if isr[2] & defs.IRQS_RXFS_MASK:
             self.at86_state = RADIOSTATE_RECEIVING
             #  logging.info('defs state is {0}, start of frame'.format(self.at86_state))
-            logging.info('RADIOSTATE_RECEIVING')
+            #logging.info('RADIOSTATE_RECEIVING RF09_IRQS{0} RF24 IRQS{1} BBC0 IRQS {2} BBC1 IRQS {3}'.format((isr[0]), (isr[1]), (isr[2]), (isr[3])))
         if isr[2] & defs.IRQS_TXFE_MASK:
             self.at86_state = RADIOSTATE_TXRX_DONE
         #    logging.info('defs state is {0}, end of tx '.format(self.at86_state))
         #    logging.info('RADIOSTATE_TXRX_DONE')
             self.state['state_TXnow'].set()
+            self.count += 1
+            self.queue.put(self.count)
 
         if isr[2] & defs.IRQS_RXFE_MASK:
+            self.count += 1
             self.at86_state = RADIOSTATE_TXRX_DONE
-         #   logging.info('defs state is {0}, end of the rx frame'.format(self.at86_state))
-        #    logging.info('RADIOSTATE_TXRX_DONE')
+        #   logging.info('defs state is {0}, end of the rx frame'.format(self.at86_state))
+        #   logging.info('RADIOSTATE_TXRX_DONE')
             (pkt_rcv, rssi, crc, mcs) = self.radio_get_received_frame()
-            self.cb(pkt_rcv, rssi, crc, mcs)
-            #self.radio_rx_now()
-
+            #self.cb(pkt_rcv, rssi, crc, mcs)
+            self.queue.put((pkt_rcv, rssi, crc, mcs))
+            self.queue.put(self.count)
+            # logging.info( 'RADIOSTATE_RX_DONE RF09_IRQS {0} RF24_IRQS {1} BBC0_IRQS {2} BBC1_IRQS {3}'.format((isr[0]), (isr[1]), (isr[2]), (isr[3])))
+            self.radio_rx_now()
+        self.queue.put(time.time() - now)
 
     def cb_gpio(self, channel = 3):
         self.read_isr_source()
@@ -200,7 +236,7 @@ class At86rf215(object):
         rcv = self.radio_read_spi(defs.RG_BBC0_RXFLL, 2)
         len_pkt = rcv[0] + ((rcv[1] & 0x07) << 8)
 
-        logging.info('length is {0}'.format(len_pkt))
+        #logging.info('length is {0}'.format(len_pkt))
 
         # read the packet
         pkt_rcv = self.radio_read_spi(defs.RG_BBC0_FBRXS, len_pkt)

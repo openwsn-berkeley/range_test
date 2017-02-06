@@ -18,14 +18,14 @@ CRC_SIZE      = 4
 
 class TxTimer(threading.Thread):
 
-    TIMER_PERIOD = 0.100
+    TIMER_PERIOD = 0.0500
+
     def __init__(self, event):
 
         # store parameters
         self.event = event
 
         # local variables
-
 
         # start the thread
         threading.Thread.__init__(self)
@@ -37,6 +37,7 @@ class TxTimer(threading.Thread):
         while True:
             time.sleep(self.TIMER_PERIOD)
             self.event.set()
+
 
 class ExperimentTx(threading.Thread):
     
@@ -96,6 +97,7 @@ class ExperimentTx(threading.Thread):
             for frame_length in settings.frame_lengths:
 
                 now = time.time()
+                self.radio_driver.radio_trx_enable()
                 # send burst of frames
                 for i in range(settings.BURST_SIZE):
 
@@ -108,7 +110,7 @@ class ExperimentTx(threading.Thread):
                         
                     # send frame
                     self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE])
-                    self.radio_driver.radio_trx_enable()
+                    #self.radio_driver.radio_trx_enable()
                     self.radio_driver.radio_tx_now()
                 #    logging.info('sent.\n')
 
