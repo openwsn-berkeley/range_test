@@ -201,7 +201,7 @@ fsk_option3_FEC = [
     (RG_RF09_TXCUTC,        0x83),  #
     (RG_RF09_TXDFE,         0x94),  # //find the right values
     (RG_RF09_PAC,           0x7F),  # // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
-    (RG_BBC0_IRQM,          0x12),  # // TXFE, RXFE interrupts enabled.  RXFS , RXEM, RXAM, disabled
+    (RG_BBC0_IRQM,          0x13),  # // TXFE, RXFE interrupts enabled.  RXFS , RXEM, RXAM, disabled
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x15),  # // No FCS filter, 32 bits FCS, FSK.
     (RG_BBC0_FSKDM,         0x01),  # //Direct modulation enabled and Pre-emphasis disabled.

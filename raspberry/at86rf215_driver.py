@@ -112,7 +112,7 @@ class At86rf215(object):
         if isr[2] & defs.IRQS_RXFS_MASK:
             self.at86_state = RADIOSTATE_RECEIVING
             #  logging.info('defs state is {0}, start of frame'.format(self.at86_state))
-            #logging.info('RADIOSTATE_RECEIVING RF09_IRQS{0} RF24 IRQS{1} BBC0 IRQS {2} BBC1 IRQS {3}'.format((isr[0]), (isr[1]), (isr[2]), (isr[3])))
+            self.queue.put(logging.info('RADIOSTATE_RECEIVING RF09_IRQS{0} RF24 IRQS{1} BBC0 IRQS {2} BBC1 IRQS {3}'.format((isr[0]), (isr[1]), (isr[2]), (isr[3]))))
         if isr[2] & defs.IRQS_TXFE_MASK:
             self.at86_state = RADIOSTATE_TXRX_DONE
         #    logging.info('defs state is {0}, end of tx '.format(self.at86_state))
@@ -130,7 +130,7 @@ class At86rf215(object):
             #self.cb(pkt_rcv, rssi, crc, mcs)
             self.queue.put((pkt_rcv, rssi, crc, mcs))
             self.queue.put(self.count)
-            # logging.info( 'RADIOSTATE_RX_DONE RF09_IRQS {0} RF24_IRQS {1} BBC0_IRQS {2} BBC1_IRQS {3}'.format((isr[0]), (isr[1]), (isr[2]), (isr[3])))
+            self.queue.put(logging.info( 'RADIOSTATE_RX_DONE RF09_IRQS {0} RF24_IRQS {1} BBC0_IRQS {2} BBC1_IRQS {3}'.format((isr[0]), (isr[1]), (isr[2]), (isr[3]))))
             self.radio_rx_now()
         self.queue.put(time.time() - now)
 
@@ -146,6 +146,9 @@ class At86rf215(object):
 
         self.spi = spidev.SpiDev()
         self.spi.open(0, 0)
+
+        # spi speed TEST
+        self.spi.max_speed_hz=(15600000)
 
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(channel, GPIO.IN)
