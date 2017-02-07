@@ -225,10 +225,12 @@ class At86rf215(object):
     # RX
     def radio_rx_now(self):
         """
-        Puts the radio in reception mode, listening for packets.
+        Puts the radio in reception mode, listening for frames.
         :return:
         """
         self.radio_write_spi(defs.RG_RF09_CMD, defs.CMD_RF_RX)
+        #while self.check_radio_state_rf09() is not defs.RF_STATE_RX:
+        #    self.radio_write_spi(defs.RG_RF09_CMD, defs.CMD_RF_RX)
 
     def radio_get_received_frame(self):
         """
@@ -291,3 +293,11 @@ class At86rf215(object):
             reg = address[:] + [value]
         reg[0] |= 0x80
         self.spi.xfer(reg)
+
+    def check_radio_state_rf09(self):
+        """
+        It reads the radio state value
+        :return: that read value
+        """
+        add = defs.RG_RF09_STATE[:] + [0x00]
+        return self.spi.xfer(add)[2]

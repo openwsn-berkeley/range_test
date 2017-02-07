@@ -18,7 +18,7 @@ CRC_SIZE      = 4
 
 class TxTimer(threading.Thread):
 
-    TIMER_PERIOD = 0.100
+    TIMER_PERIOD = 0.05000
 
     def __init__(self, event):
 
