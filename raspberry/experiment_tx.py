@@ -9,12 +9,40 @@ import logging
 import threading
 import sys
 import sched
+import Queue
 
 import at86rf215_driver      as radio
 import experiment_settings   as settings
 
 FRAME_LENGTH  = 2047
 CRC_SIZE      = 4
+
+
+class InformativeTx(threading.Thread):
+
+    def __init__(self, queue):
+
+        # store parameters
+        self.queue = queue
+
+        # local variables
+
+        # start the thread
+        threading.Thread.__init__(self)
+        self.name = 'InformativeTx'
+        self.daemon = True
+        self.start()
+
+        logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
+
+    def run(self):
+
+        while True:
+            item = self.queue.get()
+            if type(item) is tuple:
+                logging.warning('Time to send the frames {0} - {1} was {2} seconds\n'.format(item[0] - 100, item[0], item[1]))
+            else:
+                logging.warning('Modulation used is: {0}'.format(item))
 
 
 class TxTimer(threading.Thread):
@@ -74,6 +102,7 @@ class ExperimentTx(threading.Thread):
         self.radio_driver = None
         self.index = index
         self.start_event = start_event
+        self.queue_tx = Queue.Queue()
         
         # start the thread
         threading.Thread.__init__(self)
@@ -84,9 +113,10 @@ class ExperimentTx(threading.Thread):
         self.txEvent = threading.Event()
         self.txEvent.clear()
 
+        self.informativeTx = InformativeTx(self.queue_tx)
         self.txTimer = TxTimer(self.txEvent)
         # configure the logging module
-        logging.basicConfig(stream= sys.__stdout__, level=logging.DEBUG)
+        logging.basicConfig(stream= sys.__stdout__, level=logging.WARNING)
     
     def run(self):
         
@@ -121,6 +151,7 @@ class ExperimentTx(threading.Thread):
         # wait for the right moment to start transmitting
         self.start_event.wait()
         self.start_event.clear()
+        self.queue_tx.put(settings.radio_configs_name[self.index])
                 
         # loop through packet lengths
         for frame_length in settings.frame_lengths:
@@ -132,24 +163,20 @@ class ExperimentTx(threading.Thread):
 
                 # increment the frame counter
                 frame_counter += 1
-            #    logging.info('sending frame {0}...'.format(frame_counter)),
-                #print frame_counter
+
                 # create frame
                 frameToSend = [frame_counter >> 8, frame_counter & 0xFF] + [i & 0xFF for i in range(FRAME_LENGTH - 2)]
                         
                 # send frame
                 self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE])
-                #self.radio_driver.radio_trx_enable()
-                self.radio_driver.radio_tx_now()
-            #    logging.info('sent.\n')
 
-            #    print threading.enumerate()
+                self.radio_driver.radio_tx_now()
 
                 # wait for IFS (to allow the receiver to handle the RX'ed frame)
                 self.txEvent.wait()
                 self.txEvent.clear()
 
-            print time.time() - now
+            self.queue_tx.put((frame_counter, time.time() - now))
     
     #  ======================== private =======================================
     
@@ -160,7 +187,7 @@ class ExperimentTx(threading.Thread):
 
 
 def main():
-    scheduler    = Scheduled(int(sys.argv[1]))
+    scheduler = Scheduled(int(sys.argv[1]))
     experimentTx = ExperimentTx(0, scheduler.start_event_sch)
     while True:
         input = raw_input('>')

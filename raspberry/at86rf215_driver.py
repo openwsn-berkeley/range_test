@@ -50,6 +50,9 @@ class Processing(threading.Thread):
         self.daemon = True
         self.start()
 
+        # configure the logging module
+        logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
+
     def run(self):
 
         while True:
@@ -58,7 +61,7 @@ class Processing(threading.Thread):
                 logging.info('FRAME number: {0}, frame size: {1}, RSSI: {2} dBm,  CRC: {3}, MCS: {4}\n'.
                             format((item[0][0] * 256 + item[0][1]), len(item[0]), item[1], item[2], item[3]))
             else:
-                print item
+                logging.info('Time in the ISR is {0} seconds\n'.format(item))
 
 
 class At86rf215(object):
@@ -75,15 +78,15 @@ class At86rf215(object):
         self.state_trx_prep     = threading.Event()
         self.state_tx_now       = threading.Event()
         self.state_IFS          = threading.Event()
-        self.processing         = Processing(self.queue)
         self.count              = 0
 
+        self.processing = Processing(self.queue)
         self.state              = {'state_TRXprep': self.state_trx_prep, 'state_TXnow': self.state_tx_now}
         self.state['state_TRXprep'].clear()
         self.state['state_TXnow'].clear()
 
         # configure the logging module
-        logging.basicConfig(stream= sys.__stdout__, level=logging.DEBUG)
+        logging.basicConfig(stream= sys.__stdout__, level=logging.WARNING)
     
     # ======================== public ==========================================
     
@@ -104,20 +107,9 @@ class At86rf215(object):
         if isr[0] & defs.IRQS_TRXRDY_MASK:
             self.at86_state = RADIOSTATE_TRX_ENABLED
             self.state['state_TRXprep'].set()
-            # debug, info, warning, error, critical
-        #   logging.info('defs state is {0}, ready to send/receive'.format(self.at86_state))
-        #   logging.info('RADIOSTATE_TRX_ENABLED')
-        if isr[0] & defs.IRQS_TRXERR:
-        #   logging.info('ERROR IN TRX')
-            self.radio_rx_now()
-        #if isr[2] & defs.IRQS_RXFS_MASK:
-        #    self.at86_state = RADIOSTATE_RECEIVING
-            #  logging.info('defs state is {0}, start of frame'.format(self.at86_state))
-            #self.queue.put(logging.info('RADIOSTATE_RECEIVING RF09_IRQS{0} RF24 IRQS{1} BBC0 IRQS {2} BBC1 IRQS {3}'.format((isr[0]), (isr[1]), (isr[2]), (isr[3]))))
+
         if isr[2] & defs.IRQS_TXFE_MASK:
             self.at86_state = RADIOSTATE_TXRX_DONE
-        #    logging.info('defs state is {0}, end of tx '.format(self.at86_state))
-        #    logging.info('RADIOSTATE_TXRX_DONE')
             self.state['state_TXnow'].set()
             self.count += 1
             self.queue.put(self.count)
@@ -125,15 +117,10 @@ class At86rf215(object):
         if isr[2] & defs.IRQS_RXFE_MASK:
             self.count += 1
             self.at86_state = RADIOSTATE_TXRX_DONE
-        #   logging.info('defs state is {0}, end of the rx frame'.format(self.at86_state))
-        #   logging.info('RADIOSTATE_TXRX_DONE')
             (pkt_rcv, rssi, crc, mcs) = self.radio_get_received_frame()
-            #self.cb(pkt_rcv, rssi, crc, mcs)
+            self.cb(pkt_rcv, rssi, crc, mcs)
             self.queue.put((pkt_rcv, rssi, crc, mcs))
-            self.queue.put(self.count)
-            self.queue.put(isr)
-            #self.queue.put(logging.info( 'RADIOSTATE_RX_DONE RF09_IRQS {0} RF24_IRQS {1} BBC0_IRQS {2} BBC1_IRQS {3}'.format((isr[0]), (isr[1]), (isr[2]), (isr[3]))))
-            self.radio_rx_now()
+
         self.queue.put(time.time() - now)
 
     def cb_gpio(self, channel = 3):
