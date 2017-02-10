@@ -8,6 +8,7 @@ import time
 import logging
 import threading
 import sys
+import sched
 
 import at86rf215_driver      as radio
 import experiment_settings   as settings
@@ -18,7 +19,7 @@ CRC_SIZE      = 4
 
 class TxTimer(threading.Thread):
 
-    TIMER_PERIOD = 0.05000
+    TIMER_PERIOD = 0.01000
 
     def __init__(self, event):
 
@@ -39,12 +40,40 @@ class TxTimer(threading.Thread):
             self.event.set()
 
 
+class Scheduled(threading.Thread):
+
+    def __init__(self, start_time):
+
+        #local variables
+        self.experiment = None
+        self.start_time = start_time
+
+        #start the thread
+        threading.Thread.__init__(self)
+        self.name = 'Scheduler'
+        self.daemon = True
+        self.start()
+
+        self.start_event_sch = threading.Event()
+        self.start_event_sch.clear()
+
+    def timer(self):
+        self.start_event_sch.set()
+
+    def run(self):
+        s = sched.scheduler(time.time, time.sleep)
+        s.enter(self.start_time, 1, self.timer, ())
+        s.run()
+
+
 class ExperimentTx(threading.Thread):
     
-    def __init__(self):
+    def __init__(self, index, start_event):
         
         # local variables
         self.radio_driver = None
+        self.index = index
+        self.start_event = start_event
         
         # start the thread
         threading.Thread.__init__(self)
@@ -71,56 +100,56 @@ class ExperimentTx(threading.Thread):
         frame_counter = 0
 
         # match up a modulation with a frequency setup (frequency_0, bandwidth, channel)
-        freq_mod_tech = zip(settings.radio_configs_tx, settings.radio_frequencies)
+        # freq_mod_tech = zip(settings.radio_configs_tx, settings.radio_frequencies)
         
         # loop radio configurations
-        #for radio_config in settings.radio_configs_tx:
-        for fmt in freq_mod_tech:
+        # for radio_config in settings.radio_configs_tx:
+        # for fmt in freq_mod_tech:
 
-            # useless print
-            #logging.info("frequencies: {0}".format(fmt[1]))
+        # re-configure the radio
+        self.radio_driver.radio_write_config(settings.radio_configs_tx[self.index])
+        # self.radio_driver.radio_write_config(freq_mod_tech[9][0])
 
-            # re-configure the radio
-            #self.radio_driver.radio_write_config(radio_config)
-            self.radio_driver.radio_write_config(freq_mod_tech[2][0])
-
-            # loop through frequencies
-            #for frequency_setup in settings.radio_frequencies:
+        # loop through frequencies
+        # for frequency_setup in settings.radio_frequencies:
                 
-            # switch frequency
-            self.radio_driver.radio_off()
-            #self.radio_driver.radio_set_frequency(frequency_setup)
-            self.radio_driver.radio_set_frequency(freq_mod_tech[2][1])
-            #logging.info("frequencies: {0}".format(freq_mod_tech[17][1]))
+        # switch frequency
+        self.radio_driver.radio_off()
+        self.radio_driver.radio_set_frequency(settings.radio_frequencies[self.index])
+        # self.radio_driver.radio_set_frequency(freq_mod_tech[9][1])
+
+        # wait for the right moment to start transmitting
+        self.start_event.wait()
+        self.start_event.clear()
                 
-            # loop through packet lengths
-            for frame_length in settings.frame_lengths:
+        # loop through packet lengths
+        for frame_length in settings.frame_lengths:
 
-                now = time.time()
-                self.radio_driver.radio_trx_enable()
-                # send burst of frames
-                for i in range(settings.BURST_SIZE):
+            now = time.time()
+            self.radio_driver.radio_trx_enable()
+            # send burst of frames
+            for i in range(settings.BURST_SIZE):
 
-                    # increment the frame counter
-                    frame_counter += 1
-                #    logging.info('sending frame {0}...'.format(frame_counter)),
-                    #print frame_counter
-                    # create frame
-                    frameToSend = [frame_counter >> 8, frame_counter & 0xFF] + [i & 0xFF for i in range(FRAME_LENGTH - 2)]
+                # increment the frame counter
+                frame_counter += 1
+            #    logging.info('sending frame {0}...'.format(frame_counter)),
+                #print frame_counter
+                # create frame
+                frameToSend = [frame_counter >> 8, frame_counter & 0xFF] + [i & 0xFF for i in range(FRAME_LENGTH - 2)]
                         
-                    # send frame
-                    self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE])
-                    #self.radio_driver.radio_trx_enable()
-                    self.radio_driver.radio_tx_now()
-                #    logging.info('sent.\n')
+                # send frame
+                self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE])
+                #self.radio_driver.radio_trx_enable()
+                self.radio_driver.radio_tx_now()
+            #    logging.info('sent.\n')
 
-                #    print threading.enumerate()
+            #    print threading.enumerate()
 
-                    # wait for IFS (to allow the receiver to handle the RX'ed frame)
-                    self.txEvent.wait()
-                    self.txEvent.clear()
+                # wait for IFS (to allow the receiver to handle the RX'ed frame)
+                self.txEvent.wait()
+                self.txEvent.clear()
 
-                print time.time() - now
+            print time.time() - now
     
     #  ======================== private =======================================
     
@@ -131,7 +160,8 @@ class ExperimentTx(threading.Thread):
 
 
 def main():
-    experimentTx = ExperimentTx()
+    scheduler    = Scheduled(int(sys.argv[1]))
+    experimentTx = ExperimentTx(0, scheduler.start_event_sch)
     while True:
         input = raw_input('>')
         if input == 's':

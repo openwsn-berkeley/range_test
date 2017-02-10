@@ -6,8 +6,8 @@ Lists of frequencies and modulations to be used in the range test.
 
 import at86rf215_defs as defs
 
-frame_lengths = [8, 127, 1000, 2047, 8, 127, 1000, 2047, 8, 127, 1000, 2047, 8, 127, 1000, 2047, 8, 127, 1000, 2047]
-BURST_SIZE    = 10000
+frame_lengths = [8, 127, 1000, 2047]
+BURST_SIZE    = 100
 IFS_S         = 0.1
 
 radio_frequencies = [
@@ -120,3 +120,4 @@ radio_configs_rx = [
     defs.oqpsk_rate2,
     defs.oqpsk_rate3,
 ]
+

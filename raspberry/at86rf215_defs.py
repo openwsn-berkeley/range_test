@@ -231,7 +231,7 @@ fsk_option1 = [
     (RG_RF09_TXCUTC,        0xC0),
     (RG_RF09_TXDFE,         0x98),
     (RG_RF09_PAC,           0x7F),  # // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
-    (RG_BBC0_IRQM,          0x1F),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
+    (RG_BBC0_IRQM,          0x12),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x1D),  # // No FCS filter, 32 bits FCS, FSK.
     (RG_BBC0_FSKDM,         0x01),  # //Direct modulation enabled and Pre-emphasis disabled.
@@ -257,7 +257,7 @@ fsk_option2 = [
     (RG_RF09_TXCUTC,        0x83),
     (RG_RF09_TXDFE,         0x94),
     (RG_RF09_PAC,           0x7F),  # // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.//
-    (RG_BBC0_IRQM,          0x1F),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
+    (RG_BBC0_IRQM,          0x12),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x1D),  # // No FCS filter, 32 bits FCS, FSK.
     (RG_BBC0_FSKDM,         0x01),  # //Direct modulation enabled and Pre-emphasis disabled.
@@ -283,7 +283,7 @@ fsk_option3 = [
     (RG_RF09_TXCUTC,        0x83),  #
     (RG_RF09_TXDFE,         0x94),  #
     (RG_RF09_PAC,           0x7F),  # // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
-    (RG_BBC0_IRQM,          0x1F),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
+    (RG_BBC0_IRQM,          0x12),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x15),  # // No FCS filter, 32 bits FCS, FSK.
     (RG_BBC0_FSKDM,         0x01),  # //Direct modulation enabled and Preemphasis disabled.
@@ -399,7 +399,7 @@ ofdm_1_mcs0 = [
     (RG_RF09_TXCUTC,        0x0A),  # recommended value (0x0B)
     (RG_RF09_TXDFE,         0x83),
     (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x64 - 0dBm  mettre 0x7F
-    (RG_BBC0_IRQM,          0x1F),
+    (RG_BBC0_IRQM,          0x12),
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x16),  # NO FCS FILTER
     (RG_BBC0_OFDMC,         0x00),
@@ -417,7 +417,7 @@ ofdm_1_mcs1 = [
     (RG_RF09_TXCUTC,        0x0A),  # recommended value (0x0B)
     (RG_RF09_TXDFE,         0x83),
     (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x64 - 0dBm  mettre 0x7F
-    (RG_BBC0_IRQM,          0x1F),
+    (RG_BBC0_IRQM,          0x12),
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x16),  # NO FCS FILTER
     (RG_BBC0_OFDMC,         0x00),
@@ -435,7 +435,7 @@ ofdm_1_mcs2 = [
     (RG_RF09_TXCUTC,        0x0A),  # recommended value (0x0B)
     (RG_RF09_TXDFE,         0x83),
     (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
-    (RG_BBC0_IRQM,          0x1F),
+    (RG_BBC0_IRQM,          0x12),
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x16),  # NO FCS FILTER
     (RG_BBC0_OFDMC,         0x00),
@@ -453,7 +453,7 @@ ofdm_1_mcs3 = [
     (RG_RF09_TXCUTC,        0x0A),  # recommended value (0x0B)
     (RG_RF09_TXDFE,         0x83),
     (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
-    (RG_BBC0_IRQM,          0x1F),
+    (RG_BBC0_IRQM,          0x12),
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x16),  # NO FCS FILTER
     (RG_BBC0_OFDMC,         0x00),
@@ -471,7 +471,7 @@ ofdm_2_mcs0 = [
     (RG_RF09_TXCUTC,        0x08),  # recommended value ()
     (RG_RF09_TXDFE,         0x63),
     (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
-    (RG_BBC0_IRQM,          0x1F),
+    (RG_BBC0_IRQM,          0x12),
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x16),  # NO FCS FILTER
     (RG_BBC0_OFDMC,         0x01),
@@ -489,7 +489,7 @@ ofdm_2_mcs1 = [
     (RG_RF09_TXCUTC,        0x08),  # recommended value ()
     (RG_RF09_TXDFE,         0x63),
     (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
-    (RG_BBC0_IRQM,          0x1F),
+    (RG_BBC0_IRQM,          0x12),
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x16),  # NO FCS FILTER
     (RG_BBC0_OFDMC,         0x01),
@@ -507,7 +507,7 @@ ofdm_2_mcs2 = [
     (RG_RF09_TXCUTC,        0x08),  # recommended value ()
     (RG_RF09_TXDFE,         0x63),
     (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
-    (RG_BBC0_IRQM,          0x1F),
+    (RG_BBC0_IRQM,          0x12),
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x16),  # NO FCS FILTER
     (RG_BBC0_OFDMC,         0x01),
@@ -525,7 +525,7 @@ ofdm_2_mcs3 = [
     (RG_RF09_TXCUTC,        0x08),  # recommended value ()
     (RG_RF09_TXDFE,         0x63),
     (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
-    (RG_BBC0_IRQM,          0x1F),
+    (RG_BBC0_IRQM,          0x12),
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x16),  # NO FCS FILTER
     (RG_BBC0_OFDMC,         0x01),
@@ -543,7 +543,7 @@ ofdm_2_mcs4 = [
     (RG_RF09_TXCUTC,        0x08),  # recommended value ()
     (RG_RF09_TXDFE,         0x63),
     (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
-    (RG_BBC0_IRQM,          0x1F),
+    (RG_BBC0_IRQM,          0x12),
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x16),  # NO FCS FILTER
     (RG_BBC0_OFDMC,         0x01),
@@ -561,7 +561,7 @@ ofdm_2_mcs5 = [
     (RG_RF09_TXCUTC,        0x08),  # recommended value ()
     (RG_RF09_TXDFE,         0x63),
     (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
-    (RG_BBC0_IRQM,          0x1F),
+    (RG_BBC0_IRQM,          0x12),
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x16),  # NO FCS FILTER
     (RG_BBC0_OFDMC,         0x01),
@@ -579,7 +579,7 @@ ofdm_3_mcs1 = [
     (RG_RF09_TXCUTC,        0x05),  # recommended value ()
     (RG_RF09_TXDFE,         0x66),
     (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
-    (RG_BBC0_IRQM,          0x1F),
+    (RG_BBC0_IRQM,          0x12),
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x16),  # NO FCS FILTER
     (RG_BBC0_OFDMC,         0x02),
@@ -597,7 +597,7 @@ ofdm_3_mcs2 = [
     (RG_RF09_TXCUTC,        0x05),  # recommended value ()
     (RG_RF09_TXDFE,         0x66),
     (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
-    (RG_BBC0_IRQM,          0x1F),
+    (RG_BBC0_IRQM,          0x12),
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x16),  # NO FCS FILTER
     (RG_BBC0_OFDMC,         0x02),
@@ -615,7 +615,7 @@ ofdm_3_mcs3 = [
     (RG_RF09_TXCUTC,        0x05),  # recommended value ()
     (RG_RF09_TXDFE,         0x66),
     (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
-    (RG_BBC0_IRQM,          0x1F),
+    (RG_BBC0_IRQM,          0x12),
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x16),  # NO FCS FILTER
     (RG_BBC0_OFDMC,         0x02),
@@ -633,7 +633,7 @@ ofdm_3_mcs4 = [
     (RG_RF09_TXCUTC,        0x05),  # recommended value ()
     (RG_RF09_TXDFE,         0x66),
     (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
-    (RG_BBC0_IRQM,          0x1F),
+    (RG_BBC0_IRQM,          0x12),
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x16),  # NO FCS FILTER
     (RG_BBC0_OFDMC,         0x02),
@@ -651,7 +651,7 @@ ofdm_3_mcs5 = [
     (RG_RF09_TXCUTC,        0x05),  # recommended value ()
     (RG_RF09_TXDFE,         0x66),
     (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
-    (RG_BBC0_IRQM,          0x1F),
+    (RG_BBC0_IRQM,          0x12),
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x16),  # NO FCS FILTER
     (RG_BBC0_OFDMC,         0x02),
@@ -669,7 +669,7 @@ ofdm_3_mcs6 = [
     (RG_RF09_TXCUTC,        0x05),  # recommended value ()
     (RG_RF09_TXDFE,         0x66),
     (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
-    (RG_BBC0_IRQM,          0x1F),
+    (RG_BBC0_IRQM,          0x12),
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x16),  # NO FCS FILTER
     (RG_BBC0_OFDMC,         0x02),
@@ -687,7 +687,7 @@ ofdm_4_mcs2 = [
     (RG_RF09_TXCUTC,        0x03),  # recommended value ()
     (RG_RF09_TXDFE,         0x46),
     (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
-    (RG_BBC0_IRQM,          0x1F),
+    (RG_BBC0_IRQM,          0x12),
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x16),  # NO FCS FILTER
     (RG_BBC0_OFDMC,         0x03),
@@ -705,7 +705,7 @@ ofdm_4_mcs3 = [
     (RG_RF09_TXCUTC,        0x03),  # recommended value ()
     (RG_RF09_TXDFE,         0x46),
     (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
-    (RG_BBC0_IRQM,          0x1F),
+    (RG_BBC0_IRQM,          0x12),
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x16),  # NO FCS FILTER
     (RG_BBC0_OFDMC,         0x03),
@@ -723,7 +723,7 @@ ofdm_4_mcs4 = [
     (RG_RF09_TXCUTC,        0x03),  # recommended value ()
     (RG_RF09_TXDFE,         0x46),
     (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
-    (RG_BBC0_IRQM,          0x1F),
+    (RG_BBC0_IRQM,          0x12),
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x16),  # NO FCS FILTER
     (RG_BBC0_OFDMC,         0x03),
@@ -741,7 +741,7 @@ ofdm_4_mcs5 = [
     (RG_RF09_TXCUTC,        0x03),  # recommended value ()
     (RG_RF09_TXDFE,         0x46),
     (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
-    (RG_BBC0_IRQM,          0x1F),
+    (RG_BBC0_IRQM,          0x12),
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x16),  # NO FCS FILTER
     (RG_BBC0_OFDMC,         0x03),
@@ -759,7 +759,7 @@ ofdm_4_mcs6 = [
     (RG_RF09_TXCUTC,        0x03),  # recommended value ()
     (RG_RF09_TXDFE,         0x46),
     (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
-    (RG_BBC0_IRQM,          0x1F),
+    (RG_BBC0_IRQM,          0x12),
     (RG_BBC1_IRQM,          0x00),
     (RG_BBC0_PC,            0x16),  # NO FCS FILTER
     (RG_BBC0_OFDMC,         0x03),
