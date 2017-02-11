@@ -151,7 +151,7 @@ fsk_option1_FEC = [
     (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
     (RG_BBC0_IRQM,          0x1F),  # TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
     (RG_BBC1_IRQM,          0x00),
-    (RG_BBC0_PC,            0x1D),  # // No FCS filter, 32 bits FCS, FSK.
+   (RG_BBC0_PC,            0x15),  # // No FCS filter, 32 bits FCS, FSK.
     (RG_BBC0_FSKDM,         0x01),  # //Direct modulation enabled and Pre-emphasis disabled.
     (RG_BBC0_FSKC0,         0xD6),
     (RG_BBC0_FSKC1,         0x00),
@@ -177,7 +177,7 @@ fsk_option2_FEC = [
     (RG_RF09_PAC,           0x7F),  # // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.//
     (RG_BBC0_IRQM,          0x1F),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
     (RG_BBC1_IRQM,          0x00),
-    (RG_BBC0_PC,            0x1D),  # // No FCS filter, 32 bits FCS, FSK.
+   (RG_BBC0_PC,            0x15),  # // No FCS filter, 32 bits FCS, FSK.
     (RG_BBC0_FSKDM,         0x01),  # //Direct modulation enabled and Pre-emphasis disabled.
     (RG_BBC0_FSKC0,         0xD6),
     (RG_BBC0_FSKC1,         0x01),
@@ -233,7 +233,7 @@ fsk_option1 = [
     (RG_RF09_PAC,           0x7F),  # // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
     (RG_BBC0_IRQM,          0x12),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
     (RG_BBC1_IRQM,          0x00),
-    (RG_BBC0_PC,            0x1D),  # // No FCS filter, 32 bits FCS, FSK.
+   (RG_BBC0_PC,            0x15),  # // No FCS filter, 32 bits FCS, FSK.
     (RG_BBC0_FSKDM,         0x01),  # //Direct modulation enabled and Pre-emphasis disabled.
     (RG_BBC0_FSKC0,         0xD6),
     (RG_BBC0_FSKC1,         0x00),
@@ -259,7 +259,7 @@ fsk_option2 = [
     (RG_RF09_PAC,           0x7F),  # // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.//
     (RG_BBC0_IRQM,          0x12),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
     (RG_BBC1_IRQM,          0x00),
-    (RG_BBC0_PC,            0x1D),  # // No FCS filter, 32 bits FCS, FSK.
+   (RG_BBC0_PC,            0x15),  # // No FCS filter, 32 bits FCS, FSK.
     (RG_BBC0_FSKDM,         0x01),  # //Direct modulation enabled and Pre-emphasis disabled.
     (RG_BBC0_FSKC0,         0xD6),
     (RG_BBC0_FSKC1,         0x01),

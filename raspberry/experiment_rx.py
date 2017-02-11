@@ -43,7 +43,9 @@ class InformativeRx(threading.Thread):
             item = self.queue.get()
             if type(item) is tuple:
                 logging.warning('Frames received / Frames sent = {0}/{1}\n'.
-                             format(((item[0][0])*256 + item[0][1]), item[4]))
+                             format(((((item[0][0]) << 8) & 0xFF) + ( item[0][1]) & 0xFF), item[4]))
+                logging.warning('Frame received byte 0: {0}, byte 1: {1}\n'.format(item[0][0], item[0][1]))
+                logging.warning('Frame: {0}\n'.format(item[0]))
             else:
                 logging.warning('Modulation used is: {0}'.format(item))
 

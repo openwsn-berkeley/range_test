@@ -135,7 +135,7 @@ class At86rf215(object):
         self.spi.open(0, 0)
 
         # spi speed TEST
-        self.spi.max_speed_hz = 15600000
+        self.spi.max_speed_hz = 7800000
 
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(channel, GPIO.IN)
@@ -228,11 +228,11 @@ class At86rf215(object):
         rcv = self.radio_read_spi(defs.RG_BBC0_RXFLL, 2)
         len_pkt = rcv[0] + ((rcv[1] & 0x07) << 8)
 
-        #logging.info('length is {0}'.format(len_pkt))
+        logging.warning('length is {0}'.format(len_pkt))
 
         # read the packet
         pkt_rcv = self.radio_read_spi(defs.RG_BBC0_FBRXS, len_pkt)
-
+        logging.warning('frame number: {0}'.format(pkt_rcv[0:2]))
         # read from metadata
         rssi = self.radio_read_spi(defs.RG_RF09_EDV, 1)[0]
         crc = ((self.radio_read_spi(defs.RG_BBC0_PC, 1))[0] >> 5) & 0x01
@@ -265,7 +265,7 @@ class At86rf215(object):
         """
         reg = address[:]
         reg += [0x00] * nb_bytes
-        data = self.spi.xfer(reg)
+        data = self.spi.xfer2(reg)
         return data[2:]
 
     def radio_write_spi(self, address, value=None):
@@ -279,7 +279,7 @@ class At86rf215(object):
         if value is not None:
             reg = address[:] + [value]
         reg[0] |= 0x80
-        self.spi.xfer(reg)
+        self.spi.xfer2(reg)
 
     def check_radio_state_rf09(self):
         """
@@ -287,4 +287,4 @@ class At86rf215(object):
         :return: that read value
         """
         add = defs.RG_RF09_STATE[:] + [0x00]
-        return self.spi.xfer(add)[2]
+        return self.spi.xfer2(add)[2]
