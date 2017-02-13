@@ -87,11 +87,12 @@ class Scheduled(threading.Thread):
 
 class ExperimentRx(threading.Thread):
     
-    def __init__(self, index):
+    def __init__(self, start_time):
         
         # local variables
         self.radio_driver = None
-        self.index = index
+        self.start_time = start_time
+        self.index = 5
         # self.start_event = start_event
         self.queue_rx = Queue.Queue()
         self.count_frames_rx = 0
@@ -107,31 +108,45 @@ class ExperimentRx(threading.Thread):
         # configure the logging module
         logging.basicConfig(stream= sys.__stdout__, level=logging.WARNING)
 
-    def run(self):
-
+    def radio_setup(self):
         # initialize the radio driver
         self.radio_driver = radio.At86rf215(self._cb_rx_frame)
         self.radio_driver.radio_init(3)
         self.radio_driver.radio_reset()
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
 
+    def execute_exp(self):
         # re-configure the radio
         self.radio_driver.radio_write_config(settings.radio_configs_rx[self.index])
         self.radio_driver.radio_set_frequency(settings.radio_frequencies[self.index])
 
-        #  self.start_event.wait()
-        #  self.start_event.clear()
         # show the config
         self.queue_rx.put(settings.radio_configs_name[self.index])
-
+        self.index += 1
         self.radio_driver.radio_trx_enable()
         self.radio_driver.radio_rx_now()
-        while True:  # main loop
+       # while True:  # main loop
 
             # wait for the GPS thread to indicate it's time to move to the next configuration
-            time.sleep(10)
+        #    time.sleep(10)
             # FIXME: replace by an event from the GPS thread
-            print('TIMER 10 Seconds triggers')
+        #    print('TIMER 10 Seconds triggers')
+
+    def run(self):
+
+        self.radio_setup()
+        s = sched.scheduler(time.time, time.sleep)
+        s.enter(self.start_time, 1, self.execute_exp, ())
+        s.enter(self.start_time + 38, 1, self.execute_exp, ())
+        s.enter(self.start_time + 78, 1, self.execute_exp, ())
+        s.run()
+
+        #while True:  # main loop
+
+            # wait for the GPS thread to indicate it's time to move to the next configuration
+        #    time.sleep(10)
+            # FIXME: replace by an event from the GPS thread
+        #    print('TIMER 10 Seconds triggers')
     
     #  ======================== public ========================================
     
@@ -155,13 +170,13 @@ class ExperimentRx(threading.Thread):
 
 def main():
     # scheduler = Scheduled(int(sys.argv[1]))
-    # experimentRx = ExperimentRx(0, scheduler.start_event_sch)
-    Scheduled(int(sys.argv[1]))
+    experimentRx = ExperimentRx(int(sys.argv[1]))
+    #Scheduled(int(sys.argv[1]))
     while True :
         input = raw_input('>')
         if input == 's':
-            # print experimentRx.getStats()
-            print 'stats TODO'
+            print experimentRx.getStats()
+            # print 'stats TODO'
         elif input == 'q':
             sys.exit(0)
             
