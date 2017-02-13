@@ -1,8 +1,8 @@
-'''
+"""
 Transmission script of the range test.
 
-\author Jonathan Munoz (jonathan.munoz@inria.fr), January 2017
-'''
+author Jonathan Munoz (jonathan.munoz@inria.fr), January 2017
+"""
 
 import time
 import logging
@@ -47,7 +47,7 @@ class InformativeTx(threading.Thread):
 
 class TxTimer(threading.Thread):
 
-    TIMER_PERIOD = 0.0500
+    TIMER_PERIOD = 0.0200
 
     def __init__(self, event):
 
@@ -68,45 +68,19 @@ class TxTimer(threading.Thread):
             self.event.set()
 
 
-class Scheduled(threading.Thread):
-
-    def __init__(self, start_time):
-
-        #local variables
-        self.experiment = None
-        self.start_time = start_time
-
-        #start the thread
-        threading.Thread.__init__(self)
-        self.name = 'Scheduler'
-        self.daemon = True
-        self.start()
-
-        self.start_event_sch = threading.Event()
-        self.start_event_sch.clear()
-
-    def timer(self):
-        self.start_event_sch.set()
-
-    def run(self):
-        s = sched.scheduler(time.time, time.sleep)
-        s.enter(self.start_time, 1, self.timer, ())
-        s.run()
-
-
 class ExperimentTx(threading.Thread):
     
-    def __init__(self, index, start_event):
+    def __init__(self, start_time):
         
         # local variables
         self.radio_driver = None
-        self.index = index
-        self.start_event = start_event
+        self.start_time = start_time
+        self.index = 0
         self.queue_tx = Queue.Queue()
         
         # start the thread
         threading.Thread.__init__(self)
-        self.name = 'ExperimentTx'
+        self.name = 'ExperimentTx_'
         self.daemon = True
         self.start()
 
@@ -117,21 +91,24 @@ class ExperimentTx(threading.Thread):
         self.txTimer = TxTimer(self.txEvent)
         # configure the logging module
         logging.basicConfig(stream= sys.__stdout__, level=logging.WARNING)
-    
-    def run(self):
-        
+
+    def radio_setup(self):
+
         # initialize the radio driver
         self.radio_driver = radio.At86rf215(self._cb_rx_frame)
         self.radio_driver.radio_init(3)
         self.radio_driver.radio_reset()
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
-        
+
+    def execute_exp(self):
+
         # initialize the frame counter
         frame_counter = 0
 
+        logging.warning('Number of threads; {0}'.format(threading.enumerate()))
         # match up a modulation with a frequency setup (frequency_0, bandwidth, channel)
         # freq_mod_tech = zip(settings.radio_configs_tx, settings.radio_frequencies)
-        
+
         # loop radio configurations
         # for radio_config in settings.radio_configs_tx:
         # for fmt in freq_mod_tech:
@@ -142,43 +119,61 @@ class ExperimentTx(threading.Thread):
 
         # loop through frequencies
         # for frequency_setup in settings.radio_frequencies:
-                
+
         # switch frequency
         self.radio_driver.radio_off()
         self.radio_driver.radio_set_frequency(settings.radio_frequencies[self.index])
         # self.radio_driver.radio_set_frequency(freq_mod_tech[9][1])
 
         # wait for the right moment to start transmitting
-        self.start_event.wait()
-        self.start_event.clear()
+        # self.start_event.wait()
+        # self.start_event.clear()
         self.queue_tx.put(settings.radio_configs_name[self.index])
-                
+
         # loop through packet lengths
         for frame_length in settings.frame_lengths:
 
+            logging.warning('frame length {0}, thread name: {1}'.format(frame_length, self.name))
             now = time.time()
             self.radio_driver.radio_trx_enable()
             # send burst of frames
+            logging.warning('before start sending frames')
             for i in range(settings.BURST_SIZE):
-
+                logging.debug('frame burst {0}'.format(i))
                 # increment the frame counter
                 frame_counter += 1
 
                 # create frame
-                frameToSend = [(frame_counter >> 8) & 0xFF, frame_counter & 0xFF] + [i & 0xFF for i in range(FRAME_LENGTH - 2)]
-                logging.warning('frame counter: byte 0:{0} byte 1:{1} real counter {2}'.format(((frame_counter>>8) & 0xFF), frame_counter & 0xFF, frame_counter ))
-                logging.warning('three first bytes, frame counter: {0}.\n'.format(frameToSend[0:3]))
+                frameToSend = [(frame_counter >> 8) & 0xFF, frame_counter & 0xFF] + [i & 0xFF for i in
+                                                                                     range(FRAME_LENGTH - 2)]
+                logging.debug(
+                    'frame counter: byte 0:{0} byte 1:{1} real counter {2}'.format(((frame_counter >> 8) & 0xFF),
+                                                                                   frame_counter & 0xFF, frame_counter))
+                logging.debug('three first bytes, frame counter: {0}.\n'.format(frameToSend[0:3]))
                 # send frame
                 self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE])
-
+                self.queue_tx.put('SENDING')
                 self.radio_driver.radio_tx_now()
-
+                self.queue_tx.put('SENT')
                 # wait for IFS (to allow the receiver to handle the RX'ed frame)
                 self.txEvent.wait()
                 self.txEvent.clear()
 
             self.queue_tx.put((frame_counter, time.time() - now))
+        logging.warning('FINAL')
+        logging.warning('Number of threads; {0}'.format(threading.enumerate()))
+        self.index += 1
     
+    def run(self):
+
+        self.radio_setup()
+        s = sched.scheduler(time.time, time.sleep)
+        s.enter(self.start_time, 1, self.execute_exp, ())
+        s.enter(self.start_time + 30, 1, self.execute_exp, ())
+        s.enter(self.start_time + 60, 1, self.execute_exp, ())
+        s.run()
+
+
     #  ======================== private =======================================
     
     def _cb_rx_frame(self, pkt_rcv, rssi, crc, mcs):
@@ -188,12 +183,14 @@ class ExperimentTx(threading.Thread):
 
 
 def main():
-    scheduler = Scheduled(int(sys.argv[1]))
-    experimentTx = ExperimentTx(0, scheduler.start_event_sch)
+    # scheduler = Scheduled(int(sys.argv[1]))
+    experimentTx = ExperimentTx(int(sys.argv[1]))
+    #Scheduled(int(sys.argv[1]))
     while True:
         input = raw_input('>')
         if input == 's':
             print experimentTx.getStats()
+            # print 'print stats TX'
         if input == 'q':
             sys.exit(0)
 

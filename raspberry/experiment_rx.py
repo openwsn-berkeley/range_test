@@ -44,8 +44,8 @@ class InformativeRx(threading.Thread):
             if type(item) is tuple:
                 logging.warning('Frames received / Frames sent = {0}/{1}\n'.
                              format(((((item[0][0]) << 8) & 0xFF) + ( item[0][1]) & 0xFF), item[4]))
-                logging.warning('Frame received byte 0: {0}, byte 1: {1}\n'.format(item[0][0], item[0][1]))
-                logging.warning('Frame: {0}\n'.format(item[0]))
+                logging.debug('Frame received byte 0: {0}, byte 1: {1}\n'.format(item[0][0], item[0][1]))
+                logging.debug('Frame: {0}\n'.format(item[0]))
             else:
                 logging.warning('Modulation used is: {0}'.format(item))
 
@@ -54,36 +54,45 @@ class Scheduled(threading.Thread):
 
     def __init__(self, start_time):
 
-        #local variables
+        # local variables
         self.experiment = None
         self.start_time = start_time
 
-        #start the thread
+        # start the thread
         threading.Thread.__init__(self)
         self.name = 'Scheduler'
         self.daemon = True
         self.start()
 
-        self.start_event_sch = threading.Event()
-        self.start_event_sch.clear()
+        # self.start_event_sch = threading.Event()
+        # self.start_event_sch.clear()
 
-    def timer(self):
-        self.start_event_sch.set()
+    def exp_rx_0(self):
+        # self.start_event_sch.set()
+        ExperimentRx(2)
+
+    def exp_rx_1(self):
+        ExperimentRx(1)
+
+    def exp_rx_2(self):
+        ExperimentRx(0)
 
     def run(self):
         s = sched.scheduler(time.time, time.sleep)
-        s.enter(self.start_time, 1, self.timer, ())
+        s.enter(self.start_time, 1, self.exp_rx_0, ())
+        s.enter(self.start_time + 38, 1, self.exp_rx_1, ())
+        s.enter(self.start_time + 78, 1, self.exp_rx_2, ())
         s.run()
 
 
 class ExperimentRx(threading.Thread):
     
-    def __init__(self, index, start_event):
+    def __init__(self, index):
         
         # local variables
         self.radio_driver = None
         self.index = index
-        self.start_event = start_event
+        # self.start_event = start_event
         self.queue_rx = Queue.Queue()
         self.count_frames_rx = 0
         self.frame_number_last = 0
@@ -100,7 +109,7 @@ class ExperimentRx(threading.Thread):
 
     def run(self):
 
-        # initialize the radio
+        # initialize the radio driver
         self.radio_driver = radio.At86rf215(self._cb_rx_frame)
         self.radio_driver.radio_init(3)
         self.radio_driver.radio_reset()
@@ -110,8 +119,8 @@ class ExperimentRx(threading.Thread):
         self.radio_driver.radio_write_config(settings.radio_configs_rx[self.index])
         self.radio_driver.radio_set_frequency(settings.radio_frequencies[self.index])
 
-        self.start_event.wait()
-        self.start_event.clear()
+        #  self.start_event.wait()
+        #  self.start_event.clear()
         # show the config
         self.queue_rx.put(settings.radio_configs_name[self.index])
 
@@ -145,12 +154,14 @@ class ExperimentRx(threading.Thread):
 
 
 def main():
-    scheduler = Scheduled(int(sys.argv[1]))
-    experimentRx = ExperimentRx(0, scheduler.start_event_sch)
+    # scheduler = Scheduled(int(sys.argv[1]))
+    # experimentRx = ExperimentRx(0, scheduler.start_event_sch)
+    Scheduled(int(sys.argv[1]))
     while True :
         input = raw_input('>')
         if input == 's':
-            print experimentRx.getStats()
+            # print experimentRx.getStats()
+            print 'stats TODO'
         elif input == 'q':
             sys.exit(0)
             

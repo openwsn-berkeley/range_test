@@ -122,6 +122,7 @@ class At86rf215(object):
             self.queue.put((pkt_rcv, rssi, crc, mcs))
 
         self.queue.put(time.time() - now)
+        logging.debug('ISR values: {0}'.format(isr[:]))
 
     def cb_gpio(self, channel = 3):
         self.read_isr_source()
@@ -137,6 +138,7 @@ class At86rf215(object):
         # spi speed TEST
         self.spi.max_speed_hz = 7800000
 
+        GPIO.cleanup()
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(channel, GPIO.IN)
         GPIO.add_event_detect(channel, GPIO.RISING, self.cb_gpio)
