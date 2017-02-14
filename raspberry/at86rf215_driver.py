@@ -13,7 +13,7 @@ Connections
 | 23-     |  18 - SPI_SCK                     |
 | 24-     |  15 - SPI_SS_A                    |
 
-\author Jonathan Munoz (jonathan.munoz@inria.fr), January 2017.
+\ author Jonathan Munoz (jonathan.munoz@inria.fr), January 2017.
 """
 
 import threading
@@ -51,7 +51,7 @@ class Processing(threading.Thread):
         self.start()
 
         # configure the logging module
-        logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
+        #logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
 
     def run(self):
 
@@ -86,7 +86,7 @@ class At86rf215(object):
         self.state['state_TXnow'].clear()
 
         # configure the logging module
-        logging.basicConfig(stream= sys.__stdout__, level=logging.WARNING)
+        # logging.basicConfig(stream= sys.__stdout__, level=logging.WARNING)
     
     # ======================== public ==========================================
     
@@ -230,11 +230,11 @@ class At86rf215(object):
         rcv = self.radio_read_spi(defs.RG_BBC0_RXFLL, 2)
         len_pkt = rcv[0] + ((rcv[1] & 0x07) << 8)
 
-        logging.warning('length is {0}'.format(len_pkt))
+        logging.debug('length is {0}'.format(len_pkt))
 
         # read the packet
         pkt_rcv = self.radio_read_spi(defs.RG_BBC0_FBRXS, len_pkt)
-        logging.warning('frame number: {0}'.format(pkt_rcv[0:2]))
+        logging.debug('frame number: {0}'.format(pkt_rcv[0:2]))
         # read from metadata
         rssi = self.radio_read_spi(defs.RG_RF09_EDV, 1)[0]
         crc = ((self.radio_read_spi(defs.RG_BBC0_PC, 1))[0] >> 5) & 0x01

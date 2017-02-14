@@ -11,8 +11,8 @@ import sys
 import sched
 import Queue
 
-import at86rf215_driver      as radio
-import experiment_settings   as settings
+import at86rf215_driver as radio
+import experiment_settings as settings
 
 FRAME_LENGTH  = 2047
 CRC_SIZE      = 4
@@ -34,6 +34,7 @@ class InformativeTx(threading.Thread):
         self.start()
 
         logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
+        # logging.basicConfig(filename='range_test_tx.log', level=logging.WARNING)
 
     def run(self):
 
@@ -91,6 +92,7 @@ class ExperimentTx(threading.Thread):
         self.txTimer = TxTimer(self.txEvent)
         # configure the logging module
         logging.basicConfig(stream= sys.__stdout__, level=logging.WARNING)
+        # logging.basicConfig(filename='range_test_tx.log', level=logging.WARNING)
 
     def radio_setup(self):
 
@@ -123,19 +125,18 @@ class ExperimentTx(threading.Thread):
             self.radio_driver.radio_trx_enable()
 
             # send burst of frames
-            logging.warning('before start sending frames')
+            logging.debug('before start sending frames')
             for i in range(settings.BURST_SIZE):
                 logging.debug('frame burst {0}'.format(i))
+
+                # create frame
+                frameToSend = [frame_counter >> 8, frame_counter & 0xFF] + [i & 0xFF for i in range(FRAME_LENGTH - 2)]
+
+                logging.debug('three first bytes, frame counter: {0}.\n'.format(frameToSend[0:3]))
+
                 # increment the frame counter
                 frame_counter += 1
 
-                # create frame
-                frameToSend = [(frame_counter >> 8) & 0xFF, frame_counter & 0xFF] + [i & 0xFF for i in
-                                                                                     range(FRAME_LENGTH - 2)]
-                logging.debug(
-                    'frame counter: byte 0:{0} byte 1:{1} real counter {2}'.format(((frame_counter >> 8) & 0xFF),
-                                                                                   frame_counter & 0xFF, frame_counter))
-                logging.debug('three first bytes, frame counter: {0}.\n'.format(frameToSend[0:3]))
                 # send frame
                 self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE])
                 self.radio_driver.radio_tx_now()
@@ -154,8 +155,8 @@ class ExperimentTx(threading.Thread):
         self.radio_setup()
         s = sched.scheduler(time.time, time.sleep)
         s.enter(self.start_time, 1, self.execute_exp, ())
-        s.enter(self.start_time + 40, 1, self.execute_exp, ())
-        s.enter(self.start_time + 80, 1, self.execute_exp, ())
+        s.enter(self.start_time + 20, 1, self.execute_exp, ())
+        s.enter(self.start_time + 60, 1, self.execute_exp, ())
         s.run()
 
 
@@ -168,6 +169,7 @@ class ExperimentTx(threading.Thread):
 
 
 def main():
+    # logging.basicConfig(filename='range_test_tx.log', level=logging.WARNING)
     experimentTx = ExperimentTx(int(sys.argv[1]))
     while True:
         input = raw_input('>')

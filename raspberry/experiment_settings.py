@@ -5,6 +5,7 @@ Lists of frequencies and modulations to be used in the range test.
 """
 
 import at86rf215_defs as defs
+import json
 
 frame_lengths = [8, 127, 1000, 2047]
 BURST_SIZE    = 100
@@ -43,14 +44,9 @@ radio_frequencies = [
     (             600,      868300,       0),  # oqpsk
     (             600,      868300,       0),  # oqpsk
     (             600,      868300,       0),  # oqpsk
-#   (             200,      863125,      17),  # fsk operating mode 1
-#   (             400,      863225,       9),  # fsk operating mode 2-3
-#   (            1200,      863625,       2),  # ofdm option 1
-#   (             800,      863425,       4),  # ofdm option 2
-#   (             400,      863225,       8),  # ofdm option 3
-#   (             200,      863125,      17),  # ofdm option 4
-#   (             600,      868950,       0),  # oqpsk
 ]
+
+# range_experiment_setup =
 
 radio_configs_tx = [
     defs.fsk_option1_FEC,
