@@ -43,7 +43,7 @@ class InformativeTx(threading.Thread):
             if type(item) is tuple:
                 logging.warning('Time to send the frames {0} - {1} was {2} seconds\n'.format(item[0] - 100, item[0], item[1]))
             else:
-                logging.warning('Modulation used is: {0}'.format(item))
+                logging.warning('Modulation used is: {0}\n'.format(item))
 
 
 class TxTimer(threading.Thread):
@@ -90,6 +90,7 @@ class ExperimentTx(threading.Thread):
 
         self.informativeTx = InformativeTx(self.queue_tx)
         self.txTimer = TxTimer(self.txEvent)
+
         # configure the logging module
         logging.basicConfig(stream= sys.__stdout__, level=logging.WARNING)
         # logging.basicConfig(filename='range_test_tx.log', level=logging.WARNING)
@@ -120,19 +121,19 @@ class ExperimentTx(threading.Thread):
         # loop through packet lengths
         for frame_length in settings.frame_lengths:
 
-            logging.debug('frame length {0}, thread name: {1}'.format(frame_length, self.name))
+            # logging.debug('frame length {0}, thread name: {1}'.format(frame_length, self.name))
             now = time.time()
             self.radio_driver.radio_trx_enable()
 
             # send burst of frames
-            logging.debug('before start sending frames')
+
             for i in range(settings.BURST_SIZE):
                 logging.debug('frame burst {0}'.format(i))
 
                 # create frame
                 frameToSend = [frame_counter >> 8, frame_counter & 0xFF] + [i & 0xFF for i in range(FRAME_LENGTH - 2)]
 
-                logging.debug('three first bytes, frame counter: {0}.\n'.format(frameToSend[0:3]))
+                # logging.debug('three first bytes, frame counter: {0}.\n'.format(frameToSend[0:3]))
 
                 # increment the frame counter
                 frame_counter += 1
@@ -146,7 +147,7 @@ class ExperimentTx(threading.Thread):
                 self.txEvent.clear()
 
             self.queue_tx.put((frame_counter, time.time() - now))
-        logging.debug('FINAL')
+        # logging.debug('FINAL')
 
         self.index += 1
     
