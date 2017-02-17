@@ -40,10 +40,12 @@ class InformativeRx(threading.Thread):
         self.rx_frames_hundred = []
         self.rx_frames_thousand = []
         self.rx_frames_two_thousand = []
-        self.results = {'Time:': None, 'Modulation used is:': None, 'Results: frames received:': self.count_rx,
-                        'Frames received    8 bytes long:': None,
-                        'Frames received  127 bytes long:': None, 'Frames received 1000 bytes long:': None,
-                        'Frames received 2047 bytes long:': None, 'RSSI average value:': None}
+        self.results = {'Time Experiment:': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
+                        'Time for this set of settings:': None,
+                        'Modulation used is:': None, 'Results: frames received:': self.count_rx,
+                        'Frames received    8 bytes long:': None, 'Frames received  127 bytes long:': None,
+                        'Frames received 1000 bytes long:': None, 'Frames received 2047 bytes long:': None,
+                        'RSSI average value:': None}
 
         # start the thread
         threading.Thread.__init__(self)
@@ -100,6 +102,8 @@ class InformativeRx(threading.Thread):
         logging.debug('RSSI average value: {0}\n'.format(self.rssi_avg_func()))
 
     def run(self):
+
+        self.results['Time for this set of settings:'] = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime())
         self.rx_analitics.wait()
         self.rx_analitics.clear()
         while True:
@@ -114,7 +118,6 @@ class InformativeRx(threading.Thread):
                 else:
                     with open('results_rx.json', 'w') as f:
                         f.write(json.dumps('Range Test Experiment:'))
-                        self.results['Time:'] = time.time()
 
             else:
                 if type(item) is tuple:
