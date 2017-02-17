@@ -117,7 +117,7 @@ class InformativeRx(threading.Thread):
                     self.count_rx = 0
                 else:
                     with open('results_rx.json', 'w') as f:
-                        f.write(json.dumps('Range Test Experiment:'))
+                        f.write(json.dumps('Range Test Experiment Rx:'))
 
             else:
                 if type(item) is tuple:
@@ -142,6 +142,7 @@ class ExperimentRx(threading.Thread):
         self.radio_driver = None
         self.start_time = start_time
         self.index = 5
+        self.end = False
         # self.start_event = start_event
         self.queue_rx = Queue.Queue()
         self.count_frames_rx = 0
@@ -171,6 +172,8 @@ class ExperimentRx(threading.Thread):
         it makes print the last modulation results
         """
         self.queue_rx.put('Print last')
+        self.end = True
+
 
     def execute_exp(self):
         """
@@ -238,14 +241,15 @@ def main():
     logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
     experimentRx = ExperimentRx(int(sys.argv[1]))
 
-    while True:
+    while experimentRx.end is False:
         input = raw_input('>')
         if input == 's':
             print experimentRx.getStats()
             # print 'stats TODO'
         elif input == 'q':
             sys.exit(0)
-
+    logging.warning('Experiment END Variable: {0}'.format(experimentRx.end))
+    sys.exit(0)
 
 if __name__ == '__main__':
     main()

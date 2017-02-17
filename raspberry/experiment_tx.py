@@ -10,6 +10,7 @@ import threading
 import sys
 import sched
 import Queue
+import json
 
 import at86rf215_driver as radio
 import experiment_settings as settings
@@ -24,6 +25,8 @@ class InformativeTx(threading.Thread):
 
         # store parameters
         self.queue = queue
+        self.results = {'Time Experiment:': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
+                        'Time for this set of settings:': None}
 
         # local variables
 
@@ -42,6 +45,7 @@ class InformativeTx(threading.Thread):
             item = self.queue.get()
             if type(item) is tuple:
                 logging.warning('Time to send the frames {0} - {1} was {2} seconds\n'.format(item[0] - 100, item[0], item[1]))
+
             else:
                 logging.warning('Modulation used is: {0}\n'.format(item))
 
