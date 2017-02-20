@@ -12,10 +12,10 @@ BURST_SIZE    = 100
 IFS_S         = 0.1
 
 radio_TRX_parameters = {
-    'frame size 8 bytes': (8, 0.0015),
-    'frame size 127 bytes': (127, 0.002),
-    'frame size 1000 bytes': (1000, 0.0035),
-    'frame size 2047 bytes': (2047, 0.0045),
+    'frame size 8 bytes': (8, 0.002),
+    'frame size 127 bytes': (127, 0.003),
+    'frame size 1000 bytes': (1000, 0.005),
+    'frame size 2047 bytes': (2047, 0.0065),
 }
 radio_TRX_order = {'order': [radio_TRX_parameters['frame size 8 bytes'], radio_TRX_parameters['frame size 127 bytes'],
                              radio_TRX_parameters['frame size 1000 bytes'],
@@ -62,6 +62,32 @@ radio_freq_setup = {
     u'fsk operating mode 3': (400, 863225, 0), u'ofdm option 1': (1200, 863625, 0),
     u'ofdm option 2': (800, 863425, 0), u'ofdm option 3': (400, 863225, 0), u'ofdm option 4': (200, 863125, 0),
     u'o-qpsk': (600, 868300, 0)
+}
+
+radio_trx_mod_order = {u'order': [u'FSK operating mode 1 FEC', u'FSK operating mode 2 FEC',
+                                  u'FSK operating mode 3 FEC', u'FSK operating mode 1 no FEC',
+                                  u'FSK operating mode 2 no FEC', u'FSK operating mode 3 no FEC',
+                                  u'OFDM Option 1 MCS 0', u'OFDM Option 1 MCS 1', u'OFDM Option 1 MCS 2',
+                                  u'OFDM Option 1 MCS 3', u'OFDM Option 2 MCS 0', u'OFDM Option 2 MCS 1',
+                                  u'OFDM Option 2 MCS 2', u'OFDM Option 2 MCS 3', u'OFDM Option 2 MCS 4',
+                                  u'OFDM Option 2 MCS 5', u'OFDM Option 3 MCS 1', u'OFDM Option 3 MCS 2',
+                                  u'OFDM Option 3 MCS 3', u'OFDM Option 3 MCS 4', u'OFDM Option 3 MCS 5',
+                                  u'OFDM Option 3 MCS 6', u'OFDM Option 4 MCS 2', u'OFDM Option 4 MCS 3',
+                                  u'OFDM Option 4 MCS 4', u'OFDM Option 4 MCS 5', u'OFDM Option 4 MCS 6',
+                                  u'O-QPSK rate mode 0', u'O-QPSK rate mode 1', u'O-QPSK rate mode 2',
+                                  u'O-QPSK rate mode 3'
+                                  ]}
+
+time_mod = {
+    u'FSK operating mode 1 FEC': 106, u'FSK operating mode 2 FEC': 54, u'FSK operating mode 3 FEC': 16,
+    u'FSK operating mode 1 no FEC': 55, u'FSK operating mode 2 no FEC': 29, u'FSK operating mode 3 no FEC': 16,
+    u'OFDM Option 1 MCS 0': 30, u'OFDM Option 1 MCS 1': 17, u'OFDM Option 1 MCS 2': 11, u'OFDM Option 1 MCS 3': 9,
+    u'OFDM Option 2 MCS 0': 56, u'OFDM Option 2 MCS 1': 30, u'OFDM Option 2 MCS 2': 18, u'OFDM Option 2 MCS 3': 11,
+    u'OFDM Option 2 MCS 4': 9, u'OFDM Option 2 MCS 5': 9, u'OFDM Option 3 MCS 1': 56, u'OFDM Option 3 MCS 2': 30,
+    u'OFDM Option 3 MCS 3': 18, u'OFDM Option 3 MCS 4': 13, u'OFDM Option 3 MCS 5': 11, u'OFDM Option 3 MCS 6': 9,
+    u'OFDM Option 4 MCS 2': 56, u'OFDM Option 4 MCS 3': 30, u'OFDM Option 4 MCS 4': 22, u'OFDM Option 4 MCS 5': 18,
+    u'OFDM Option 4 MCS 6': 13, u'O-QPSK rate mode 0': 450, u'O-QPSK rate mode 1': 230, u'O-QPSK rate mode 2': 122,
+    u'O-QPSK rate mode 3': 67
 }
 
 test_settings = {

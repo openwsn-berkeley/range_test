@@ -57,7 +57,7 @@ class Processing(threading.Thread):
 
         while True:
             item = self.queue.get()
-            logging.warning('ITEM {0}'.format(item))
+            # logging.warning('ITEM {0}'.format(item))
             #if type(item) is tuple:
                 # logging.info('FRAME number: {0}, frame size: {1}, RSSI: {2} dBm,  CRC: {3}, MCS: {4}\n'.
                 #            format((item[0][0] * 256 + item[0][1]), len(item[0]), item[1], item[2], item[3]))

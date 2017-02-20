@@ -141,7 +141,7 @@ class ExperimentRx(threading.Thread):
         # local variables
         self.radio_driver = None
         self.start_time = start_time
-        self.index = 5
+        self.index = 0
         self.end = False
         # self.start_event = start_event
         self.queue_rx = Queue.Queue()
@@ -189,7 +189,7 @@ class ExperimentRx(threading.Thread):
 
         # show the config
         self.queue_rx.put(settings.radio_configs_name[self.index])
-        self.index += 1
+        self.index += 3
         self.radio_driver.radio_trx_enable()
         self.rxAnalitics.set()
         self.radio_driver.radio_rx_now()
@@ -205,9 +205,9 @@ class ExperimentRx(threading.Thread):
         self.radio_setup()
         s = sched.scheduler(time.time, time.sleep)
         s.enter(self.start_time, 1, self.execute_exp, ())
-        s.enter(self.start_time + 20, 1, self.execute_exp, ())
-        s.enter(self.start_time + 60, 1, self.execute_exp, ())
-        s.enter(self.start_time + 98, 1, self.stop_exp, ())
+        s.enter(self.start_time + 107, 1, self.execute_exp, ())
+        s.enter(self.start_time + 56 + 107, 1, self.execute_exp, ())
+        s.enter(self.start_time + 56 + 107+ 120, 1, self.stop_exp, ())
         s.run()
 
         # while True:  # main loop

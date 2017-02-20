@@ -81,7 +81,7 @@ class ExperimentTx(threading.Thread):
         # local variables
         self.radio_driver = None
         self.start_time = start_time
-        self.index = 5
+        self.index = 0
         self.queue_tx = Queue.Queue()
         
         # start the thread
@@ -108,6 +108,14 @@ class ExperimentTx(threading.Thread):
         self.radio_driver.radio_reset()
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
 
+    def experiment_scheduling(self):
+        s = sched.scheduler(time.time, time.sleep)
+        offset = 2
+        for item in settings.radio_trx_mod_order['order']:
+            s.enter(self.start_time + offset, 1, self.execute_exp, ())
+            offset += settings.time_mod[item]
+        s.run()
+
     def execute_exp(self):
 
         # initialize the frame counter
@@ -122,7 +130,7 @@ class ExperimentTx(threading.Thread):
 
         # log the config name
         self.queue_tx.put(settings.radio_configs_name[self.index])
-
+        noww = time.time()
         # loop through packet lengths
         # for frame_length in settings.frame_lengths:
         for trx_settings in settings.radio_TRX_order['order']:
@@ -153,20 +161,18 @@ class ExperimentTx(threading.Thread):
                 # self.txEvent.clear()
                 time.sleep(trx_settings[1])
 
-
             self.queue_tx.put((frame_counter, time.time() - now))
         # logging.debug('FINAL')
-
-        self.index += 1
+        self.queue_tx.put(time.time() - noww)
+        self.index += 3
     
     def run(self):
 
         self.radio_setup()
-        s = sched.scheduler(time.time, time.sleep)
-        s.enter(self.start_time, 1, self.execute_exp, ())
-        s.enter(self.start_time + 22, 1, self.execute_exp, ())
-        s.enter(self.start_time + 62, 1, self.execute_exp, ())
-        s.run()
+        # s = sched.scheduler(time.time, time.sleep)
+        # s.enter(self.start_time, 1, self.execute_exp, ())
+        # s.run()
+        self.experiment_scheduling()
 
 
     #  ======================== private =======================================
