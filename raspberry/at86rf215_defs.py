@@ -49,6 +49,23 @@ IRQS_FBLI =                 0x80
 # reset command
 RST_CMD =                   0x07
 
+# time for each frame to be sent, in seconds
+time_per_frame = {
+    u'ofdm1-mcs0-6bytes': 0.00185,
+    u'ofdm1-mcs0-127bytes': 0.01155,
+    u'ofdm1-mcs0-1000bytes': 0.0840,
+    u'ofdm1-mcs0-2047bytes': 0.1654,
+    u'ofdm1-mcs1-6bytes': 0.0016,
+    u'ofdm1-mcs1-127bytes': 0.0064,
+    u'ofdm1-mcs1-1000bytes': 0.04131,
+    u'ofdm1-mcs1-2047bytes': 0.084,
+    u'ofdm1-mcs2-6bytes': 0.00185,
+    u'ofdm1-mcs2-127bytes': 0.01155,
+    u'ofdm1-mcs2-1000bytes': 0.0840,
+    u'ofdm1-mcs2-2047bytes': 0.1654,
+}
+
+
 # register addresses (16-bit)
 
 RG_RF09_IRQS =              [0x00, 0x00]

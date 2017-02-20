@@ -174,7 +174,6 @@ class ExperimentRx(threading.Thread):
         self.queue_rx.put('Print last')
         self.end = True
 
-
     def execute_exp(self):
         """
         This is the functions that reconfigures the radio at each test. It gets passed to the scheduler function.
@@ -206,8 +205,8 @@ class ExperimentRx(threading.Thread):
         self.radio_setup()
         s = sched.scheduler(time.time, time.sleep)
         s.enter(self.start_time, 1, self.execute_exp, ())
-        s.enter(self.start_time + 18, 1, self.execute_exp, ())
-        s.enter(self.start_time + 58, 1, self.execute_exp, ())
+        s.enter(self.start_time + 20, 1, self.execute_exp, ())
+        s.enter(self.start_time + 60, 1, self.execute_exp, ())
         s.enter(self.start_time + 98, 1, self.stop_exp, ())
         s.run()
 
@@ -235,8 +234,8 @@ class ExperimentRx(threading.Thread):
 
 # ========================== main ============================================
 
-
 def main():
+
     # logging.basicConfig(filename='range_test_rx.log', level=logging.WARNING)
     logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
     experimentRx = ExperimentRx(int(sys.argv[1]))

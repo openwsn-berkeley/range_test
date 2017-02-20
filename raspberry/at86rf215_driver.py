@@ -57,11 +57,13 @@ class Processing(threading.Thread):
 
         while True:
             item = self.queue.get()
-            if type(item) is tuple:
-                logging.info('FRAME number: {0}, frame size: {1}, RSSI: {2} dBm,  CRC: {3}, MCS: {4}\n'.
-                            format((item[0][0] * 256 + item[0][1]), len(item[0]), item[1], item[2], item[3]))
-            else:
-                logging.info('Time in the ISR is {0} seconds\n'.format(item))
+            logging.warning('ITEM {0}'.format(item))
+            #if type(item) is tuple:
+                # logging.info('FRAME number: {0}, frame size: {1}, RSSI: {2} dBm,  CRC: {3}, MCS: {4}\n'.
+                #            format((item[0][0] * 256 + item[0][1]), len(item[0]), item[1], item[2], item[3]))
+                # logging.warning('{0} Time in the ISR is {1} seconds\n'.format((item[0], item[1])))
+            # else:
+                # logging.warning('Time in the ISR is {0} seconds\n'.format(item))
 
 
 class At86rf215(object):
@@ -79,6 +81,7 @@ class At86rf215(object):
         self.state_tx_now       = threading.Event()
         self.state_IFS          = threading.Event()
         self.count              = 0
+        self.counter = 0
 
         self.processing = Processing(self.queue)
         self.state              = {'state_TRXprep': self.state_trx_prep, 'state_TXnow': self.state_tx_now}
@@ -119,10 +122,11 @@ class At86rf215(object):
             self.at86_state = RADIOSTATE_TXRX_DONE
             (pkt_rcv, rssi, crc, mcs) = self.radio_get_received_frame()
             self.cb(pkt_rcv, rssi, crc, mcs)
-            self.queue.put((pkt_rcv, rssi, crc, mcs))
+            # self.queue.put((pkt_rcv, rssi, crc, mcs))
+            self.queue.put((self.count, time.time() - now))
 
-        self.queue.put(time.time() - now)
-        logging.debug('ISR values: {0}'.format(isr[:]))
+        # self.queue.put((self.count, time.time() - now))
+        # logging.debug('ISR values: {0}'.format(isr[:]))
 
     def cb_gpio(self, channel = 3):
         self.read_isr_source()
@@ -226,6 +230,7 @@ class At86rf215(object):
         Demands to the radio the received packet
         :return: a tuple with 1) packet received, 2) rssi, 3) crc(boolean) 4) mcs (valid for OFDM).
         """
+        # now = time.time()
         # get the length of the frame
         rcv = self.radio_read_spi(defs.RG_BBC0_RXFLL, 2)
         len_pkt = rcv[0] + ((rcv[1] & 0x07) << 8)
@@ -247,6 +252,8 @@ class At86rf215(object):
         if rssi >= 128:
             rssi = (((~rssi)& 0xFF) + 1) * -1
 
+        # print (time.time() - now)
+        # self.counter += 1
         return pkt_rcv, rssi, crc, mcs
 
     def radio_write_config(self, settings):

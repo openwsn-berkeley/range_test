@@ -44,7 +44,8 @@ class InformativeTx(threading.Thread):
         while True:
             item = self.queue.get()
             if type(item) is tuple:
-                logging.warning('Time to send the frames {0} - {1} was {2} seconds\n'.format(item[0] - 100, item[0], item[1]))
+                logging.warning('Time to send the frames {0} - {1} was {2} seconds\n'.format(item[0] - 100, item[0],
+                                                                                             item[1]))
 
             else:
                 logging.warning('Modulation used is: {0}\n'.format(item))
@@ -58,7 +59,7 @@ class TxTimer(threading.Thread):
 
         # store parameters
         self.event = event
-
+        # self.timer_period
         # local variables
 
         # start the thread
@@ -123,8 +124,8 @@ class ExperimentTx(threading.Thread):
         self.queue_tx.put(settings.radio_configs_name[self.index])
 
         # loop through packet lengths
-        for frame_length in settings.frame_lengths:
-
+        # for frame_length in settings.frame_lengths:
+        for trx_settings in settings.radio_TRX_order['order']:
             # logging.debug('frame length {0}, thread name: {1}'.format(frame_length, self.name))
             now = time.time()
             self.radio_driver.radio_trx_enable()
@@ -132,7 +133,7 @@ class ExperimentTx(threading.Thread):
             # send burst of frames
 
             for i in range(settings.BURST_SIZE):
-                logging.debug('frame burst {0}'.format(i))
+                # logging.debug('frame burst {0}'.format(i))
 
                 # create frame
                 frameToSend = [frame_counter >> 8, frame_counter & 0xFF] + [i & 0xFF for i in range(FRAME_LENGTH - 2)]
@@ -143,12 +144,15 @@ class ExperimentTx(threading.Thread):
                 frame_counter += 1
 
                 # send frame
-                self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE])
+                # self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE])
+                self.radio_driver.radio_load_packet(frameToSend[:trx_settings[0] - CRC_SIZE])
                 self.radio_driver.radio_tx_now()
 
                 # wait for a timeout (to allow the receiver to handle the RX'ed frame)
-                self.txEvent.wait()
-                self.txEvent.clear()
+                # self.txEvent.wait()
+                # self.txEvent.clear()
+                time.sleep(trx_settings[1])
+
 
             self.queue_tx.put((frame_counter, time.time() - now))
         # logging.debug('FINAL')
@@ -160,8 +164,8 @@ class ExperimentTx(threading.Thread):
         self.radio_setup()
         s = sched.scheduler(time.time, time.sleep)
         s.enter(self.start_time, 1, self.execute_exp, ())
-        s.enter(self.start_time + 20, 1, self.execute_exp, ())
-        s.enter(self.start_time + 60, 1, self.execute_exp, ())
+        s.enter(self.start_time + 22, 1, self.execute_exp, ())
+        s.enter(self.start_time + 62, 1, self.execute_exp, ())
         s.run()
 
 
