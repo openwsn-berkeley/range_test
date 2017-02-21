@@ -145,6 +145,7 @@ fsk_option1_FEC = [
     (RG_RF09_RXBWC,         0x00),
     (RG_RF09_RXDFE,         0x2A),  # RCUT = 1, bits 5-7. bit 4 not used.
     (RG_RF09_AGCC,          0x01),
+    (RG_RF09_AGCS,          0x37),
     (RG_RF09_EDD,           0x7A),
     (RG_RF09_TXCUTC,        0xC0),
     (RG_RF09_TXDFE,         0x98),
@@ -171,6 +172,7 @@ fsk_option2_FEC = [
     (RG_RF09_RXBWC,         0x03),
     (RG_RF09_RXDFE,         0x25),  # RCUT = 1, bits 5-7. bit 4 not used.
     (RG_RF09_AGCC,          0x01),
+    (RG_RF09_AGCS,          0x37),
     (RG_RF09_EDD,           0x7A),
     (RG_RF09_TXCUTC,        0x83),
     (RG_RF09_TXDFE,         0x94),
@@ -197,6 +199,7 @@ fsk_option3_FEC = [
     (RG_RF09_RXBWC,         0x03),  # //IF shift, 200 kHz bandwidth
     (RG_RF09_RXDFE,         0x24),  # //find the right values
     (RG_RF09_AGCC,          0x01),
+    (RG_RF09_AGCS,          0x37),
     (RG_RF09_EDD,           0x7A),
     (RG_RF09_TXCUTC,        0x83),  #
     (RG_RF09_TXDFE,         0x94),  # //find the right values
@@ -227,6 +230,7 @@ fsk_option1 = [
     (RG_RF09_RXBWC,         0x00), # 0 IFS, 50 kHz symbol rate
     (RG_RF09_RXDFE,         0x2A), # RCUT = 1 , SR = 10
     (RG_RF09_AGCC,          0x01),
+    (RG_RF09_AGCS,          0x37),
     (RG_RF09_EDD,           0x7A),
     (RG_RF09_TXCUTC,        0xC0),
     (RG_RF09_TXDFE,         0x98),
@@ -253,6 +257,7 @@ fsk_option2 = [
     (RG_RF09_RXBWC,         0x03),  # 0 IFS, 100 kHz symbol rate
     (RG_RF09_RXDFE,         0x25),  # RCUT = 1 , SR = 5
     (RG_RF09_AGCC,          0x01),
+    (RG_RF09_AGCS,          0x37),
     (RG_RF09_EDD,           0x7A),
     (RG_RF09_TXCUTC,        0x83),
     (RG_RF09_TXDFE,         0x94),
@@ -279,6 +284,7 @@ fsk_option3 = [
     (RG_RF09_RXBWC,         0x03),  # //IFS 1, 200 kHz
     (RG_RF09_RXDFE,         0x25),  # # RCUT = 2 , SR = 4
     (RG_RF09_AGCC,          0x01),
+    (RG_RF09_AGCS,          0x37),
     (RG_RF09_EDD,           0x7A),
     (RG_RF09_TXCUTC,        0x83),  #
     (RG_RF09_TXDFE,         0x94),  #
