@@ -143,7 +143,7 @@ fsk_option1_FEC = [
     (RG_RF09_IRQM,          0x1F),  # TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts enabled
     (RG_RF24_IRQM,          0x00),
     (RG_RF09_RXBWC,         0x00),
-    (RG_RF09_RXDFE,         0x1A),
+    (RG_RF09_RXDFE,         0x2A),  # RCUT = 1, bits 5-7. bit 4 not used.
     (RG_RF09_AGCC,          0x01),
     (RG_RF09_EDD,           0x7A),
     (RG_RF09_TXCUTC,        0xC0),
@@ -169,7 +169,7 @@ fsk_option2_FEC = [
     (RG_RF09_IRQM,          0x1F),  # // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts enabled
     (RG_RF24_IRQM,          0x00),
     (RG_RF09_RXBWC,         0x03),
-    (RG_RF09_RXDFE,         0x15),
+    (RG_RF09_RXDFE,         0x25),  # RCUT = 1, bits 5-7. bit 4 not used.
     (RG_RF09_AGCC,          0x01),
     (RG_RF09_EDD,           0x7A),
     (RG_RF09_TXCUTC,        0x83),
