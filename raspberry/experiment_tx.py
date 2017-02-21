@@ -17,6 +17,7 @@ import experiment_settings as settings
 
 FRAME_LENGTH  = 2047
 CRC_SIZE      = 4
+SECURITY_TIME = 3 # 3 seconds to give more time to TRX to complete the 400 frame bursts.
 
 
 class InformativeTx(threading.Thread):
@@ -76,13 +77,15 @@ class TxTimer(threading.Thread):
 
 class ExperimentTx(threading.Thread):
     
-    def __init__(self, start_time):
+    def __init__(self):
         
         # local variables
         self.radio_driver = None
-        self.start_time = start_time
+        # self.start_time = start_time
         self.index = 0
         self.queue_tx = Queue.Queue()
+        self.started_time = time.time()
+        self.chronogram = ['time' for i in range(32)]
         
         # start the thread
         threading.Thread.__init__(self)
@@ -110,26 +113,32 @@ class ExperimentTx(threading.Thread):
 
     def experiment_scheduling(self):
         s = sched.scheduler(time.time, time.sleep)
-        offset = 2
+        offset = 3 + SECURITY_TIME
         for item in settings.radio_trx_mod_order['order']:
-            s.enter(self.start_time + offset, 1, self.execute_exp, ())
-            offset += settings.time_mod[item]
+            s.enter(offset, 1, self.execute_exp, (item,))
+            self.chronogram[settings.radio_trx_mod_order['order'].index(item)] = offset
+            offset += settings.test_settings[item]['time'] + SECURITY_TIME
+        logging.warning(self.chronogram)
         s.run()
 
-    def execute_exp(self):
-
+    def execute_exp(self, item):
+        self.queue_tx.put(time.time() - self.started_time)
         # initialize the frame counter
         frame_counter = 0
 
         # re-configure the radio
-        self.radio_driver.radio_write_config(settings.radio_configs_tx[self.index])
+        # self.radio_driver.radio_write_config(settings.radio_configs_tx[self.index])
+        self.radio_driver.radio_write_config(settings.test_settings[item]['configuration'])
 
         # select the frequency
         self.radio_driver.radio_off()
-        self.radio_driver.radio_set_frequency(settings.radio_frequencies[self.index])
+        # self.radio_driver.radio_set_frequency(settings.radio_frequencies[self.index])
+        self.radio_driver.radio_set_frequency(settings.test_settings[item]['frequency set up'])
 
         # log the config name
-        self.queue_tx.put(settings.radio_configs_name[self.index])
+        # self.queue_tx.put(settings.radio_configs_name[self.index])
+        self.queue_tx.put(settings.test_settings[item]['id'])
+
         noww = time.time()
         # loop through packet lengths
         # for frame_length in settings.frame_lengths:
@@ -164,10 +173,10 @@ class ExperimentTx(threading.Thread):
             self.queue_tx.put((frame_counter, time.time() - now))
         # logging.debug('FINAL')
         self.queue_tx.put(time.time() - noww)
-        self.index += 3
+        self.index += 1
     
     def run(self):
-
+        # time.sleep(self.start_time)
         self.radio_setup()
         # s = sched.scheduler(time.time, time.sleep)
         # s.enter(self.start_time, 1, self.execute_exp, ())
@@ -185,7 +194,8 @@ class ExperimentTx(threading.Thread):
 
 def main():
     # logging.basicConfig(filename='range_test_tx.log', level=logging.WARNING)
-    experimentTx = ExperimentTx(int(sys.argv[1]))
+    # experimentTx = ExperimentTx(int(sys.argv[1]))
+    experimentTx = ExperimentTx()
     while True:
         input = raw_input('>')
         if input == 's':

@@ -18,6 +18,7 @@ import experiment_settings as settings
 
 PACKET_LENGTH = 2047
 CRC_SIZE = 4
+SECURITY_TIME = 3
 
 
 class InformativeRx(threading.Thread):
@@ -60,6 +61,7 @@ class InformativeRx(threading.Thread):
             val += 1
             if rssi_val < -4 and rssi_val is not 127:
                 avg += rssi_val
+        # logging.warning('RSSI matrix value= {0}'.format(self.rssi_values))
         return avg / val
 
     def rx_frames_psize(self):
@@ -131,22 +133,26 @@ class InformativeRx(threading.Thread):
 
                 elif item == 'Print last':
                     self.show_results()
-                else:
+
+                elif type(item) == float:
                     logging.warning('Modulation used is: {0}'.format(item))
+                else:
                     self.current_modulation = item
 
 
 class ExperimentRx(threading.Thread):
-    def __init__(self, start_time):
+    def __init__(self):
         # local variables
         self.radio_driver = None
-        self.start_time = start_time
+        # self.start_time = start_time
         self.index = 0
         self.end = False
         # self.start_event = start_event
         self.queue_rx = Queue.Queue()
         self.count_frames_rx = 0
         self.frame_number_last = 0
+        self.started_time = time.time()
+        self.chronogram = ['time' for i in range(32)]
 
         # start the threads
         threading.Thread.__init__(self)
@@ -174,25 +180,40 @@ class ExperimentRx(threading.Thread):
         self.queue_rx.put('Print last')
         self.end = True
 
-    def execute_exp(self):
+    def experiment_scheduling(self):
+        s = sched.scheduler(time.time, time.sleep)
+        offset = 2 + SECURITY_TIME
+        for item in settings.radio_trx_mod_order['order']:
+            logging.warning('item: {0}'.format(item))
+            s.enter(offset, 1, self.execute_exp, (item,))
+            self.chronogram[settings.radio_trx_mod_order['order'].index(item)] = offset
+            # offset += settings.time_mod[item] + SECURITY_TIME
+            offset += settings.test_settings[item]['time'] + SECURITY_TIME
+        logging.warning(self.chronogram)
+        s.run()
+
+    def execute_exp(self, item):
         """
         This is the functions that reconfigures the radio at each test. It gets passed to the scheduler function.
         :return: Nothing
         """
         # re-configure the radio
-        self.radio_driver.radio_write_config(settings.radio_configs_rx[self.index])
-        self.radio_driver.radio_set_frequency(settings.radio_frequencies[self.index])
+        # self.radio_driver.radio_write_config(settings.radio_configs_rx[self.index])
+        # self.radio_driver.radio_set_frequency(settings.radio_frequencies[self.index])
+        self.radio_driver.radio_write_config(settings.test_settings[item]['configuration'])
+        self.radio_driver.radio_set_frequency(settings.test_settings[item]['frequency set up'])
 
         # RX counter to zero
         self.count_frames_rx = 0
         self.queue_rx.put('Start')
 
         # show the config
-        self.queue_rx.put(settings.radio_configs_name[self.index])
-        self.index += 3
+        self.queue_rx.put(settings.test_settings[item]['id'])
+        # self.index += 1
         self.radio_driver.radio_trx_enable()
         self.rxAnalitics.set()
         self.radio_driver.radio_rx_now()
+        self.queue_rx.put(time.time() - self.started_time)
 
         # while True:  # main loop
 
@@ -202,13 +223,15 @@ class ExperimentRx(threading.Thread):
         #    print('TIMER 10 Seconds triggers')
 
     def run(self):
+        # time.sleep(self.start_time)
         self.radio_setup()
-        s = sched.scheduler(time.time, time.sleep)
-        s.enter(self.start_time, 1, self.execute_exp, ())
-        s.enter(self.start_time + 107, 1, self.execute_exp, ())
-        s.enter(self.start_time + 56 + 107, 1, self.execute_exp, ())
-        s.enter(self.start_time + 56 + 107+ 120, 1, self.stop_exp, ())
-        s.run()
+        # s = sched.scheduler(time.time, time.sleep)
+        # s.enter(self.start_time, 1, self.execute_exp, ())
+        # s.enter(self.start_time + 107, 1, self.execute_exp, ())
+        # s.enter(self.start_time + 56 + 107, 1, self.execute_exp, ())
+        # s.enter(self.start_time + 56 + 107+ 120, 1, self.stop_exp, ())
+        # s.run()
+        self.experiment_scheduling()
 
         # while True:  # main loop
 
@@ -233,13 +256,15 @@ class ExperimentRx(threading.Thread):
 
 
 # ========================== main ============================================
+def start_experiment(moment):
+    
 
 def main():
-
+    start_experiment(sys.argv[1])
     # logging.basicConfig(filename='range_test_rx.log', level=logging.WARNING)
     logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
-    experimentRx = ExperimentRx(int(sys.argv[1]))
-
+    # experimentRx = ExperimentRx(int(sys.argv[1]))
+    experimentRx = ExperimentRx()
     while experimentRx.end is False:
         input = raw_input('>')
         if input == 's':

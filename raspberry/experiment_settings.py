@@ -75,13 +75,12 @@ radio_trx_mod_order = {u'order': [u'FSK operating mode 1 FEC', u'FSK operating m
                                   u'OFDM Option 3 MCS 6', u'OFDM Option 4 MCS 2', u'OFDM Option 4 MCS 3',
                                   u'OFDM Option 4 MCS 4', u'OFDM Option 4 MCS 5', u'OFDM Option 4 MCS 6',
                                   u'O-QPSK rate mode 0', u'O-QPSK rate mode 1', u'O-QPSK rate mode 2',
-                                  u'O-QPSK rate mode 3'
-                                  ]}
+                                  u'O-QPSK rate mode 3']}
 
 time_mod = {
-    u'FSK operating mode 1 FEC': 106, u'FSK operating mode 2 FEC': 54, u'FSK operating mode 3 FEC': 16,
-    u'FSK operating mode 1 no FEC': 55, u'FSK operating mode 2 no FEC': 29, u'FSK operating mode 3 no FEC': 16,
-    u'OFDM Option 1 MCS 0': 30, u'OFDM Option 1 MCS 1': 17, u'OFDM Option 1 MCS 2': 11, u'OFDM Option 1 MCS 3': 9,
+    u'FSK operating mode 1 FEC': 106, u'FSK operating mode 2 FEC': 54, u'FSK operating mode 3 FEC': 29,
+    u'FSK operating mode 1 no FEC': 55, u'FSK operating mode 2 no FEC': 29, u'FSK operating mode 3 no FEC': 17,
+    u'OFDM Option 1 MCS 0': 30, u'OFDM Option 1 MCS 1': 17, u'OFDM Option 1 MCS 2': 11, u'OFDM Option 1 MCS 3': 8,
     u'OFDM Option 2 MCS 0': 56, u'OFDM Option 2 MCS 1': 30, u'OFDM Option 2 MCS 2': 18, u'OFDM Option 2 MCS 3': 11,
     u'OFDM Option 2 MCS 4': 9, u'OFDM Option 2 MCS 5': 9, u'OFDM Option 3 MCS 1': 56, u'OFDM Option 3 MCS 2': 30,
     u'OFDM Option 3 MCS 3': 18, u'OFDM Option 3 MCS 4': 13, u'OFDM Option 3 MCS 5': 11, u'OFDM Option 3 MCS 6': 9,
@@ -91,37 +90,99 @@ time_mod = {
 }
 
 test_settings = {
-    u'FSK operating mode 1 FEC': (radio_freq_setup[u'fsk operating mode 1'], defs.fsk_option1_FEC),
-    u'FSK operating mode 2 FEC': (radio_freq_setup[u'fsk operating mode 2'], defs.fsk_option2_FEC),
-    u'FSK operating mode 3 FEC': (radio_freq_setup[u'fsk operating mode 3'], defs.fsk_option3_FEC),
-    u'FSK operating mode 1 no FEC': (radio_freq_setup[u'fsk operating mode 1'], defs.fsk_option1),
-    u'FSK operating mode 2 no FEC': (radio_freq_setup[u'fsk operating mode 2'], defs.fsk_option2),
-    u'FSK operating mode 3 no FEC': (radio_freq_setup[u'fsk operating mode 3'], defs.fsk_option3),
-    u'OFDM Option 1 MCS 0': (radio_freq_setup[u'ofdm option 1'], defs.ofdm_1_mcs0),
-    u'OFDM Option 1 MCS 1': (radio_freq_setup[u'ofdm option 1'], defs.ofdm_1_mcs1),
-    u'OFDM Option 1 MCS 2': (radio_freq_setup[u'ofdm option 1'], defs.ofdm_1_mcs2),
-    u'OFDM Option 1 MCS 3': (radio_freq_setup[u'ofdm option 1'], defs.ofdm_1_mcs3),
-    u'OFDM Option 2 MCS 0': (radio_freq_setup[u'ofdm option 2'], defs.ofdm_2_mcs0),
-    u'OFDM Option 2 MCS 1': (radio_freq_setup[u'ofdm option 2'], defs.ofdm_2_mcs1),
-    u'OFDM Option 2 MCS 2': (radio_freq_setup[u'ofdm option 2'], defs.ofdm_2_mcs2),
-    u'OFDM Option 2 MCS 3': (radio_freq_setup[u'ofdm option 2'], defs.ofdm_2_mcs3),
-    u'OFDM Option 2 MCS 4': (radio_freq_setup[u'ofdm option 2'], defs.ofdm_2_mcs4),
-    u'OFDM Option 2 MCS 5': (radio_freq_setup[u'ofdm option 2'], defs.ofdm_2_mcs5),
-    u'OFDM Option 3 MCS 1': (radio_freq_setup[u'ofdm option 3'], defs.ofdm_3_mcs1),
-    u'OFDM Option 3 MCS 2': (radio_freq_setup[u'ofdm option 3'], defs.ofdm_3_mcs2),
-    u'OFDM Option 3 MCS 3': (radio_freq_setup[u'ofdm option 3'], defs.ofdm_3_mcs3),
-    u'OFDM Option 3 MCS 4': (radio_freq_setup[u'ofdm option 3'], defs.ofdm_3_mcs4),
-    u'OFDM Option 3 MCS 5': (radio_freq_setup[u'ofdm option 3'], defs.ofdm_3_mcs5),
-    u'OFDM Option 3 MCS 6': (radio_freq_setup[u'ofdm option 3'], defs.ofdm_3_mcs6),
-    u'OFDM Option 4 MCS 2': (radio_freq_setup[u'ofdm option 4'], defs.ofdm_4_mcs2),
-    u'OFDM Option 4 MCS 3': (radio_freq_setup[u'ofdm option 4'], defs.ofdm_4_mcs3),
-    u'OFDM Option 4 MCS 4': (radio_freq_setup[u'ofdm option 4'], defs.ofdm_4_mcs4),
-    u'OFDM Option 4 MCS 5': (radio_freq_setup[u'ofdm option 4'], defs.ofdm_4_mcs5),
-    u'OFDM Option 4 MCS 6': (radio_freq_setup[u'ofdm option 4'], defs.ofdm_4_mcs6),
-    u'O-QPSK rate mode 0': (radio_freq_setup[u'o-qpsk'], defs.oqpsk_rate0),
-    u'O-QPSK rate mode 1': (radio_freq_setup[u'o-qpsk'], defs.oqpsk_rate1),
-    u'O-QPSK rate mode 2': (radio_freq_setup[u'o-qpsk'], defs.oqpsk_rate2),
-    u'O-QPSK rate mode 3': (radio_freq_setup[u'o-qpsk'], defs.oqpsk_rate3),
+    u'FSK operating mode 1 FEC':
+        {'frequency set up': radio_freq_setup[u'fsk operating mode 1'], 'configuration': defs.fsk_option1_FEC,
+         'time': time_mod[u'FSK operating mode 1 FEC'], 'id': 'FSK operating mode 1 FEC'},
+    u'FSK operating mode 2 FEC':
+        {'frequency set up': radio_freq_setup[u'fsk operating mode 2'], 'configuration': defs.fsk_option2_FEC,
+         'time': time_mod[u'FSK operating mode 2 FEC'], 'id': 'FSK operating mode 2 FEC'},
+    u'FSK operating mode 3 FEC':
+        {'frequency set up': radio_freq_setup[u'fsk operating mode 3'], 'configuration': defs.fsk_option3_FEC,
+         'time': time_mod[u'FSK operating mode 3 FEC'], 'id': 'FSK operating mode 3 FEC'},
+    u'FSK operating mode 1 no FEC':
+        {'frequency set up': radio_freq_setup[u'fsk operating mode 1'], 'configuration': defs.fsk_option1,
+         'time': time_mod[u'FSK operating mode 1 no FEC'], 'id': 'FSK operating mode 1 no FEC'},
+    u'FSK operating mode 2 no FEC':
+        {'frequency set up': radio_freq_setup[u'fsk operating mode 2'], 'configuration': defs.fsk_option2,
+         'time': time_mod[u'FSK operating mode 2 no FEC'], 'id': 'FSK operating mode 2 no FEC'},
+    u'FSK operating mode 3 no FEC':
+        {'frequency set up': radio_freq_setup[u'fsk operating mode 3'], 'configuration': defs.fsk_option3,
+         'time': time_mod[u'FSK operating mode 3 no FEC'], 'id': 'FSK operating mode 3 no FEC'},
+    u'OFDM Option 1 MCS 0':
+        {'frequency set up': radio_freq_setup[u'ofdm option 1'], 'configuration': defs.ofdm_1_mcs0,
+         'time': time_mod[u'OFDM Option 1 MCS 0'], 'id': 'OFDM Option 1 MCS 0'},
+    u'OFDM Option 1 MCS 1':
+        {'frequency set up': radio_freq_setup[u'ofdm option 1'], 'configuration': defs.ofdm_1_mcs1,
+         'time': time_mod[u'OFDM Option 1 MCS 1'], 'id': 'OFDM Option 1 MCS 1'},
+    u'OFDM Option 1 MCS 2':
+        {'frequency set up': radio_freq_setup[u'ofdm option 1'], 'configuration': defs.ofdm_1_mcs2,
+         'time': time_mod[u'OFDM Option 1 MCS 2'], 'id': 'OFDM Option 1 MCS 2'},
+    u'OFDM Option 1 MCS 3':
+        {'frequency set up': radio_freq_setup[u'ofdm option 1'], 'configuration': defs.ofdm_1_mcs3,
+         'time': time_mod[u'OFDM Option 1 MCS 3'], 'id': 'OFDM Option 1 MCS 3'},
+    u'OFDM Option 2 MCS 0':
+        {'frequency set up': radio_freq_setup[u'ofdm option 2'], 'configuration': defs.ofdm_2_mcs0,
+         'time': time_mod[u'OFDM Option 2 MCS 0'], 'id': 'OFDM Option 2 MCS 0'},
+    u'OFDM Option 2 MCS 1':
+        {'frequency set up': radio_freq_setup[u'ofdm option 2'], 'configuration': defs.ofdm_2_mcs1,
+         'time': time_mod[u'OFDM Option 2 MCS 1'], 'id': 'OFDM Option 2 MCS 1'},
+    u'OFDM Option 2 MCS 2':
+        {'frequency set up': radio_freq_setup[u'ofdm option 2'], 'configuration': defs.ofdm_2_mcs2,
+         'time': time_mod[u'OFDM Option 2 MCS 2'], 'id': 'OFDM Option 2 MCS 2'},
+    u'OFDM Option 2 MCS 3':
+        {'frequency set up': radio_freq_setup[u'ofdm option 2'], 'configuration': defs.ofdm_2_mcs3,
+         'time': time_mod[u'OFDM Option 2 MCS 3'], 'id': 'OFDM Option 2 MCS 3'},
+    u'OFDM Option 2 MCS 4':
+        {'frequency set up': radio_freq_setup[u'ofdm option 2'], 'configuration': defs.ofdm_2_mcs4,
+         'time': time_mod[u'OFDM Option 2 MCS 4'], 'id': 'OFDM Option 2 MCS 4'},
+    u'OFDM Option 2 MCS 5':
+        {'frequency set up': radio_freq_setup[u'ofdm option 2'], 'configuration': defs.ofdm_2_mcs5,
+         'time': time_mod[u'OFDM Option 2 MCS 5'], 'id': 'OFDM Option 2 MCS 5'},
+    u'OFDM Option 3 MCS 1':
+        {'frequency set up': radio_freq_setup[u'ofdm option 3'], 'configuration': defs.ofdm_3_mcs1,
+         'time': time_mod[u'OFDM Option 3 MCS 1'], 'id': 'OFDM Option 3 MCS 1'},
+    u'OFDM Option 3 MCS 2':
+        {'frequency set up': radio_freq_setup[u'ofdm option 3'], 'configuration': defs.ofdm_3_mcs2,
+         'time': time_mod[u'OFDM Option 3 MCS 2'], 'id': 'OFDM Option 3 MCS 2'},
+    u'OFDM Option 3 MCS 3':
+        {'frequency set up': radio_freq_setup[u'ofdm option 3'], 'configuration': defs.ofdm_3_mcs3,
+         'time': time_mod[u'OFDM Option 3 MCS 3'], 'id': 'OFDM Option 3 MCS 3'},
+    u'OFDM Option 3 MCS 4':
+        {'frequency set up': radio_freq_setup[u'ofdm option 3'], 'configuration': defs.ofdm_3_mcs4,
+         'time': time_mod[u'OFDM Option 3 MCS 4'], 'id': 'OFDM Option 3 MCS 4'},
+    u'OFDM Option 3 MCS 5':
+        {'frequency set up': radio_freq_setup[u'ofdm option 3'], 'configuration': defs.ofdm_3_mcs5,
+         'time': time_mod[u'OFDM Option 3 MCS 5'], 'id': 'OFDM Option 3 MCS 5'},
+    u'OFDM Option 3 MCS 6':
+        {'frequency set up': radio_freq_setup[u'ofdm option 3'], 'configuration': defs.ofdm_3_mcs6,
+         'time': time_mod[u'OFDM Option 3 MCS 6'], 'id': 'OFDM Option 3 MCS 6'},
+    u'OFDM Option 4 MCS 2':
+        {'frequency set up': radio_freq_setup[u'ofdm option 4'], 'configuration': defs.ofdm_4_mcs2,
+         'time': time_mod[u'OFDM Option 4 MCS 2'], 'id': 'OFDM Option 4 MCS 2'},
+    u'OFDM Option 4 MCS 3':
+        {'frequency set up': radio_freq_setup[u'ofdm option 4'], 'configuration': defs.ofdm_4_mcs3,
+         'time': time_mod[u'OFDM Option 4 MCS 3'], 'id': 'OFDM Option 4 MCS 3'},
+    u'OFDM Option 4 MCS 4':
+        {'frequency set up': radio_freq_setup[u'ofdm option 4'], 'configuration': defs.ofdm_4_mcs4,
+         'time': time_mod[u'OFDM Option 4 MCS 4'], 'id': 'OFDM Option 4 MCS 4'},
+    u'OFDM Option 4 MCS 5':
+        {'frequency set up': radio_freq_setup[u'ofdm option 4'], 'configuration': defs.ofdm_4_mcs5,
+         'time': time_mod[u'OFDM Option 4 MCS 5'], 'id': 'OFDM Option 4 MCS 5'},
+    u'OFDM Option 4 MCS 6':
+        {'frequency set up': radio_freq_setup[u'ofdm option 4'], 'configuration': defs.ofdm_4_mcs6,
+         'time': time_mod[u'OFDM Option 4 MCS 6'], 'id': 'OFDM Option 4 MCS 6'},
+    u'O-QPSK rate mode 0':
+        {'frequency set up': radio_freq_setup[u'o-qpsk'], 'configuration': defs.oqpsk_rate0,
+         'time': time_mod[u'O-QPSK rate mode 0'], 'id': 'O-QPSK rate mode 0'},
+    u'O-QPSK rate mode 1':
+        {'frequency set up': radio_freq_setup[u'o-qpsk'], 'configuration': defs.oqpsk_rate1,
+         'time': time_mod[u'O-QPSK rate mode 1'], 'id': 'O-QPSK rate mode 1'},
+    u'O-QPSK rate mode 2':
+        {'frequency set up': radio_freq_setup[u'o-qpsk'], 'configuration': defs.oqpsk_rate2,
+         'time': time_mod[u'O-QPSK rate mode 2'], 'id': 'O-QPSK rate mode 2'},
+    u'O-QPSK rate mode 3':
+        {'frequency set up': radio_freq_setup[u'o-qpsk'], 'configuration': defs.oqpsk_rate3,
+         'time': time_mod[u'O-QPSK rate mode 3'], 'id': 'O-QPSK rate mode 3'},
 }
 # range_experiment_setup =
 
