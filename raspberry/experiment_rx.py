@@ -15,8 +15,9 @@ import json
 from datetime import datetime as dt
 import datetime
 
+import at86rf215_defs as defs
 import at86rf215_driver as radio
-import experiment_settings as settings
+# import experiment_settings as settings
 
 PACKET_LENGTH = 2047
 CRC_SIZE = 4
@@ -146,6 +147,7 @@ class ExperimentRx(threading.Thread):
     def __init__(self, hours, minutes):
         # local variables
         self.radio_driver = None
+        self.settings = None
         self.hours = hours
         self.minutes = minutes
         # self.index = 0
@@ -155,7 +157,7 @@ class ExperimentRx(threading.Thread):
         self.count_frames_rx = 0
         self.frame_number_last = 0
         self.started_time = time.time()
-        self.chronogram = ['time' for i in range(32)]
+        self.chronogram = ['time' for i in range(31)]
 
         # start the threads
         threading.Thread.__init__(self)
@@ -168,6 +170,12 @@ class ExperimentRx(threading.Thread):
 
         # initializes the InformativeRx class, in charge of the logging part
         self.informativeRx = InformativeRx(self.queue_rx, self.rxAnalitics)
+
+    def load_json_files(self):
+        with open('/home/pi/range_test/raspberry/experiment_settings.json', 'r') as f:
+            settings = f.read().replace('\n', ' ').replace('\r', '')
+            settings = json.loads(settings)
+            return settings
 
     def radio_setup(self):
         # initialize the radio driver
@@ -187,11 +195,11 @@ class ExperimentRx(threading.Thread):
         s = sched.scheduler(time.time, time.sleep)
         time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
         logging.warning('TIME: {0}'.format(time_to_start))
-        offset = 2 + SECURITY_TIME
-        for item in settings.test_settings:
+        offset = 1.5
+        for item in self.settings['test_settings']:
             s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
             # s.enter(offset, 1, self.execute_exp, (item,))
-            self.chronogram[settings.test_settings.index(item)] = offset
+            self.chronogram[self.settings['test_settings'].index(item)] = offset
             # offset += settings.time_mod[item] + SECURITY_TIME
             offset += item['durationtx_s'] + SECURITY_TIME
         logging.warning(self.chronogram)
@@ -205,7 +213,7 @@ class ExperimentRx(threading.Thread):
         # re-configure the radio
         # self.radio_driver.radio_write_config(settings.radio_configs_rx[self.index])
         # self.radio_driver.radio_set_frequency(settings.radio_frequencies[self.index])
-        self.radio_driver.radio_write_config(item['modulation'])
+        self.radio_driver.radio_write_config(defs.modulations_settings[item['modulation']])
         self.radio_driver.radio_set_frequency((item['channel_spacing_kHz'],
                                                item['frequency_0_kHz'],
                                                item['channel']))
@@ -230,17 +238,9 @@ class ExperimentRx(threading.Thread):
         #    print('TIMER 10 Seconds triggers')
 
     def run(self):
-        # time.sleep(self.start_time)
         self.radio_setup()
-        # s = sched.scheduler(time.time, time.sleep)
-        # s.enter(self.start_time, 1, self.execute_exp, ())
-        # s.enter(self.start_time + 107, 1, self.execute_exp, ())
-        # s.enter(self.start_time + 56 + 107, 1, self.execute_exp, ())
-        # s.enter(self.start_time + 56 + 107+ 120, 1, self.stop_exp, ())
-        # s.run()
+        self.settings = self.load_json_files()
         self.experiment_scheduling()
-
-        # while True:  # main loop
 
         # wait for the GPS thread to indicate it's time to move to the next configuration
         #    time.sleep(10)
@@ -269,7 +269,7 @@ def main():
     # logging.basicConfig(filename='range_test_rx.log', level=logging.WARNING)
     logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
     experimentRx = ExperimentRx(hours, minutes)
-    #experimentRx = ExperimentRx()
+
     while experimentRx.end is False:
         input = raw_input('>')
         if input == 's':

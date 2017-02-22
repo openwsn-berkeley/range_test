@@ -118,7 +118,7 @@ class ExperimentTx(threading.Thread):
     def experiment_scheduling(self):
         s = sched.scheduler(time.time, time.sleep)
         time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
-        offset = 3 + SECURITY_TIME
+        offset = 3
         for item in settings.test_settings:
             # s.enter(offset, 1, self.execute_exp, (item,))
             s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
