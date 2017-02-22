@@ -12,6 +12,8 @@ import sched
 import Queue
 import numpy as np
 import json
+from datetime import datetime as dt
+import datetime
 
 import at86rf215_driver as radio
 import experiment_settings as settings
@@ -141,10 +143,10 @@ class InformativeRx(threading.Thread):
 
 
 class ExperimentRx(threading.Thread):
-    def __init__(self):
+    def __init__(self, start_time):
         # local variables
         self.radio_driver = None
-        # self.start_time = start_time
+        self.start_time = start_time
         self.index = 0
         self.end = False
         # self.start_event = start_event
@@ -182,10 +184,12 @@ class ExperimentRx(threading.Thread):
 
     def experiment_scheduling(self):
         s = sched.scheduler(time.time, time.sleep)
+        time_to_start = dt.combine(dt.now(), datetime.time(self.start_time))
+        logging.warning('TIME: {0}'.format(time_to_start))
         offset = 2 + SECURITY_TIME
         for item in settings.radio_trx_mod_order['order']:
-            logging.warning('item: {0}'.format(item))
-            s.enter(offset, 1, self.execute_exp, (item,))
+            s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
+            # s.enter(offset, 1, self.execute_exp, (item,))
             self.chronogram[settings.radio_trx_mod_order['order'].index(item)] = offset
             # offset += settings.time_mod[item] + SECURITY_TIME
             offset += settings.test_settings[item]['time'] + SECURITY_TIME
@@ -256,15 +260,13 @@ class ExperimentRx(threading.Thread):
 
 
 # ========================== main ============================================
-def start_experiment(moment):
-    
-
 def main():
-    start_experiment(sys.argv[1])
+    time_to_start = int(sys.argv[1])
+    print time_to_start
     # logging.basicConfig(filename='range_test_rx.log', level=logging.WARNING)
     logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
-    # experimentRx = ExperimentRx(int(sys.argv[1]))
-    experimentRx = ExperimentRx()
+    experimentRx = ExperimentRx(time_to_start)
+    #experimentRx = ExperimentRx()
     while experimentRx.end is False:
         input = raw_input('>')
         if input == 's':
