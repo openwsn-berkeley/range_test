@@ -215,7 +215,7 @@ class ExperimentRx(threading.Thread):
         self.queue_rx.put('Start')
 
         # show the config
-        self.queue_rx.put(item.keys())
+        self.queue_rx.put(item)
         # self.index += 1
         self.radio_driver.radio_trx_enable()
         self.rxAnalitics.set()

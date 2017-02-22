@@ -11,6 +11,8 @@ import sys
 import sched
 import Queue
 import json
+from datetime import datetime as dt
+import datetime
 
 import at86rf215_driver as radio
 import experiment_settings as settings
@@ -77,15 +79,17 @@ class TxTimer(threading.Thread):
 
 class ExperimentTx(threading.Thread):
     
-    def __init__(self):
+    def __init__(self, hours, minutes):
         
         # local variables
         self.radio_driver = None
+        self.hours = hours
+        self.minutes = minutes
         # self.start_time = start_time
         self.index = 0
         self.queue_tx = Queue.Queue()
         self.started_time = time.time()
-        self.chronogram = ['time' for i in range(32)]
+        self.chronogram = ['time' for i in range(31)]
         
         # start the thread
         threading.Thread.__init__(self)
@@ -113,11 +117,13 @@ class ExperimentTx(threading.Thread):
 
     def experiment_scheduling(self):
         s = sched.scheduler(time.time, time.sleep)
+        time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
         offset = 3 + SECURITY_TIME
         for item in settings.test_settings:
-            s.enter(offset, 1, self.execute_exp, (item,))
-            self.chronogram[settings.radio_trx_mod_order['order'].index(item)] = offset
-            offset += settings.test_settings[item]['time'] + SECURITY_TIME
+            # s.enter(offset, 1, self.execute_exp, (item,))
+            s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
+            self.chronogram[settings.test_settings.index(item)] = offset
+            offset += item['durationtx_s'] + SECURITY_TIME
         logging.warning(self.chronogram)
         s.run()
 
@@ -128,21 +134,24 @@ class ExperimentTx(threading.Thread):
 
         # re-configure the radio
         # self.radio_driver.radio_write_config(settings.radio_configs_tx[self.index])
-        self.radio_driver.radio_write_config(settings.test_settings[item]['configuration'])
+        self.radio_driver.radio_write_config(item['modulation'])
 
         # select the frequency
         self.radio_driver.radio_off()
         # self.radio_driver.radio_set_frequency(settings.radio_frequencies[self.index])
-        self.radio_driver.radio_set_frequency(settings.test_settings[item]['frequency set up'])
+        self.radio_driver.radio_set_frequency((item['channel_spacing_kHz'],
+                                               item['frequency_0_kHz'],
+                                               item['channel']))
 
         # log the config name
         # self.queue_tx.put(settings.radio_configs_name[self.index])
-        self.queue_tx.put(settings.test_settings[item]['id'])
+        # self.queue_tx.put(settings.test_settings[item]['id'])
+        self.queue_tx.put(item)
 
         noww = time.time()
         # loop through packet lengths
         # for frame_length in settings.frame_lengths:
-        for trx_settings in settings.radio_TRX_order['order']:
+        for frame_length in settings.frame_lengths:
             # logging.debug('frame length {0}, thread name: {1}'.format(frame_length, self.name))
             now = time.time()
             self.radio_driver.radio_trx_enable()
@@ -162,13 +171,13 @@ class ExperimentTx(threading.Thread):
 
                 # send frame
                 # self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE])
-                self.radio_driver.radio_load_packet(frameToSend[:trx_settings[0] - CRC_SIZE])
+                self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE])
                 self.radio_driver.radio_tx_now()
 
                 # wait for a timeout (to allow the receiver to handle the RX'ed frame)
                 # self.txEvent.wait()
                 # self.txEvent.clear()
-                time.sleep(trx_settings[1])
+                time.sleep(int(settings.IFS[frame_length]))
 
             self.queue_tx.put((frame_counter, time.time() - now))
         # logging.debug('FINAL')
@@ -193,9 +202,11 @@ class ExperimentTx(threading.Thread):
 
 
 def main():
+    hours = int(sys.argv[1])
+    minutes = int(sys.argv[2])
     # logging.basicConfig(filename='range_test_tx.log', level=logging.WARNING)
     # experimentTx = ExperimentTx(int(sys.argv[1]))
-    experimentTx = ExperimentTx()
+    experimentTx = ExperimentTx(hours, minutes)
     while True:
         input = raw_input('>')
         if input == 's':
