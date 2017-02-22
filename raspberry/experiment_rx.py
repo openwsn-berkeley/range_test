@@ -123,6 +123,7 @@ class InformativeRx(threading.Thread):
                 elif type(item) == float:
                     logging.warning('Modulation used is: {0}'.format(item))
                 else:
+                    logging.warning('Modulation used is: {0}'.format(item))
                     self.current_modulation = item
 
 
@@ -133,12 +134,9 @@ class ExperimentRx(threading.Thread):
         self.settings = settings
         self.hours = hours
         self.minutes = minutes
-        # self.index = 0
         self.end = False
-        # self.start_event = start_event
         self.queue_rx = Queue.Queue()
         self.count_frames_rx = 0
-        self.frame_number_last = 0
         self.started_time = time.time()
         self.chronogramme = ['time' for i in range(31)]
 
@@ -203,15 +201,15 @@ class ExperimentRx(threading.Thread):
         self.queue_rx.put('Start')
 
         # show the config
-        self.queue_rx.put(item)
-        # self.index += 1
+        self.queue_rx.put(item['modulation'])
+
+        # put the radio into RX mode
         self.radio_driver.radio_trx_enable()
         self.rxAnalytics.set()
         self.radio_driver.radio_rx_now()
         self.queue_rx.put(time.time() - self.started_time)
 
         # while True:  # main loop
-
         # wait for the GPS thread to indicate it's time to move to the next configuration
         #    time.sleep(10)
         # FIXME: replace by an event from the GPS thread

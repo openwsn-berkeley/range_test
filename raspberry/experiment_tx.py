@@ -54,31 +54,6 @@ class InformativeTx(threading.Thread):
             else:
                 logging.warning('Modulation used is: {0}\n'.format(item))
 
-"""
-class TxTimer(threading.Thread):
-
-    TIMER_PERIOD = 0.0200
-
-    def __init__(self, event):
-
-        # store parameters
-        self.event = event
-        # self.timer_period
-        # local variables
-
-        # start the thread
-        threading.Thread.__init__(self)
-        self.name = 'TxTimer'
-        self.daemon = True
-        self.start()
-
-    def run(self):
-        while True:
-            time.sleep(self.TIMER_PERIOD)
-            self.event.set()
-
-"""
-
 
 class ExperimentTx(threading.Thread):
     
@@ -89,8 +64,6 @@ class ExperimentTx(threading.Thread):
         self.settings = settings
         self.hours = hours
         self.minutes = minutes
-        # self.start_time = start_time
-        self.index = 0
         self.queue_tx = Queue.Queue()
         self.started_time = time.time()
         self.chronogramme = ['time' for i in range(31)]
@@ -124,7 +97,6 @@ class ExperimentTx(threading.Thread):
         time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
         offset = 3
         for item in self.settings['test_settings']:
-            # s.enter(offset, 1, self.execute_exp, (item,))
             s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
             self.chronogramme[self.settings['test_settings'].index(item)] = offset
             offset += item['durationtx_s'] + SECURITY_TIME
@@ -137,27 +109,22 @@ class ExperimentTx(threading.Thread):
         frame_counter = 0
 
         # re-configure the radio
-        # self.radio_driver.radio_write_config(settings.radio_configs_tx[self.index])
         self.radio_driver.radio_write_config(defs.modulations_settings[item['modulation']])
 
         # select the frequency
         self.radio_driver.radio_off()
-        # self.radio_driver.radio_set_frequency(settings.radio_frequencies[self.index])
         self.radio_driver.radio_set_frequency((item['channel_spacing_kHz'],
                                                item['frequency_0_kHz'],
                                                item['channel']))
 
         # log the config name
-        # self.queue_tx.put(settings.radio_configs_name[self.index])
-        # self.queue_tx.put(settings.test_settings[item]['id'])
-        self.queue_tx.put(item)
+        self.queue_tx.put(item['modulation'])
 
-        noww = time.time()
+        # noww = time.time()
         # loop through packet lengths
-        # for frame_length in settings.frame_lengths:
         for frame_length, ifs in zip(self.settings["frame_lengths"], self.settings["IFS"]):
-            # logging.debug('frame length {0}, thread name: {1}'.format(frame_length, self.name))
-            now = time.time()
+
+            # now = time.time()
             self.radio_driver.radio_trx_enable()
 
             # send burst of frames
@@ -168,8 +135,6 @@ class ExperimentTx(threading.Thread):
                 # create frame
                 frameToSend = [frame_counter >> 8, frame_counter & 0xFF] + [i & 0xFF for i in range(FRAME_LENGTH - 2)]
 
-                # logging.debug('three first bytes, frame counter: {0}.\n'.format(frameToSend[0:3]))
-
                 # increment the frame counter
                 frame_counter += 1
 
@@ -178,15 +143,8 @@ class ExperimentTx(threading.Thread):
                 self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE])
                 self.radio_driver.radio_tx_now()
 
-                # wait for a timeout (to allow the receiver to handle the RX'ed frame)
-                # self.txEvent.wait()
-                # self.txEvent.clear()
+                # IFS
                 time.sleep(ifs)
-
-            self.queue_tx.put((frame_counter, time.time() - now))
-        # logging.debug('FINAL')
-        self.queue_tx.put(time.time() - noww)
-        self.index += 1
     
     def run(self):
         # time.sleep(self.start_time)
