@@ -50,7 +50,8 @@ class InformativeTx(threading.Thread):
             if type(item) is tuple:
                 logging.warning('Time to send the frames {0} - {1} was {2} seconds\n'.format(item[0] - 100, item[0],
                                                                                              item[1]))
-
+            elif type(item) is float:
+                logging.warning()
             else:
                 logging.warning('Modulation used is: {0}\n'.format(item))
 
@@ -147,13 +148,8 @@ class ExperimentTx(threading.Thread):
                 time.sleep(ifs)
     
     def run(self):
-        # time.sleep(self.start_time)
         self.radio_setup()
-        # s = sched.scheduler(time.time, time.sleep)
-        # s.enter(self.start_time, 1, self.execute_exp, ())
-        # s.run()
         self.experiment_scheduling()
-
 
     #  ======================== private =======================================
     
@@ -161,6 +157,7 @@ class ExperimentTx(threading.Thread):
         raise SystemError("frame received on transmitting mote")
 
 #  ============================ main ==========================================
+
 
 def load_json_files():
     with open('/home/pi/range_test/raspberry/experiment_settings.json', 'r') as f:

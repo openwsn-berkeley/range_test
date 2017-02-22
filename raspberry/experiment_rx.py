@@ -217,13 +217,9 @@ class ExperimentRx(threading.Thread):
 
     def run(self):
         self.radio_setup()
-        # self.settings = self.load_json_files()
         self.experiment_scheduling()
 
-        # wait for the GPS thread to indicate it's time to move to the next configuration
-        #    time.sleep(10)
         # FIXME: replace by an event from the GPS thread
-        #    print('TIMER 10 Seconds triggers')
 
     #  ======================== public ========================================
 
@@ -239,8 +235,8 @@ class ExperimentRx(threading.Thread):
         # re-arm the radio in RX mode
         self.radio_driver.radio_rx_now()
 
-
 # ========================== main ============================================
+
 
 def load_json_files():
     with open('/home/pi/range_test/raspberry/experiment_settings.json', 'r') as f:
