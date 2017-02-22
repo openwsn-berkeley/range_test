@@ -144,10 +144,10 @@ class InformativeRx(threading.Thread):
 
 
 class ExperimentRx(threading.Thread):
-    def __init__(self, hours, minutes):
+    def __init__(self, hours, minutes, settings):
         # local variables
         self.radio_driver = None
-        self.settings = None
+        self.settings = settings
         self.hours = hours
         self.minutes = minutes
         # self.index = 0
@@ -170,12 +170,6 @@ class ExperimentRx(threading.Thread):
 
         # initializes the InformativeRx class, in charge of the logging part
         self.informativeRx = InformativeRx(self.queue_rx, self.rxAnalitics)
-
-    def load_json_files(self):
-        with open('/home/pi/range_test/raspberry/experiment_settings.json', 'r') as f:
-            settings = f.read().replace('\n', ' ').replace('\r', '')
-            settings = json.loads(settings)
-            return settings
 
     def radio_setup(self):
         # initialize the radio driver
@@ -239,7 +233,7 @@ class ExperimentRx(threading.Thread):
 
     def run(self):
         self.radio_setup()
-        self.settings = self.load_json_files()
+        # self.settings = self.load_json_files()
         self.experiment_scheduling()
 
         # wait for the GPS thread to indicate it's time to move to the next configuration
@@ -263,12 +257,20 @@ class ExperimentRx(threading.Thread):
 
 
 # ========================== main ============================================
+
+def load_json_files():
+    with open('/home/pi/range_test/raspberry/experiment_settings.json', 'r') as f:
+        settings = f.read().replace('\n', ' ').replace('\r', '')
+        settings = json.loads(settings)
+        return settings
+
+
 def main():
     hours = int(sys.argv[1])
     minutes = int(sys.argv[2])
     # logging.basicConfig(filename='range_test_rx.log', level=logging.WARNING)
     logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
-    experimentRx = ExperimentRx(hours, minutes)
+    experimentRx = ExperimentRx(hours, minutes, load_json_files())
 
     while experimentRx.end is False:
         input = raw_input('>')

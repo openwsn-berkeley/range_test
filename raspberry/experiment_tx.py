@@ -14,8 +14,9 @@ import json
 from datetime import datetime as dt
 import datetime
 
+import at86rf215_defs as defs
 import at86rf215_driver as radio
-import experiment_settings as settings
+# import experiment_settings as settings
 
 FRAME_LENGTH  = 2047
 CRC_SIZE      = 4
@@ -79,10 +80,11 @@ class TxTimer(threading.Thread):
 
 class ExperimentTx(threading.Thread):
     
-    def __init__(self, hours, minutes):
+    def __init__(self, hours, minutes, settings):
         
         # local variables
         self.radio_driver = None
+        self.settings = settings
         self.hours = hours
         self.minutes = minutes
         # self.start_time = start_time
@@ -119,10 +121,10 @@ class ExperimentTx(threading.Thread):
         s = sched.scheduler(time.time, time.sleep)
         time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
         offset = 3
-        for item in settings.test_settings:
+        for item in self.settings['test_settings']:
             # s.enter(offset, 1, self.execute_exp, (item,))
             s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
-            self.chronogram[settings.test_settings.index(item)] = offset
+            self.chronogram[self.settings['test_settings'].index(item)] = offset
             offset += item['durationtx_s'] + SECURITY_TIME
         logging.warning(self.chronogram)
         s.run()
@@ -134,7 +136,7 @@ class ExperimentTx(threading.Thread):
 
         # re-configure the radio
         # self.radio_driver.radio_write_config(settings.radio_configs_tx[self.index])
-        self.radio_driver.radio_write_config(item['modulation'])
+        self.radio_driver.radio_write_config(defs.modulations_settings[item['modulation']])
 
         # select the frequency
         self.radio_driver.radio_off()
@@ -151,14 +153,14 @@ class ExperimentTx(threading.Thread):
         noww = time.time()
         # loop through packet lengths
         # for frame_length in settings.frame_lengths:
-        for frame_length in settings.frame_lengths:
+        for frame_length, ifs in zip(self.settings["frame_lengths"], self.settings["IFS"]):
             # logging.debug('frame length {0}, thread name: {1}'.format(frame_length, self.name))
             now = time.time()
             self.radio_driver.radio_trx_enable()
 
             # send burst of frames
 
-            for i in range(settings.BURST_SIZE):
+            for i in range(item["numframes"]):
                 # logging.debug('frame burst {0}'.format(i))
 
                 # create frame
@@ -177,7 +179,7 @@ class ExperimentTx(threading.Thread):
                 # wait for a timeout (to allow the receiver to handle the RX'ed frame)
                 # self.txEvent.wait()
                 # self.txEvent.clear()
-                time.sleep(int(settings.IFS[frame_length]))
+                time.sleep(ifs)
 
             self.queue_tx.put((frame_counter, time.time() - now))
         # logging.debug('FINAL')
@@ -200,13 +202,19 @@ class ExperimentTx(threading.Thread):
 
 #  ============================ main ==========================================
 
+def load_json_files():
+    with open('/home/pi/range_test/raspberry/experiment_settings.json', 'r') as f:
+        settings = f.read().replace('\n', ' ').replace('\r', '')
+        settings = json.loads(settings)
+        return settings
+
 
 def main():
     hours = int(sys.argv[1])
     minutes = int(sys.argv[2])
     # logging.basicConfig(filename='range_test_tx.log', level=logging.WARNING)
     # experimentTx = ExperimentTx(int(sys.argv[1]))
-    experimentTx = ExperimentTx(hours, minutes)
+    experimentTx = ExperimentTx(hours, minutes, load_json_files())
     while True:
         input = raw_input('>')
         if input == 's':
