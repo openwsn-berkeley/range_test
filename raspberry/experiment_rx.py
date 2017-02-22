@@ -169,6 +169,7 @@ class ExperimentRx(threading.Thread):
         """
         self.queue_rx.put('Print last')
         self.end = True
+        self.rxAnalytics.set()
 
     def experiment_scheduling(self):
         """
@@ -184,6 +185,7 @@ class ExperimentRx(threading.Thread):
             self.chronogramme[self.settings['test_settings'].index(item)] = offset
             offset += item['durationtx_s'] + SECURITY_TIME
         logging.warning(self.chronogramme)
+        s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
         s.run()
 
     def execute_exp(self, item):

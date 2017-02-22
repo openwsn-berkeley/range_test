@@ -31,7 +31,6 @@ class InformativeTx(threading.Thread):
         self.queue = queue
         self.results = {'Time Experiment:': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
                         'Time for this set of settings:': None}
-
         # local variables
 
         # start the thread
@@ -41,7 +40,6 @@ class InformativeTx(threading.Thread):
         self.start()
 
         logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
-        # logging.basicConfig(filename='range_test_tx.log', level=logging.WARNING)
 
     def run(self):
 
@@ -51,7 +49,7 @@ class InformativeTx(threading.Thread):
                 logging.warning('Time to send the frames {0} - {1} was {2} seconds\n'.format(item[0] - 100, item[0],
                                                                                              item[1]))
             elif type(item) is float:
-                logging.warning()
+                logging.warning('Time {0}'.format(item))
             else:
                 logging.warning('Modulation used is: {0}\n'.format(item))
 
@@ -75,15 +73,10 @@ class ExperimentTx(threading.Thread):
         self.daemon = True
         self.start()
 
-        self.txEvent = threading.Event()
-        self.txEvent.clear()
-
         self.informativeTx = InformativeTx(self.queue_tx)
-        # self.txTimer = TxTimer(self.txEvent)
 
         # configure the logging module
         logging.basicConfig(stream= sys.__stdout__, level=logging.WARNING)
-        # logging.basicConfig(filename='range_test_tx.log', level=logging.WARNING)
 
     def radio_setup(self):
 
@@ -129,9 +122,7 @@ class ExperimentTx(threading.Thread):
             self.radio_driver.radio_trx_enable()
 
             # send burst of frames
-
             for i in range(item["numframes"]):
-                # logging.debug('frame burst {0}'.format(i))
 
                 # create frame
                 frameToSend = [frame_counter >> 8, frame_counter & 0xFF] + [i & 0xFF for i in range(FRAME_LENGTH - 2)]
@@ -140,7 +131,6 @@ class ExperimentTx(threading.Thread):
                 frame_counter += 1
 
                 # send frame
-                # self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE])
                 self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE])
                 self.radio_driver.radio_tx_now()
 
@@ -170,7 +160,6 @@ def main():
     hours = int(sys.argv[1])
     minutes = int(sys.argv[2])
     # logging.basicConfig(filename='range_test_tx.log', level=logging.WARNING)
-    # experimentTx = ExperimentTx(int(sys.argv[1]))
     experimentTx = ExperimentTx(hours, minutes, load_json_files())
     while True:
         input = raw_input('>')
