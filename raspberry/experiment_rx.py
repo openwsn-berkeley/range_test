@@ -143,11 +143,12 @@ class InformativeRx(threading.Thread):
 
 
 class ExperimentRx(threading.Thread):
-    def __init__(self, start_time):
+    def __init__(self, hours, minutes):
         # local variables
         self.radio_driver = None
-        self.start_time = start_time
-        self.index = 0
+        self.hours = hours
+        self.minutes = minutes
+        # self.index = 0
         self.end = False
         # self.start_event = start_event
         self.queue_rx = Queue.Queue()
@@ -184,15 +185,15 @@ class ExperimentRx(threading.Thread):
 
     def experiment_scheduling(self):
         s = sched.scheduler(time.time, time.sleep)
-        time_to_start = dt.combine(dt.now(), datetime.time(self.start_time))
+        time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
         logging.warning('TIME: {0}'.format(time_to_start))
         offset = 2 + SECURITY_TIME
-        for item in settings.radio_trx_mod_order['order']:
+        for item in settings.test_settings:
             s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
             # s.enter(offset, 1, self.execute_exp, (item,))
-            self.chronogram[settings.radio_trx_mod_order['order'].index(item)] = offset
+            self.chronogram[settings.test_settings.index(item)] = offset
             # offset += settings.time_mod[item] + SECURITY_TIME
-            offset += settings.test_settings[item]['time'] + SECURITY_TIME
+            offset += item['durationtx_s'] + SECURITY_TIME
         logging.warning(self.chronogram)
         s.run()
 
@@ -204,15 +205,17 @@ class ExperimentRx(threading.Thread):
         # re-configure the radio
         # self.radio_driver.radio_write_config(settings.radio_configs_rx[self.index])
         # self.radio_driver.radio_set_frequency(settings.radio_frequencies[self.index])
-        self.radio_driver.radio_write_config(settings.test_settings[item]['configuration'])
-        self.radio_driver.radio_set_frequency(settings.test_settings[item]['frequency set up'])
+        self.radio_driver.radio_write_config(item['modulation'])
+        self.radio_driver.radio_set_frequency((item['channel_spacing_kHz'],
+                                               item['frequency_0_kHz'],
+                                               item['channel']))
 
         # RX counter to zero
         self.count_frames_rx = 0
         self.queue_rx.put('Start')
 
         # show the config
-        self.queue_rx.put(settings.test_settings[item]['id'])
+        self.queue_rx.put(item.keys())
         # self.index += 1
         self.radio_driver.radio_trx_enable()
         self.rxAnalitics.set()
@@ -261,11 +264,11 @@ class ExperimentRx(threading.Thread):
 
 # ========================== main ============================================
 def main():
-    time_to_start = int(sys.argv[1])
-    print time_to_start
+    hours = int(sys.argv[1])
+    minutes = int(sys.argv[2])
     # logging.basicConfig(filename='range_test_rx.log', level=logging.WARNING)
     logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
-    experimentRx = ExperimentRx(time_to_start)
+    experimentRx = ExperimentRx(hours, minutes)
     #experimentRx = ExperimentRx()
     while experimentRx.end is False:
         input = raw_input('>')

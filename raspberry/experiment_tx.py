@@ -114,7 +114,7 @@ class ExperimentTx(threading.Thread):
     def experiment_scheduling(self):
         s = sched.scheduler(time.time, time.sleep)
         offset = 3 + SECURITY_TIME
-        for item in settings.radio_trx_mod_order['order']:
+        for item in settings.test_settings:
             s.enter(offset, 1, self.execute_exp, (item,))
             self.chronogram[settings.radio_trx_mod_order['order'].index(item)] = offset
             offset += settings.test_settings[item]['time'] + SECURITY_TIME
