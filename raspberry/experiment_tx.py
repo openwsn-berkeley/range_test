@@ -54,7 +54,7 @@ class InformativeTx(threading.Thread):
             else:
                 logging.warning('Modulation used is: {0}\n'.format(item))
 
-
+"""
 class TxTimer(threading.Thread):
 
     TIMER_PERIOD = 0.0200
@@ -77,6 +77,8 @@ class TxTimer(threading.Thread):
             time.sleep(self.TIMER_PERIOD)
             self.event.set()
 
+"""
+
 
 class ExperimentTx(threading.Thread):
     
@@ -91,7 +93,7 @@ class ExperimentTx(threading.Thread):
         self.index = 0
         self.queue_tx = Queue.Queue()
         self.started_time = time.time()
-        self.chronogram = ['time' for i in range(31)]
+        self.chronogramme = ['time' for i in range(31)]
         
         # start the thread
         threading.Thread.__init__(self)
@@ -103,7 +105,7 @@ class ExperimentTx(threading.Thread):
         self.txEvent.clear()
 
         self.informativeTx = InformativeTx(self.queue_tx)
-        self.txTimer = TxTimer(self.txEvent)
+        # self.txTimer = TxTimer(self.txEvent)
 
         # configure the logging module
         logging.basicConfig(stream= sys.__stdout__, level=logging.WARNING)
@@ -124,9 +126,9 @@ class ExperimentTx(threading.Thread):
         for item in self.settings['test_settings']:
             # s.enter(offset, 1, self.execute_exp, (item,))
             s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
-            self.chronogram[self.settings['test_settings'].index(item)] = offset
+            self.chronogramme[self.settings['test_settings'].index(item)] = offset
             offset += item['durationtx_s'] + SECURITY_TIME
-        logging.warning(self.chronogram)
+        logging.warning(self.chronogramme)
         s.run()
 
     def execute_exp(self, item):
@@ -197,7 +199,7 @@ class ExperimentTx(threading.Thread):
 
     #  ======================== private =======================================
     
-    def _cb_rx_frame(self, pkt_rcv, rssi, crc, mcs):
+    def _cb_rx_frame(self, frame_rcv, rssi, crc, mcs):
         raise SystemError("frame received on transmitting mote")
 
 #  ============================ main ==========================================

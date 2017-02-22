@@ -122,11 +122,8 @@ class At86rf215(object):
             self.at86_state = RADIOSTATE_TXRX_DONE
             (pkt_rcv, rssi, crc, mcs) = self.radio_get_received_frame()
             self.cb(pkt_rcv, rssi, crc, mcs)
-            # self.queue.put((pkt_rcv, rssi, crc, mcs))
+            # self.queue.put((frame_rcv, rssi, crc, mcs))
             self.queue.put((self.count, time.time() - now))
-
-        # self.queue.put((self.count, time.time() - now))
-        # logging.debug('ISR values: {0}'.format(isr[:]))
 
     def cb_gpio(self, channel = 3):
         self.read_isr_source()
@@ -142,7 +139,7 @@ class At86rf215(object):
         # spi speed TEST
         self.spi.max_speed_hz = 7800000
 
-        GPIO.cleanup()
+        # GPIO.cleanup()
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(channel, GPIO.IN)
         GPIO.add_event_detect(channel, GPIO.RISING, self.cb_gpio)
@@ -188,9 +185,9 @@ class At86rf215(object):
         fifo_tx_len[0] |= 0x80
         self.radio_write_spi(fifo_tx_len)
         # send the packet to the modem tx fifo
-        pkt = defs.RG_BBC0_FBTXS[:] + packet
-        pkt[0] |= 0x80
-        self.radio_write_spi(pkt)
+        frame = defs.RG_BBC0_FBTXS[:] + packet
+        frame[0] |= 0x80
+        self.radio_write_spi(frame)
 
     def radio_trx_enable(self):
         """
@@ -198,8 +195,6 @@ class At86rf215(object):
         :return: Nothing
         """
         self.radio_write_spi(defs.RG_RF09_CMD, defs.CMD_RF_TXPREP)
-        #while self.at86_state != RADIOSTATE_TRX_ENABLED:
-            #pass
         self.state['state_TRXprep'].wait()
         self.state['state_TRXprep'].clear()
 
@@ -209,9 +204,7 @@ class At86rf215(object):
         :return: Nothing
         """
         self.radio_write_spi(defs.RG_RF09_CMD, defs.CMD_RF_TX)
-        # while self.at86_state != RADIOSTATE_TXRX_DONE:
-        #    pass
-            # TODO: foreseen the case when there is a failure in the tx -TXRERR.
+        # TODO: foreseen the case when there is a failure in the tx -TXRERR.
         self.state['state_TXnow'].wait()
         self.state['state_TXnow'].clear()
 
@@ -222,24 +215,21 @@ class At86rf215(object):
         :return:
         """
         self.radio_write_spi(defs.RG_RF09_CMD, defs.CMD_RF_RX)
-        #while self.check_radio_state_rf09() is not defs.RF_STATE_RX:
-        #    self.radio_write_spi(defs.RG_RF09_CMD, defs.CMD_RF_RX)
 
     def radio_get_received_frame(self):
         """
         Demands to the radio the received packet
         :return: a tuple with 1) packet received, 2) rssi, 3) crc(boolean) 4) mcs (valid for OFDM).
         """
-        # now = time.time()
-        # get the length of the frame
+        # get the length of the received frame
         rcv = self.radio_read_spi(defs.RG_BBC0_RXFLL, 2)
-        len_pkt = rcv[0] + ((rcv[1] & 0x07) << 8)
+        len_frame = rcv[0] + ((rcv[1] & 0x07) << 8)
 
-        logging.debug('length is {0}'.format(len_pkt))
+        logging.debug('length is {0}'.format(len_frame))
 
         # read the packet
-        pkt_rcv = self.radio_read_spi(defs.RG_BBC0_FBRXS, len_pkt)
-        logging.debug('frame number: {0}'.format(pkt_rcv[0:2]))
+        frame_rcv = self.radio_read_spi(defs.RG_BBC0_FBRXS, len_frame)
+        logging.debug('frame number: {0}'.format(frame_rcv[0:2]))
         # read from metadata
         rssi = self.radio_read_spi(defs.RG_RF09_EDV, 1)[0]
         crc = ((self.radio_read_spi(defs.RG_BBC0_PC, 1))[0] >> 5) & 0x01
@@ -252,9 +242,7 @@ class At86rf215(object):
         if rssi >= 128:
             rssi = (((~rssi)& 0xFF) + 1) * -1
 
-        # print (time.time() - now)
-        # self.counter += 1
-        return pkt_rcv, rssi, crc, mcs
+        return frame_rcv, rssi, crc, mcs
 
     def radio_write_config(self, settings):
         """

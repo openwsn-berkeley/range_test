@@ -25,11 +25,11 @@ SECURITY_TIME = 3
 
 
 class InformativeRx(threading.Thread):
-    def __init__(self, queue, rx_analitics):
+    def __init__(self, queue, rx_analytics):
 
         # store parameters
         self.queue = queue
-        self.rx_analitics = rx_analitics
+        self.rx_analytics = rx_analytics
 
         # local variables
         self.rssi_avg = 0
@@ -64,7 +64,6 @@ class InformativeRx(threading.Thread):
             val += 1
             if rssi_val < -4 and rssi_val is not 127:
                 avg += rssi_val
-        # logging.warning('RSSI matrix value= {0}'.format(self.rssi_values))
         return avg / val
 
     def rx_frames_psize(self):
@@ -75,11 +74,6 @@ class InformativeRx(threading.Thread):
         experiment and the modulation used.
         :returns: Nothing
         """
-        # rx_frames_eight = [''.join(self.rx_frames[0:100])]
-        # rx_frames_hundred = [''.join(self.rx_frames[100:200])]
-        # rx_frames_thousand = [''.join(self.rx_frames[200:300])]
-        # rx_frames_two_thousand = [''.join(self.rx_frames[300:400])]
-        # return rx_frames_eight, rx_frames_hundred, rx_frames_thousand, rx_frames_two_thousand
         self.results['Modulation used is:'] = self.current_modulation
         self.results['Results: frames received:'] = self.count_rx
         self.results['Frames received    8 bytes long:'] = ''.join(self.rx_frames[0:100])
@@ -89,28 +83,17 @@ class InformativeRx(threading.Thread):
         self.results['RSSI average value:'] = round(self.rssi_avg_func(), 2)
 
     def show_results(self):
-        # results = self.rx_frames_psize()
         self.rx_frames_psize()
         with open('results_rx.json', 'a') as f:
             f.write(json.dumps(self.results))
-
-        #logging.debug('Results: frames received {4}/400\n'
-        #              'Frames received    8 bytes long: {0}\n'
-        #              'Frames received  127 bytes long: {1}\n'
-        #              'Frames received 1000 bytes long: {2}\n'
-        #              'Frames received 2047 bytes long: {3}\n'.format(results[0],
-        #                                                              results[1],
-        #                                                              results[2],
-        #                                                              results[3],
-        #                                                              self.count_rx))
 
         logging.debug('RSSI average value: {0}\n'.format(self.rssi_avg_func()))
 
     def run(self):
 
         self.results['Time for this set of settings:'] = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime())
-        self.rx_analitics.wait()
-        self.rx_analitics.clear()
+        self.rx_analytics.wait()
+        self.rx_analytics.clear()
         while True:
 
             item = self.queue.get()
@@ -157,7 +140,7 @@ class ExperimentRx(threading.Thread):
         self.count_frames_rx = 0
         self.frame_number_last = 0
         self.started_time = time.time()
-        self.chronogram = ['time' for i in range(31)]
+        self.chronogramme = ['time' for i in range(31)]
 
         # start the threads
         threading.Thread.__init__(self)
@@ -165,13 +148,17 @@ class ExperimentRx(threading.Thread):
         self.daemon = True
         self.start()
 
-        self.rxAnalitics = threading.Event()
-        self.rxAnalitics.clear()
+        self.rxAnalytics = threading.Event()
+        self.rxAnalytics.clear()
 
         # initializes the InformativeRx class, in charge of the logging part
-        self.informativeRx = InformativeRx(self.queue_rx, self.rxAnalitics)
+        self.informativeRx = InformativeRx(self.queue_rx, self.rxAnalytics)
 
     def radio_setup(self):
+        """
+        it initialises the radio driver, it loads the callback for the RX
+        :return:
+        """
         # initialize the radio driver
         self.radio_driver = radio.At86rf215(self._cb_rx_frame)
         self.radio_driver.radio_init(3)
@@ -186,17 +173,19 @@ class ExperimentRx(threading.Thread):
         self.end = True
 
     def experiment_scheduling(self):
+        """
+        it schedules each set of settings to be run
+        :return: Nothing
+        """
         s = sched.scheduler(time.time, time.sleep)
         time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
         logging.warning('TIME: {0}'.format(time_to_start))
         offset = 1.5
         for item in self.settings['test_settings']:
             s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
-            # s.enter(offset, 1, self.execute_exp, (item,))
-            self.chronogram[self.settings['test_settings'].index(item)] = offset
-            # offset += settings.time_mod[item] + SECURITY_TIME
+            self.chronogramme[self.settings['test_settings'].index(item)] = offset
             offset += item['durationtx_s'] + SECURITY_TIME
-        logging.warning(self.chronogram)
+        logging.warning(self.chronogramme)
         s.run()
 
     def execute_exp(self, item):
@@ -204,9 +193,6 @@ class ExperimentRx(threading.Thread):
         This is the functions that reconfigures the radio at each test. It gets passed to the scheduler function.
         :return: Nothing
         """
-        # re-configure the radio
-        # self.radio_driver.radio_write_config(settings.radio_configs_rx[self.index])
-        # self.radio_driver.radio_set_frequency(settings.radio_frequencies[self.index])
         self.radio_driver.radio_write_config(defs.modulations_settings[item['modulation']])
         self.radio_driver.radio_set_frequency((item['channel_spacing_kHz'],
                                                item['frequency_0_kHz'],
@@ -220,7 +206,7 @@ class ExperimentRx(threading.Thread):
         self.queue_rx.put(item)
         # self.index += 1
         self.radio_driver.radio_trx_enable()
-        self.rxAnalitics.set()
+        self.rxAnalytics.set()
         self.radio_driver.radio_rx_now()
         self.queue_rx.put(time.time() - self.started_time)
 
@@ -248,9 +234,9 @@ class ExperimentRx(threading.Thread):
 
     #  ====================== private =========================================
 
-    def _cb_rx_frame(self, pkt_rcv, rssi, crc, mcs):
+    def _cb_rx_frame(self, frame_rcv, rssi, crc, mcs):
         self.count_frames_rx += 1
-        self.queue_rx.put((pkt_rcv, rssi, crc, mcs))
+        self.queue_rx.put((frame_rcv, rssi, crc, mcs))
 
         # re-arm the radio in RX mode
         self.radio_driver.radio_rx_now()
