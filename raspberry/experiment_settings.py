@@ -4,35 +4,38 @@ Lists of frequencies and modulations to be used in the range test.
 \author Jonathan Munoz (jonathan.munoz@inria.fr), January 2017
 """
 
+#FIXME: change to .json file
+
 import at86rf215_defs as defs
 import json
 
 frame_lengths = [8, 127, 1000, 2047]
 BURST_SIZE    = 100
-IFS_S         = 0.1
 
-radio_TRX_parameters = {
-    'frame size 8 bytes': (8, 0.002),
-    'frame size 127 bytes': (127, 0.003),
-    'frame size 1000 bytes': (1000, 0.005),
-    'frame size 2047 bytes': (2047, 0.0065),
+'''
+time between frames
+FIXME change name
+'''
+IFS = {
+    # frame length IFS seconds
+    8:             0.0020,
+    127:           0.0030,
+    1000:          0.0050,
+    2047:          0.0065,
 }
-radio_TRX_order = {'order': [radio_TRX_parameters['frame size 8 bytes'], radio_TRX_parameters['frame size 127 bytes'],
-                             radio_TRX_parameters['frame size 1000 bytes'],
-                             radio_TRX_parameters['frame size 2047 bytes']]}
 
-radio_frequencies = [
+radio_settings = [
     #(channel_spacing, frequency_0, channel)
     (             200,      863125,       0),  # fsk operating mode 1
-    (             400,      863225,       0),  # fsk operating mode 2-3
-    (             400,      863225,       0),  # fsk operating mode 2-3
-    (             200,      863125,       0),  # fsk operating mode 1
-    (             400,      863225,       0),  # fsk operating mode 2-3
-    (             400,      863225,       0),  # fsk operating mode 2-3
-    (            1200,      863625,       0),  # ofdm option 1
-    (            1200,      863625,       0),  # ofdm option 1
-    (            1200,      863625,       0),  # ofdm option 1
-    (            1200,      863625,       0),  # ofdm option 1
+    (             400,      863225,       0),  # fsk operating mode 2
+    (             400,      863225,       0),  # fsk operating mode 3
+    #(             200,      863125,       0),  # fsk operating mode 1
+    #(             400,      863225,       0),  # fsk operating mode 2
+    #(             400,      863225,       0),  # fsk operating mode 3
+    (            1200,      863625,       0),  # ofdm option 1 MCS 0
+    (            1200,      863625,       0),  # ofdm option 1 MCS 1
+    (            1200,      863625,       0),  # ofdm option 1 MCS 2
+    (            1200,      863625,       0),  # ofdm option 1 MCS 3
     (             800,      863425,       0),  # ofdm option 2
     (             800,      863425,       0),  # ofdm option 2
     (             800,      863425,       0),  # ofdm option 2
@@ -56,18 +59,26 @@ radio_frequencies = [
     (             600,      868300,       0),  # oqpsk
 ]
 
-
 radio_freq_setup = {
-    u'fsk operating mode 1': (200, 863125, 0), u'fsk operating mode 2': (400, 863225, 0),
-    u'fsk operating mode 3': (400, 863225, 0), u'ofdm option 1': (1200, 863625, 0),
-    u'ofdm option 2': (800, 863425, 0), u'ofdm option 3': (400, 863225, 0), u'ofdm option 4': (200, 863125, 0),
-    u'o-qpsk': (600, 868300, 0)
+    'fsk operating mode 1': ( 200, 863125, 0),
+    'fsk operating mode 2': ( 400, 863225, 0),
+    'fsk operating mode 3': ( 400, 863225, 0),
+    'ofdm option 1':        (1200, 863625, 0),
+    'ofdm option 2':        ( 800, 863425, 0),
+    'ofdm option 3':        ( 400, 863225, 0),
+    'ofdm option 4':        ( 200, 863125, 0),
+    'o-qpsk':               ( 600, 868300, 0),
 }
 
-radio_trx_mod_order = {u'order': [u'FSK operating mode 1 FEC', u'FSK operating mode 2 FEC',
-                                  u'FSK operating mode 3 FEC', u'FSK operating mode 1 no FEC',
-                                  u'FSK operating mode 2 no FEC', u'FSK operating mode 3 no FEC',
-                                  u'OFDM Option 1 MCS 0', u'OFDM Option 1 MCS 1', u'OFDM Option 1 MCS 2',
+radio_trx_mod_order = [
+    'FSK operating mode 1 FEC',
+    'FSK operating mode 2 FEC',
+    'FSK operating mode 3 FEC',
+    'FSK operating mode 1 no FEC',
+    'FSK operating mode 2 no FEC',
+    'FSK operating mode 3 no FEC',
+    'OFDM Option 1 MCS 0',
+    'OFDM Option 1 MCS 1', u'OFDM Option 1 MCS 2',
                                   u'OFDM Option 1 MCS 3', u'OFDM Option 2 MCS 0', u'OFDM Option 2 MCS 1',
                                   u'OFDM Option 2 MCS 2', u'OFDM Option 2 MCS 3', u'OFDM Option 2 MCS 4',
                                   u'OFDM Option 2 MCS 5', u'OFDM Option 3 MCS 1', u'OFDM Option 3 MCS 2',
@@ -89,9 +100,21 @@ time_mod = {
     u'O-QPSK rate mode 3': 67
 }
 
-test_settings = {
-    u'FSK operating mode 1 FEC':
-        {'frequency set up': radio_freq_setup[u'fsk operating mode 1'], 'configuration': defs.fsk_option1_FEC,
+test_settings = [
+    {'channel_spacing_kHz': 200, 'frequency_0_kHz': 863125, 'channel': 0, 'modulation': defs.fsk_option1_FEC, 'numframes': BURST_SIZE, 'durationtx_s': 106},
+]
+
+d = [t['channel'] for channel in test_settings.items()]
+d = test_settings.keys()
+
+for test_setting in test_settings:
+   one_run(**test_setting)
+   
+def one_run(channel_spacing_kHz=None, frequency_0_kHz=None, channel=None, modulation=None, numframes=None, durationtx_s=None):
+    pass
+
+test_settings = [
+        {name: 'FSK operating mode 1 FEC', 'frequency set up': radio_freq_setup[u'fsk operating mode 1'], 'configuration': defs.fsk_option1_FEC,
          'time': time_mod[u'FSK operating mode 1 FEC'], 'id': 'FSK operating mode 1 FEC'},
     u'FSK operating mode 2 FEC':
         {'frequency set up': radio_freq_setup[u'fsk operating mode 2'], 'configuration': defs.fsk_option2_FEC,
