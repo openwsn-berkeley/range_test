@@ -39,6 +39,7 @@ class InformativeRx(threading.Thread):
         self.frame_last_rx = 0
         self.rx_frames = ['!' for i in range(400)]
         self.rssi_values = np.zeros(400)
+        self.name_file = '/home/pi/results/' + dt.now().strftime("%D_%H_%M_%S").replace('/', '_') + '_results.json'
         self.current_modulation = None
         self.rx_frames_eight = []
         self.rx_frames_hundred = []
@@ -89,7 +90,7 @@ class InformativeRx(threading.Thread):
 
     def show_results(self):
         self.rx_frames_psize()
-        with open('results_rx.json', 'a') as f:
+        with open(self.name_file, 'a') as f:
             f.write(json.dumps(self.results))
 
         logging.debug('RSSI average value: {0}\n'.format(self.rssi_avg_func()))
@@ -109,7 +110,7 @@ class InformativeRx(threading.Thread):
                     self.rssi_values *= 0
                     self.count_rx = 0
                 else:
-                    with open('results_rx.json', 'w') as f:
+                    with open(self.name_file, 'w') as f:
                         f.write(json.dumps('Range Test Experiment Rx:'))
 
             else:
