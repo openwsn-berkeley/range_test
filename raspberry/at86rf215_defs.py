@@ -151,7 +151,7 @@ modulations_settings = {
         (RG_RF09_TXCUTC,        0xC0),
         (RG_RF09_TXDFE,         0x98),
         (RG_RF09_PAC,           0x64),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
-        (RG_BBC0_IRQM,          0x1F),  # TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
+        (RG_BBC0_IRQM,          0x12),  # TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
         (RG_BBC1_IRQM,          0x00),
         (RG_BBC0_PC,            0x15),  # // No FCS filter, 32 bits FCS, FSK.
         (RG_BBC0_FSKDM,         0x01),  # //Direct modulation enabled and Pre-emphasis disabled.
@@ -177,7 +177,7 @@ modulations_settings = {
         (RG_RF09_TXCUTC,        0x83),
         (RG_RF09_TXDFE,         0x94),
         (RG_RF09_PAC,           0x64),  # // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.//
-        (RG_BBC0_IRQM,          0x1F),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
+        (RG_BBC0_IRQM,          0x12),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
         (RG_BBC1_IRQM,          0x00),
         (RG_BBC0_PC,            0x15),  # // No FCS filter, 32 bits FCS, FSK.
         (RG_BBC0_FSKDM,         0x01),  # //Direct modulation enabled and Pre-emphasis disabled.
@@ -196,7 +196,7 @@ modulations_settings = {
         (RG_RF09_IRQM,          0x1F),  # // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts enabled
         (RG_RF24_IRQM,          0x00),
         (RG_RF09_RXBWC,         0x03),  # //IF shift, 200 kHz bandwidth
-        (RG_RF09_RXDFE,         0x24),  # //find the right values
+        (RG_RF09_RXDFE,         0x25),  # //find the right values
         (RG_RF09_AGCC,          0x01),
         (RG_RF09_AGCS,          0x37),
         (RG_RF09_EDD,           0x7A),
@@ -212,7 +212,7 @@ modulations_settings = {
     #    (RG_BBC0_FSKSDF1L,     0xAE),
     #    (RG_BBC0_FSKSDF1H,     0xBF),
         (RG_BBC0_FSKC0,         0xD7),
-        (RG_BBC0_FSKC1,         0x01),  #  1 = 200 kHz symbol rate, 3 = 400 kHz
+        (RG_BBC0_FSKC1,         0x01),  #  1 = 100 kHz symbol rate, 3 = 200 kHz
         (RG_BBC0_FSKC2,         0x40),
         (RG_BBC0_FSKC3,         0x85),
         (RG_BBC0_FSKC4,         0x0A),

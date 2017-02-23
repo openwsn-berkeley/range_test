@@ -171,7 +171,6 @@ class ExperimentRx(threading.Thread):
         """
         self.queue_rx.put('Print last')
         self.end = True
-        self.rxAnalytics.set()
 
     def experiment_scheduling(self):
         """
