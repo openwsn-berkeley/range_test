@@ -65,7 +65,7 @@ class ExperimentTx(threading.Thread):
         self.minutes = minutes
         self.queue_tx = Queue.Queue()
         self.started_time = time.time()
-        self.chronogramme = ['time' for i in range(31)]
+        self.schedule = ['time' for i in range(31)]
         
         # start the thread
         threading.Thread.__init__(self)
@@ -92,9 +92,9 @@ class ExperimentTx(threading.Thread):
         offset = 3
         for item in self.settings['test_settings']:
             s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
-            self.chronogramme[self.settings['test_settings'].index(item)] = offset
+            self.schedule[self.settings['test_settings'].index(item)] = offset
             offset += item['durationtx_s'] + SECURITY_TIME
-        logging.warning(self.chronogramme)
+        logging.warning(self.schedule)
         s.run()
 
     def execute_exp(self, item):
@@ -149,7 +149,7 @@ class ExperimentTx(threading.Thread):
 #  ============================ main ==========================================
 
 
-def load_json_files():
+def load_experiment_details():
     with open('/home/pi/range_test/raspberry/experiment_settings.json', 'r') as f:
         settings = f.read().replace('\n', ' ').replace('\r', '')
         settings = json.loads(settings)
@@ -160,7 +160,7 @@ def main():
     hours = int(sys.argv[1])
     minutes = int(sys.argv[2])
     # logging.basicConfig(filename='range_test_tx.log', level=logging.WARNING)
-    experimentTx = ExperimentTx(hours, minutes, load_json_files())
+    experimentTx = ExperimentTx(hours, minutes, load_experiment_details())
     while True:
         input = raw_input('>')
         if input == 's':

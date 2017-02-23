@@ -91,16 +91,11 @@ class InformativeRx(threading.Thread):
     def show_results(self):
         self.rx_frames_psize()
         self.results_per_settings[self.results['Modulation used is:']] = self.results
-        #with open(self.name_file, 'a') as f:
-            # f.write(json.dumps(self.results))
-
-        # logging.debug('RSSI average value: {0}\n'.format(self.rssi_avg_func()))
 
     def run(self):
 
         self.results['Time for this set of settings:'] = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime())
-        # self.rx_analytics.wait()
-        # self.rx_analytics.clear()
+
         while True:
 
             item = self.queue.get()
@@ -110,9 +105,6 @@ class InformativeRx(threading.Thread):
                     self.rx_frames = ['!' for i in range(400)]
                     self.rssi_values *= 0
                     self.count_rx = 0
-                # else:
-                #    with open(self.name_file, 'w') as f:
-                #        f.write(json.dumps('Range Test Experiment Rx:'))
 
             else:
                 if type(item) is tuple:
@@ -128,7 +120,6 @@ class InformativeRx(threading.Thread):
                     self.show_results()
                     with open(self.name_file, 'a') as f:
                         f.write(json.dumps(self.results_per_settings))
-
 
                 elif type(item) == float:
                     logging.warning('TIME: {0}'.format(item))
@@ -148,7 +139,7 @@ class ExperimentRx(threading.Thread):
         self.queue_rx = Queue.Queue()
         self.count_frames_rx = 0
         self.started_time = time.time()
-        self.chronogramme = ['time' for i in range(31)]
+        self.schedule = ['time' for i in range(31)]
 
         # start the threads
         threading.Thread.__init__(self)
@@ -188,9 +179,9 @@ class ExperimentRx(threading.Thread):
         offset = 1.5
         for item in self.settings['test_settings']:
             s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
-            self.chronogramme[self.settings['test_settings'].index(item)] = offset
+            self.schedule[self.settings['test_settings'].index(item)] = offset
             offset += item['durationtx_s'] + SECURITY_TIME
-        logging.warning(self.chronogramme)
+        logging.warning(self.schedule)
         s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
         s.run()
 
@@ -213,7 +204,6 @@ class ExperimentRx(threading.Thread):
 
         # put the radio into RX mode
         self.radio_driver.radio_trx_enable()
-        # self.rxAnalytics.set()
         self.radio_driver.radio_rx_now()
         self.queue_rx.put(time.time() - self.started_time)
 
@@ -232,7 +222,7 @@ class ExperimentRx(threading.Thread):
     #  ======================== public ========================================
 
     def getStats(self):
-        raise NotImplementedError()
+        logging.warning('Results ongoing {0}'.format(self.informativeRx.results_per_settings))
 
     #  ====================== private =========================================
 
@@ -246,7 +236,7 @@ class ExperimentRx(threading.Thread):
 # ========================== main ============================================
 
 
-def load_json_files():
+def load_experiment_details():
     with open('/home/pi/range_test/raspberry/experiment_settings.json', 'r') as f:
         settings = f.read().replace('\n', ' ').replace('\r', '')
         settings = json.loads(settings)
@@ -258,13 +248,12 @@ def main():
     minutes = int(sys.argv[2])
     # logging.basicConfig(filename='range_test_rx.log', level=logging.WARNING)
     logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
-    experimentRx = ExperimentRx(hours, minutes, load_json_files())
+    experimentRx = ExperimentRx(hours, minutes, load_experiment_details())
 
     while experimentRx.end is False:
         input = raw_input('>')
         if input == 's':
             print experimentRx.getStats()
-            # print 'stats TODO'
         elif input == 'q':
             sys.exit(0)
     logging.warning('Experiment END Variable: {0}'.format(experimentRx.end))
