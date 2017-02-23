@@ -51,6 +51,7 @@ class InformativeRx(threading.Thread):
                         'Frames received 1000 bytes long:': None, 'Frames received 2047 bytes long:': None,
                         'RSSI average value:': None}
 
+        self.results_per_settings = {}
         # start the thread
         threading.Thread.__init__(self)
         self.name = 'InformativeRx'
@@ -68,7 +69,7 @@ class InformativeRx(threading.Thread):
             result = avg / val
         else:
             result = 0
-        logging.warning(self.rssi_values)
+        # logging.warning(self.rssi_values)
         return result
 
     def rx_frames_psize(self):
@@ -89,10 +90,11 @@ class InformativeRx(threading.Thread):
 
     def show_results(self):
         self.rx_frames_psize()
-        with open(self.name_file, 'a') as f:
-            f.write(json.dumps(self.results))
+        self.results_per_settings[self.results['Modulation used is:']] = self.results
+        #with open(self.name_file, 'a') as f:
+            # f.write(json.dumps(self.results))
 
-        logging.debug('RSSI average value: {0}\n'.format(self.rssi_avg_func()))
+        # logging.debug('RSSI average value: {0}\n'.format(self.rssi_avg_func()))
 
     def run(self):
 
@@ -108,9 +110,9 @@ class InformativeRx(threading.Thread):
                     self.rx_frames = ['!' for i in range(400)]
                     self.rssi_values *= 0
                     self.count_rx = 0
-                else:
-                    with open(self.name_file, 'w') as f:
-                        f.write(json.dumps('Range Test Experiment Rx:'))
+                # else:
+                #    with open(self.name_file, 'w') as f:
+                #        f.write(json.dumps('Range Test Experiment Rx:'))
 
             else:
                 if type(item) is tuple:
@@ -124,6 +126,9 @@ class InformativeRx(threading.Thread):
 
                 elif item == 'Print last':
                     self.show_results()
+                    with open(self.name_file, 'a') as f:
+                        f.write(json.dumps(self.results_per_settings))
+
 
                 elif type(item) == float:
                     logging.warning('TIME: {0}'.format(item))
