@@ -16,11 +16,11 @@ import datetime
 
 import at86rf215_defs as defs
 import at86rf215_driver as radio
-# import experiment_settings as settings
 
 FRAME_LENGTH  = 2047
 CRC_SIZE      = 4
-SECURITY_TIME = 3 # 3 seconds to give more time to TRX to complete the 400 frame bursts.
+SECURITY_TIME = 3  # 3 seconds to give more time to TRX to complete the 400 frame bursts.
+START_OFFSET  = 3  # 3 seconds after the starting time arrives.
 
 
 class InformativeTx(threading.Thread):
@@ -89,7 +89,7 @@ class ExperimentTx(threading.Thread):
     def experiment_scheduling(self):
         s = sched.scheduler(time.time, time.sleep)
         time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
-        offset = 3
+        offset = START_OFFSET
         for item in self.settings['test_settings']:
             s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
             self.schedule[self.settings['test_settings'].index(item)] = offset
