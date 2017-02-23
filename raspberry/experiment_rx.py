@@ -25,11 +25,10 @@ SECURITY_TIME = 3
 
 
 class InformativeRx(threading.Thread):
-    def __init__(self, queue, rx_analytics):
+    def __init__(self, queue):
 
         # store parameters
         self.queue = queue
-        self.rx_analytics = rx_analytics
 
         # local variables
         self.rssi_avg = 0
@@ -152,11 +151,8 @@ class ExperimentRx(threading.Thread):
         self.daemon = True
         self.start()
 
-        self.rxAnalytics = threading.Event()
-        self.rxAnalytics.clear()
-
         # initializes the InformativeRx class, in charge of the logging part
-        self.informativeRx = InformativeRx(self.queue_rx, self.rxAnalytics)
+        self.informativeRx = InformativeRx(self.queue_rx)
 
     def radio_setup(self):
         """
