@@ -240,7 +240,7 @@ class At86rf215(object):
             rssi = 'not valid'
 
         if rssi >= 128:
-            rssi = (((~rssi)& 0xFF) + 1) * -1
+            rssi = (((~rssi) & 0xFF) + 1) * -1
 
         return frame_rcv, rssi, crc, mcs
 

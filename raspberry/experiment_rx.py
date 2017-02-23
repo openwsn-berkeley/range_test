@@ -61,10 +61,15 @@ class InformativeRx(threading.Thread):
         avg = 0
         val = 0
         for rssi_val in self.rssi_values:
-            val += 1
             if rssi_val < -4 and rssi_val is not 127:
+                val += 1
                 avg += rssi_val
-        return avg / val
+        if val != 0:
+            result = avg / val
+        else:
+            result = 0
+        logging.warning(self.rssi_values)
+        return result
 
     def rx_frames_psize(self):
         """
@@ -92,8 +97,8 @@ class InformativeRx(threading.Thread):
     def run(self):
 
         self.results['Time for this set of settings:'] = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime())
-        self.rx_analytics.wait()
-        self.rx_analytics.clear()
+        # self.rx_analytics.wait()
+        # self.rx_analytics.clear()
         while True:
 
             item = self.queue.get()
@@ -121,7 +126,7 @@ class InformativeRx(threading.Thread):
                     self.show_results()
 
                 elif type(item) == float:
-                    logging.warning('Modulation used is: {0}'.format(item))
+                    logging.warning('TIME: {0}'.format(item))
                 else:
                     logging.warning('Modulation used is: {0}'.format(item))
                     self.current_modulation = item
@@ -207,7 +212,7 @@ class ExperimentRx(threading.Thread):
 
         # put the radio into RX mode
         self.radio_driver.radio_trx_enable()
-        self.rxAnalytics.set()
+        # self.rxAnalytics.set()
         self.radio_driver.radio_rx_now()
         self.queue_rx.put(time.time() - self.started_time)
 
