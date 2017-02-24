@@ -80,17 +80,19 @@ class InformativeRx(threading.Thread):
         experiment and the modulation used.
         :returns: Nothing
         """
-        self.results['Modulation used is:'] = self.current_modulation
-        self.results['Results: frames received:'] = self.count_rx
-        self.results['Frames received    8 bytes long:'] = ''.join(self.rx_frames[0:100])
-        self.results['Frames received  127 bytes long:'] = ''.join(self.rx_frames[100:200])
-        self.results['Frames received 1000 bytes long:'] = ''.join(self.rx_frames[200:300])
-        self.results['Frames received 2047 bytes long:'] = ''.join(self.rx_frames[300:400])
-        self.results['RSSI average value:'] = round(self.rssi_avg_func(), 2)
+        self.results = {
+            'Modulation used is:': self.current_modulation,
+            'Results: frames received:': self.count_rx,
+            'Frames received    8 bytes long:': ''.join(self.rx_frames[0:100]),
+            'Frames received  127 bytes long:': ''.join(self.rx_frames[100:200]),
+            'Frames received 1000 bytes long:': ''.join(self.rx_frames[200:300]),
+            'Frames received 2047 bytes long:': ''.join(self.rx_frames[300:400]),
+            'RSSI average value:': round(self.rssi_avg_func(), 2)
+        }
 
     def show_results(self):
         self.rx_frames_psize()
-        self.results_per_settings[self.results['Modulation used is:']] = self.results
+        self.results_per_settings[self.current_modulation] = self.results.copy()
 
     def run(self):
 
@@ -124,8 +126,8 @@ class InformativeRx(threading.Thread):
                 elif type(item) == float:
                     logging.warning('TIME: {0}'.format(item))
                 else:
-                    logging.warning('Modulation used is: {0}'.format(item))
                     self.current_modulation = item
+                    logging.warning('Modulation: {0}'.format(item))
 
 
 class ExperimentRx(threading.Thread):
