@@ -51,7 +51,7 @@ class Processing(threading.Thread):
         self.start()
 
         # configure the logging module
-        #logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
+        # logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
 
     def run(self):
 
@@ -89,7 +89,7 @@ class At86rf215(object):
         self.state['state_TXnow'].clear()
 
         # configure the logging module
-        # logging.basicConfig(stream= sys.__stdout__, level=logging.WARNING)
+        # logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
     
     # ======================== public ==========================================
     
@@ -225,15 +225,18 @@ class At86rf215(object):
         rcv = self.radio_read_spi(defs.RG_BBC0_RXFLL, 2)
         len_frame = rcv[0] + ((rcv[1] & 0x07) << 8)
 
-        logging.debug('length is {0}'.format(len_frame))
+        # logging.debug('length is {0}'.format(len_frame))
 
         # read the packet
         frame_rcv = self.radio_read_spi(defs.RG_BBC0_FBRXS, len_frame)
-        logging.debug('frame number: {0}'.format(frame_rcv[0:2]))
+        # logging.debug('frame number: {0}'.format(frame_rcv[0:2]))
         # read from metadata
         rssi = self.radio_read_spi(defs.RG_RF09_EDV, 1)[0]
         crc = ((self.radio_read_spi(defs.RG_BBC0_PC, 1))[0] >> 5) & 0x01
         mcs = self.radio_read_spi(defs.RG_BBC0_OFDMPHRRX, 1)[0] & defs.OFDMPHRRX_MCS_MASK
+
+        # verifying the FSKPHRRX register
+        # logging.warning('FSKPHRRX: {0}'.format(self.radio_read_spi(defs.RG_BBC0_FSKPHRRX, 1)))
 
         # representing the RSSI value in dBm
         if rssi == 127:

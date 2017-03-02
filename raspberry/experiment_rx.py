@@ -110,13 +110,16 @@ class InformativeRx(threading.Thread):
 
             else:
                 if type(item) is tuple:
-                    logging.debug('FRAME number: {0}, frame size: {1}, RSSI: {2} dBm,  CRC: {3}, MCS: {4}\n'.
-                                  format(item[0][0] * 256 + item[0][1], len(item[0]), item[1], item[2], item[3]))
-
-                    if item[0][0] * 256 + item[0][1] < 400:
-                        self.rx_frames[item[0][0] * 256 + item[0][1]] = '.'
-                        self.rssi_values[item[0][0] * 256 + item[0][1]] = float(item[1])
-                        self.count_rx += 1
+                    # logging.warning('item: {0}'.format(item))
+                    # logging.debug('FRAME number: {0}, frame size: {1}, RSSI: {2} dBm,  CRC: {3}, MCS: {4}\n'.
+                    #               format(item[0][0] * 256 + item[0][1], len(item[0]), item[1], item[2], item[3]))
+                    try:
+                        if item[0][0] * 256 + item[0][1] < 400:
+                            self.rx_frames[item[0][0] * 256 + item[0][1]] = '.'
+                            self.rssi_values[item[0][0] * 256 + item[0][1]] = float(item[1])
+                            self.count_rx += 1
+                    except Exception:
+                        logging.warning('item: {0}'.format(item))
 
                 elif item == 'Print last':
                     self.show_results()

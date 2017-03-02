@@ -207,15 +207,15 @@ modulations_settings = {
         (RG_BBC1_IRQM,          0x00),
         (RG_BBC0_PC,            0x15),  # // No FCS filter, 32 bits FCS, FSK.
         (RG_BBC0_FSKDM,         0x01),  # //Direct modulation enabled and Pre-emphasis disabled.
-    #    (RG_BBC0_FSKSDF0L,     0xBE),
-    #    (RG_BBC0_FSKSDF0H,     0xFF),
-    #    (RG_BBC0_FSKSDF1L,     0xAE),
-    #    (RG_BBC0_FSKSDF1H,     0xBF),
+        (RG_BBC0_FSKSDF0L,      0xBE),
+        (RG_BBC0_FSKSDF0H,      0xFF),
+        # (RG_BBC0_FSKSDF1L,      0xAE),
+        # (RG_BBC0_FSKSDF1H,      0xBF),
         (RG_BBC0_FSKC0,         0xD7),
         (RG_BBC0_FSKC1,         0x01),  #  1 = 100 kHz symbol rate, 3 = 200 kHz
         (RG_BBC0_FSKC2,         0x40),
         (RG_BBC0_FSKC3,         0x85),
-        (RG_BBC0_FSKC4,         0x2A),
+        (RG_BBC0_FSKC4,         0x22),
         (RG_BBC0_FSKPE0,        0x0E),
         (RG_BBC0_FSKPE1,        0x0F),
         (RG_BBC0_FSKPE2,        0xF0),
@@ -245,7 +245,7 @@ modulations_settings = {
         (RG_BBC0_FSKPE0,        0x02),
         (RG_BBC0_FSKPE1,        0x03),
         (RG_BBC0_FSKPE2,        0xFC),
-        (RG_BBC0_FSKPHRTX,      0x00)],
+        (RG_BBC0_FSKPHRTX,      0x08)],  # using SDF 1
 
     'fsk_option2': [
         (RG_RF09_CMD,           0x02),  # //we make sure we are in the trxoff state
@@ -271,7 +271,7 @@ modulations_settings = {
         (RG_BBC0_FSKPE0,        0x0E),
         (RG_BBC0_FSKPE1,        0x0F),
         (RG_BBC0_FSKPE2,        0xF0),
-        (RG_BBC0_FSKPHRTX,      0x00)],
+        (RG_BBC0_FSKPHRTX,      0x08)],  # using SDF1
 
     'fsk_option3': [
         (RG_RF09_CMD,           0x02),  # //we make sure we are in the trxoff state
@@ -289,10 +289,10 @@ modulations_settings = {
         (RG_BBC1_IRQM,          0x00),
         (RG_BBC0_PC,            0x15),  # // No FCS filter, 32 bits FCS, FSK.
         (RG_BBC0_FSKDM,         0x01),  # //Direct modulation enabled and Preemphasis disabled.
-    #    (RG_BBC0_FSKSDF0L,      0xEB),
-    #    (RG_BBC0_FSKSDF0H,      0xAA),
-    #    (RG_BBC0_FSKSDF1L,      0xAE),
-    #    (RG_BBC0_FSKSDF1H,      0xBF),
+        (RG_BBC0_FSKSDF0L,      0xEB),
+        (RG_BBC0_FSKSDF0H,      0xAA),
+        # (RG_BBC0_FSKSDF1L,      0xAE),
+        # (RG_BBC0_FSKSDF1H,      0xBF),
         (RG_BBC0_FSKC0,         0xD7),
         (RG_BBC0_FSKC1,         0x01),  #  1 = 200 kHz symbol rate, 3 = 400 kHz
         (RG_BBC0_FSKC2,         0x40),

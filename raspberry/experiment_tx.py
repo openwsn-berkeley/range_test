@@ -134,6 +134,9 @@ class ExperimentTx(threading.Thread):
                 self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE])
                 self.radio_driver.radio_tx_now()
 
+                # checking what I'm sending
+                # self.queue_tx.put(frameToSend[:frame_length - CRC_SIZE])
+
                 # IFS
                 time.sleep(ifs)
     
