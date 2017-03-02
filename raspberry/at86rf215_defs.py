@@ -215,7 +215,7 @@ modulations_settings = {
         (RG_BBC0_FSKC1,         0x01),  #  1 = 100 kHz symbol rate, 3 = 200 kHz
         (RG_BBC0_FSKC2,         0x40),
         (RG_BBC0_FSKC3,         0x85),
-        (RG_BBC0_FSKC4,         0x0A),
+        (RG_BBC0_FSKC4,         0x2A),
         (RG_BBC0_FSKPE0,        0x0E),
         (RG_BBC0_FSKPE1,        0x0F),
         (RG_BBC0_FSKPE2,        0xF0),
@@ -297,7 +297,7 @@ modulations_settings = {
         (RG_BBC0_FSKC1,         0x01),  #  1 = 200 kHz symbol rate, 3 = 400 kHz
         (RG_BBC0_FSKC2,         0x40),
         (RG_BBC0_FSKC3,         0x85),
-        (RG_BBC0_FSKC4,         0x00),  # FEC disabled
+        (RG_BBC0_FSKC4,         0x20),  # FEC disabled
         (RG_BBC0_FSKPE0,        0x0E),
         (RG_BBC0_FSKPE1,        0x0F),
         (RG_BBC0_FSKPE2,        0xF0),
