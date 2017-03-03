@@ -195,6 +195,9 @@ class ExperimentRx(threading.Thread):
         This is the functions that reconfigures the radio at each test. It gets passed to the scheduler function.
         :return: Nothing
         """
+        # reset the radio to erase previous configuration
+        self.radio_driver.radio_reset()
+
         self.radio_driver.radio_write_config(defs.modulations_settings[item['modulation']])
         self.radio_driver.radio_set_frequency((item['channel_spacing_kHz'],
                                                item['frequency_0_kHz'],

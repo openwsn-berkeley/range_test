@@ -76,7 +76,7 @@ class ExperimentTx(threading.Thread):
         self.informativeTx = InformativeTx(self.queue_tx)
 
         # configure the logging module
-        logging.basicConfig(stream= sys.__stdout__, level=logging.WARNING)
+        logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
 
     def radio_setup(self):
 
@@ -84,7 +84,7 @@ class ExperimentTx(threading.Thread):
         self.radio_driver = radio.At86rf215(self._cb_rx_frame)
         self.radio_driver.radio_init(3)
         self.radio_driver.radio_reset()
-        self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
+        # self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
 
     def experiment_scheduling(self):
         s = sched.scheduler(time.time, time.sleep)
@@ -101,6 +101,9 @@ class ExperimentTx(threading.Thread):
         self.queue_tx.put(time.time() - self.started_time)
         # initialize the frame counter
         frame_counter = 0
+
+        # reset the radio to erase previous configuration
+        self.radio_driver.radio_reset()
 
         # re-configure the radio
         self.radio_driver.radio_write_config(defs.modulations_settings[item['modulation']])
@@ -120,7 +123,6 @@ class ExperimentTx(threading.Thread):
 
             # now = time.time()
             self.radio_driver.radio_trx_enable()
-
             # send burst of frames
             for i in range(item["numframes"]):
 
