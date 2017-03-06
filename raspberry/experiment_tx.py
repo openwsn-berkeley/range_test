@@ -55,14 +55,17 @@ class InformativeTx(threading.Thread):
 
 
 class ExperimentTx(threading.Thread):
+    """
+    :param time_to_run: tuple (hours, minutes) for the next TRX experiment to run
+    """
     
-    def __init__(self, hours, minutes, settings):
+    def __init__(self, time_to_run, settings):
         
         # local variables
         self.radio_driver = None
         self.settings = settings
-        self.hours = hours
-        self.minutes = minutes
+        self.hours = time_to_run[0]
+        self.minutes = time_to_run[1]
         self.queue_tx = Queue.Queue()
         self.started_time = time.time()
         self.schedule = ['time' for i in range(31)]
@@ -161,18 +164,35 @@ def load_experiment_details():
         return settings
 
 
+def following_time_to_run():
+    """
+    according to the current time, it sets the time for the next experiment either at the current hour and 30 minutes
+    or at the next hour and cero minutes
+    :return: the time for the next experiment.
+    """
+    current_time = time.gmtime()
+    if current_time[4] < 30:
+        time_to_run = (current_time[3], 30)  # Same hour, at 30 minutes
+    else:
+        time_to_run = (current_time[3] + 1, 0) # Next hour, 00 minutes
+
+    return time_to_run
+
+
 def main():
-    hours = int(sys.argv[1])
-    minutes = int(sys.argv[2])
-    # logging.basicConfig(filename='range_test_tx.log', level=logging.WARNING)
-    experimentTx = ExperimentTx(hours, minutes, load_experiment_details())
-    while True:
-        input = raw_input('>')
-        if input == 's':
-            print experimentTx.getStats()
-            # print 'print stats TX'
-        if input == 'q':
-            sys.exit(0)
+    # hours = int(sys.argv[1])
+    # minutes = int(sys.argv[2])
+    # logging.basicConfig(filename='range_test_rx.log', level=logging.WARNING)
+    logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
+    experimentTx = ExperimentTx(following_time_to_run(), load_experiment_details())
+
+    # while True:
+    #    input = raw_input('>')
+    #    if input == 's':
+    #         print experimentTx.getStats()
+    #         # print 'print stats TX'
+    #     if input == 'q':
+    #         sys.exit(0)
 
 if __name__ == '__main__':
     main()

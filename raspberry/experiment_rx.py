@@ -35,7 +35,6 @@ class InformativeRx(threading.Thread):
         self.rssi_max = 0
         self.rssi_min = 0
         self.count_rx = 0
-        self.frame_last_rx = 0
         self.rx_frames = ['!' for i in range(400)]
         self.rssi_values = np.zeros(400)
         self.name_file = '/home/pi/results/' + dt.now().strftime("%D_%H_%M_%S").replace('/', '_') + '_results.json'
@@ -52,6 +51,8 @@ class InformativeRx(threading.Thread):
                         'RSSI average value:': None}
 
         self.results_per_settings = {}
+        self.program_running = threading.Event()
+        self.program_running.clear()
         # start the thread
         threading.Thread.__init__(self)
         self.name = 'InformativeRx'
@@ -125,6 +126,7 @@ class InformativeRx(threading.Thread):
                     self.show_results()
                     with open(self.name_file, 'a') as f:
                         f.write(json.dumps(self.results_per_settings))
+                    self.program_running.set()
 
                 elif type(item) == float:
                     logging.warning('TIME: {0}'.format(item))
@@ -134,12 +136,15 @@ class InformativeRx(threading.Thread):
 
 
 class ExperimentRx(threading.Thread):
-    def __init__(self, hours, minutes, settings):
+    """
+    :param time_to_run: tuple (hours, minutes) for the next TRX experiment to run
+    """
+    def __init__(self, time_to_run, settings):
         # local variables
         self.radio_driver = None
         self.settings = settings
-        self.hours = hours
-        self.minutes = minutes
+        self.hours = time_to_run[0]
+        self.minutes = time_to_run[1]
         self.end = False
         self.queue_rx = Queue.Queue()
         self.count_frames_rx = 0
@@ -251,21 +256,40 @@ def load_experiment_details():
         return settings
 
 
+def following_time_to_run():
+    """
+    according to the current time, it sets the time for the next experiment either at the current hour and 30 minutes
+    or at the next hour and cero minutes
+    :return: the time for the next experiment.
+    """
+    time_to_run = 0
+    current_time = time.gmtime()
+    # if current_time[4] < 30:
+    #     time_to_run = (current_time[3], 30)
+    # else:
+    #     time_to_run = (current_time[3] + 1, 0)
+    time_to_run = (current_time[3], current_time[4] + 1)
+
+    return time_to_run[0], time_to_run[1]
+
+
 def main():
-    hours = int(sys.argv[1])
-    minutes = int(sys.argv[2])
+    # hours = int(sys.argv[1])
+    # minutes = int(sys.argv[2])
     # logging.basicConfig(filename='range_test_rx.log', level=logging.WARNING)
     logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
-    experimentRx = ExperimentRx(hours, minutes, load_experiment_details())
+    experimentRx = ExperimentRx(following_time_to_run(), load_experiment_details())
 
-    while experimentRx.end is False:
-        input = raw_input('>')
-        if input == 's':
-            print experimentRx.getStats()
-        elif input == 'q':
-            sys.exit(0)
-    logging.warning('Experiment END Variable: {0}'.format(experimentRx.end))
+    experimentRx.informativeRx.program_running.wait()
     sys.exit(0)
+    # while experimentRx.end is False:
+    #     input = raw_input('>')
+    #     if input == 's':
+    #         print experimentRx.getStats()
+    #     elif input == 'q':
+    #         sys.exit(0)
+    # logging.warning('Experiment END Variable: {0}'.format(experimentRx.end))
+    # sys.exit(0)
 
 if __name__ == '__main__':
     main()
