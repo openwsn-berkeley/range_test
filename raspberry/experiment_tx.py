@@ -20,7 +20,7 @@ import at86rf215_driver as radio
 FRAME_LENGTH  = 2047
 CRC_SIZE      = 4
 SECURITY_TIME = 3  # 3 seconds to give more time to TRX to complete the 400 frame bursts.
-START_OFFSET  = 3  # 3 seconds after the starting time arrives.
+START_OFFSET  = 4.5  # 4.5 seconds after the starting time arrives.
 
 
 class InformativeTx(threading.Thread):
@@ -69,6 +69,8 @@ class ExperimentTx(threading.Thread):
         self.queue_tx = Queue.Queue()
         self.started_time = time.time()
         self.schedule = ['time' for i in range(31)]
+        self.program_running = threading.Event()
+        self.program_running.clear()
         
         # start the thread
         threading.Thread.__init__(self)
@@ -98,6 +100,7 @@ class ExperimentTx(threading.Thread):
             self.schedule[self.settings['test_settings'].index(item)] = offset
             offset += item['durationtx_s'] + SECURITY_TIME
         logging.warning(self.schedule)
+        s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.program_running.set, ())
         s.run()
 
     def execute_exp(self, item):
@@ -186,9 +189,11 @@ def main():
     logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
     experimentTx = ExperimentTx(following_time_to_run(), load_experiment_details())
 
+    experimentTx.program_running.wait()
+    # sys.exit()
     # while True:
     #    input = raw_input('>')
-    #    if input == 's':
+    #     if input == 's':
     #         print experimentTx.getStats()
     #         # print 'print stats TX'
     #     if input == 'q':

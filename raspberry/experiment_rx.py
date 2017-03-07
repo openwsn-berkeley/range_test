@@ -21,7 +21,7 @@ import at86rf215_driver as radio
 PACKET_LENGTH = 2047
 CRC_SIZE      = 4
 SECURITY_TIME = 3    # 3 seconds to give more time to TRX to complete the 400 frame bursts.
-START_OFFSET  = 1.5  # 1.5 seconds after the starting time arrives.
+START_OFFSET  = 3.5  # 3.5 seconds after the starting time arrives.
 
 
 class InformativeRx(threading.Thread):
@@ -262,13 +262,12 @@ def following_time_to_run():
     or at the next hour and cero minutes
     :return: the time for the next experiment.
     """
-    time_to_run = 0
     current_time = time.gmtime()
-    # if current_time[4] < 30:
-    #     time_to_run = (current_time[3], 30)
-    # else:
-    #     time_to_run = (current_time[3] + 1, 0)
-    time_to_run = (current_time[3], current_time[4] + 1)
+    if current_time[4] < 30:
+        time_to_run = (current_time[3], 30)
+    else:
+        time_to_run = (current_time[3] + 1, 0)
+
 
     return time_to_run[0], time_to_run[1]
 
@@ -281,7 +280,7 @@ def main():
     experimentRx = ExperimentRx(following_time_to_run(), load_experiment_details())
 
     experimentRx.informativeRx.program_running.wait()
-    sys.exit(0)
+    # sys.exit()
     # while experimentRx.end is False:
     #     input = raw_input('>')
     #     if input == 's':
