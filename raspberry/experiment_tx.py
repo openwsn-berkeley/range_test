@@ -25,12 +25,13 @@ START_OFFSET  = 4.5  # 4.5 seconds after the starting time arrives.
 
 class InformativeTx(threading.Thread):
 
-    def __init__(self, queue):
+    def __init__(self, queue, end):
 
         # store parameters
         self.queue = queue
         self.results = {'Time Experiment:': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
                         'Time for this set of settings:': None}
+        self.end = end
         # local variables
 
         # start the thread
@@ -42,8 +43,9 @@ class InformativeTx(threading.Thread):
         logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
 
     def run(self):
-
-        while True:
+        logging.warning('THREAD INFORMATIVE TX 1')
+        while not self.end:
+            logging.warning('THREAD INFORMATIVE TX INSIDE LOOP')
             item = self.queue.get()
             if type(item) is tuple:
                 logging.warning('Time to send the frames {0} - {1} was {2} seconds\n'.format(item[0] - 100, item[0],
@@ -52,6 +54,7 @@ class InformativeTx(threading.Thread):
                 logging.warning('Time {0}'.format(item))
             else:
                 logging.warning('Modulation used is: {0}\n'.format(item))
+        logging.warning('THREAD INFORMATIVE TX 2')
 
 
 class ExperimentTx(threading.Thread):
@@ -68,17 +71,17 @@ class ExperimentTx(threading.Thread):
         self.minutes = time_to_run[1]
         self.queue_tx = Queue.Queue()
         self.started_time = time.time()
-        self.schedule = ['time' for i in range(31)]
+        self.schedule = ['time' for i in range(len(self.settings["test_settings"]))]
         self.program_running = threading.Event()
         self.program_running.clear()
-        
+        self.end = False
         # start the thread
         threading.Thread.__init__(self)
         self.name = 'ExperimentTx_'
         self.daemon = True
         self.start()
 
-        self.informativeTx = InformativeTx(self.queue_tx)
+        self.informativeTx = InformativeTx(self.queue_tx, self.end)
 
         # configure the logging module
         logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
@@ -100,8 +103,15 @@ class ExperimentTx(threading.Thread):
             self.schedule[self.settings['test_settings'].index(item)] = offset
             offset += item['durationtx_s'] + SECURITY_TIME
         logging.warning(self.schedule)
-        s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.program_running.set, ())
+        s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
         s.run()
+
+    def stop_exp(self):
+        """
+        it makes print the last modulation results
+        """
+        self.end = True
+        self.program_running.set()
 
     def execute_exp(self, item):
         self.queue_tx.put(time.time() - self.started_time)
@@ -149,8 +159,10 @@ class ExperimentTx(threading.Thread):
                 time.sleep(ifs)
     
     def run(self):
-        self.radio_setup()
-        self.experiment_scheduling()
+        while not self.end:
+            logging.warning('THREAD EXPERIMENT TX')
+            self.radio_setup()
+            self.experiment_scheduling()
 
     #  ======================== private =======================================
     
@@ -174,12 +186,13 @@ def following_time_to_run():
     :return: the time for the next experiment.
     """
     current_time = time.gmtime()
-    if current_time[4] < 30:
-        time_to_run = (current_time[3], 30)  # Same hour, at 30 minutes
-    else:
-        time_to_run = (current_time[3] + 1, 0) # Next hour, 00 minutes
-
-    return time_to_run
+    # if current_time[4] < 30:
+    #     time_to_run = (current_time[3], 30)  # Same hour, at 30 minutes
+    # else:
+    #     time_to_run = (current_time[3] + 1, 0)  # Next hour, 00 minutes
+    #
+    # return time_to_run
+    return current_time[3], current_time[4] + 1
 
 
 def main():
@@ -190,6 +203,11 @@ def main():
     experimentTx = ExperimentTx(following_time_to_run(), load_experiment_details())
 
     experimentTx.program_running.wait()
+
+    # experimentTx.informativeTx.join()
+    # experimentTx.join()
+
+    sys.exit(0)
     # sys.exit()
     # while True:
     #    input = raw_input('>')
