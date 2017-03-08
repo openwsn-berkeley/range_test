@@ -98,7 +98,7 @@ class InformativeRx(threading.Thread):
     def run(self):
         logging.warning('THREAD INFORMATIVE RX 1')
         while not self.end:
-            logging.warning('THREAD INFORMATIVE INSIDE LOOP')
+            # logging.warning('THREAD INFORMATIVE INSIDE LOOP')
             item = self.queue.get()
             if item == 'Start':
                 if self.current_modulation is not None:
@@ -284,9 +284,10 @@ def main():
     experimentRx = ExperimentRx(following_time_to_run(), load_experiment_details())
 
     experimentRx.informativeRx.program_running.wait()
-
+    logging.warning('INFORMATIVE THREAD RUNNING PASSED WAIT')
     experimentRx.informativeRx.join()
     experimentRx.join()
+    logging.warning('MAIN THREAD BEFORE SYS EXIT')
     sys.exit(0)
     # sys.exit()
     # while experimentRx.end is False:
