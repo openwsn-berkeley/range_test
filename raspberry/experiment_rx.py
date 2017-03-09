@@ -285,8 +285,8 @@ def main():
 
     experimentRx.informativeRx.program_running.wait()
     logging.warning('INFORMATIVE THREAD RUNNING PASSED WAIT')
-    experimentRx.informativeRx.join()
-    experimentRx.join()
+    # experimentRx.informativeRx.join()
+    # experimentRx.join()
     logging.warning('MAIN THREAD BEFORE SYS EXIT')
     sys.exit(0)
     # sys.exit()
