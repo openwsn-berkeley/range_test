@@ -58,20 +58,6 @@ class InformativeRx(threading.Thread):
         self.daemon = True
         self.start()
 
-    # def rssi_avg_func(self):
-    #     avg = 0
-    #     val = 0
-    #     for rssi_val in self.rssi_values:
-    #         if rssi_val < -4 and rssi_val is not 127:
-    #             val += 1
-    #             avg += rssi_val
-    #     if val != 0:
-    #         result = avg / val
-    #     else:
-    #         result = 0
-    #     # logging.warning(self.rssi_values)
-    #     return result
-
     def rx_frames_psize(self):
         """
         It assigns the values to the result dictionary by separating the burst of 400 frames into 4 groups of 100 frames
@@ -102,9 +88,9 @@ class InformativeRx(threading.Thread):
 
     def show_results(self):
         self.rx_frames_psize()
-        self.results_per_settings[self.current_modulation] = self.results.copy()
+        # self.results_per_settings[self.current_modulation] = self.results.copy()
         with open(self.name_file, 'a') as f:
-            f.write(json.dumps(self.results_per_settings))
+            f.write(json.dumps(self.results.copy()))
 
     def run(self):
         logging.warning('THREAD INFORMATIVE RX 1')
@@ -117,6 +103,12 @@ class InformativeRx(threading.Thread):
                     self.rx_frames = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['test_settings']['numframes'])]
                     self.rssi_values = [None for i in range(len(self.settings['frame_lengths'])*self.settings['test_settings']['numframes'])]
                     self.count_rx = 0
+                    self.results['start_time_str'] = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime())
+                    self.results['start_time_epoch'] = time.time()
+                else:
+                    self.results['start_time_str'] = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime())
+                    self.results['start_time_epoch'] = time.time()
+
 
             else:
                 if type(item) is tuple:
@@ -161,7 +153,7 @@ class ExperimentRx(threading.Thread):
         self.queue_rx = Queue.Queue()
         self.count_frames_rx = 0
         self.started_time = time.time()
-        self.schedule = ['time' for i in range(len(self.settings["test_settings"]))]
+        self.schedule = [None for i in range(len(self.settings["test_settings"]))]
 
         # start the threads
         self.program_running = threading.Event()

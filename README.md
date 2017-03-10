@@ -24,7 +24,7 @@ The following is an example of what each node will write at the end of each rang
     'rssi_by_length'       {
         8    [ -95, -98, None, -89, -101, ...], (as many values as numframes)
         127  [ -97, -102, None, -89, -101, ...], (as many values as numframes)
-        1000 [ -95, None, None, -89, -101, ...], (as many values as numframes)v
+        1000 [ -95, None, None, -89, -101, ...], (as many values as numframes)
         2047 [ -95, -98, None, -89, -101, ...], (as many values as numframes)
     },
     'RX_string'             {
