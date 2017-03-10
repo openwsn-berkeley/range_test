@@ -133,7 +133,8 @@ class InformativeRx(threading.Thread):
                 elif type(item) == float:
                     logging.warning('TIME: {0}'.format(item))
                 else:
-                    self.current_modulation = item
+                    # self.current_modulation = item
+                    self.results['radio_settings'] = item
                     logging.warning('Modulation: {0}'.format(item))
 
         logging.warning('THREAD INFORMATIVE RX 2')
