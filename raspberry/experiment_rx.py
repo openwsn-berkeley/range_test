@@ -70,19 +70,16 @@ class InformativeRx(threading.Thread):
             'radio_settings': self.current_modulation,
             'Frames received:': self.count_rx,
             'RSSI_by_length': {
-                '8':    self.rssi_values[0:self.settings['test_settings']['numframes']],
-                '127':  self.rssi_values[
-                        self.settings['test_settings']['numframes']:2*self.settings['test_settings']['numframes']],
-                '1000': self.rssi_values[
-                        2*self.settings['test_settings']['numframes']:3*self.settings['test_settings']['numframes']],
-                '2047': self.rssi_values[
-                        3*self.settings['test_settings']['numframes']:4*self.settings['test_settings']['numframes']]
+                '8':    self.rssi_values[0:self.settings['numframes']],
+                '127':  self.rssi_values[self.settings['numframes']:2*self.settings['numframes']],
+                '1000': self.rssi_values[2*self.settings['numframes']:3*self.settings['numframes']],
+                '2047': self.rssi_values[3*self.settings['numframes']:4*self.settings['numframes']]
             },
             'RX_string': {
-                '8':    ''.join(self.rx_frames[0:self.settings['test_settings']['numframes']]),
-                '127':  ''.join(self.rx_frames[self.settings['test_settings']['numframes']:2*self.settings['test_settings']['numframes']]),
-                '1000': ''.join(self.rx_frames[2*self.settings['test_settings']['numframes']:3*self.settings['test_settings']['numframes']]),
-                '2047': ''.join(self.rx_frames[3*self.settings['test_settings']['numframes']:4*self.settings['test_settings']['numframes']])
+                '8':    ''.join(self.rx_frames[0:self.settings['numframes']]),
+                '127':  ''.join(self.rx_frames[self.settings['numframes']:2*self.settings['numframes']]),
+                '1000': ''.join(self.rx_frames[2*self.settings['numframes']:3*self.settings['numframes']]),
+                '2047': ''.join(self.rx_frames[3*self.settings['numframes']:4*self.settings['numframes']])
             }
         }
 
@@ -93,15 +90,15 @@ class InformativeRx(threading.Thread):
             f.write(json.dumps(self.results.copy()))
 
     def run(self):
-        logging.warning('THREAD INFORMATIVE RX 1')
+        # logging.warning('THREAD INFORMATIVE RX 1')
         while not self.end:
 
             item = self.queue.get()
             if item == 'Start':
                 if self.current_modulation is not None:
                     self.show_results()  # print to log file
-                    self.rx_frames = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['test_settings']['numframes'])]
-                    self.rssi_values = [None for i in range(len(self.settings['frame_lengths'])*self.settings['test_settings']['numframes'])]
+                    self.rx_frames = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
+                    self.rssi_values = [None for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
                     self.count_rx = 0
                     self.results['start_time_str'] = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime())
                     self.results['start_time_epoch'] = time.time()
@@ -135,7 +132,7 @@ class InformativeRx(threading.Thread):
                 else:
                     # self.current_modulation = item
                     self.results['radio_settings'] = item
-                    logging.warning('Modulation: {0}'.format(item))
+                    # logging.warning('Modulation: {0}'.format(item))
 
         logging.warning('THREAD INFORMATIVE RX 2')
 
