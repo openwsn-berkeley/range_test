@@ -25,30 +25,31 @@ START_OFFSET  = 3.5  # 3.5 seconds after the starting time arrives.
 
 
 class InformativeRx(threading.Thread):
-    def __init__(self, queue, end):
+    def __init__(self, queue, end, settings):
 
         # store parameters
         self.queue = queue
         self.end = end
+        self.settings = settings
         # local variables
         self.rssi_avg = 0
         self.rssi_max = 0
         self.rssi_min = 0
         self.count_rx = 0
-        self.rx_frames = ['!' for i in range(400)]
-        self.rssi_values = np.zeros(400)
+        self.rx_frames = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['test_settings']['numframes'])]
+        self.rssi_values = [None for i in range(len(self.settings['frame_lengths'])*self.settings['test_settings']['numframes'])]
         self.name_file = '/home/pi/results/' + dt.now().strftime("%D_%H:%M:%S").replace('/', '_') + '_results.json'
         self.current_modulation = None
         self.rx_frames_eight = []
         self.rx_frames_hundred = []
         self.rx_frames_thousand = []
         self.rx_frames_two_thousand = []
-        self.results = {'Time Experiment:': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
+        self.results = {'type': 'end_of_cycle_rx', 'start_time_str': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
                         'Time for this set of settings:': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
-                        'Modulation used is:': None, 'Results: frames received:': self.count_rx,
+                        'radio_settings': None, 'Results: frames received:': self.count_rx,
                         'Frames received    8 bytes long:': None, 'Frames received  127 bytes long:': None,
                         'Frames received 1000 bytes long:': None, 'Frames received 2047 bytes long:': None,
-                        'RSSI average value:': None}
+                        'RSSI_by_length': None}
 
         self.results_per_settings = {}
         self.program_running = threading.Event()
@@ -161,7 +162,7 @@ class ExperimentRx(threading.Thread):
         self.start()
 
         # initializes the InformativeRx class, in charge of the logging part
-        self.informativeRx = InformativeRx(self.queue_rx, self.end)
+        self.informativeRx = InformativeRx(self.queue_rx, self.end, self.settings)
 
     def radio_setup(self):
         """
