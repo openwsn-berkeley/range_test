@@ -13,7 +13,7 @@ The following is an example of what each node will write at the end of each rang
     'id'                   'rpi_10',
     'role'                 'RX',
     'radiosettings'        'ofdm_1_mcs0',
-    'burstsize'            100,
+    'numframes'            100,
     'starttime_epoch'      1489196635.438927,
     'starttime_string'     '2017-09-04 10:45:21',
     'nmea_at_start'        '$GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,47',
@@ -21,10 +21,10 @@ The following is an example of what each node will write at the end of each rang
     'frequency'            863.625 MHz
     'channel'              0
     'rssi_by_length'       {
-        8    [ -95, -98, None, -89, -101, ...], (as many values as burstsize)
-        127  [ -97, -102, None, -89, -101, ...], (as many values as burstsize)
-        1000 [ -95, None, None, -89, -101, ...], (as many values as burstsize)
-        2047 [ -95, -98, None, -89, -101, ...], (as many values as burstsize)
+        8    [ -95, -98, None, -89, -101, ...], (as many values as numframes)
+        127  [ -97, -102, None, -89, -101, ...], (as many values as numframes)
+        1000 [ -95, None, None, -89, -101, ...], (as many values as numframes)
+        2047 [ -95, -98, None, -89, -101, ...], (as many values as numframes)
     },
     'rxstring'             {
         8    '...............!.......................................................!............................',
@@ -48,5 +48,5 @@ The following is an example of what each node will write at the end of each rang
     'position_description' None,
     'frequency'            863.625 MHz
     'channel'              0
-    'burstsize'            100,
+    'numframes'            100,
 }
