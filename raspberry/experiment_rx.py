@@ -45,11 +45,9 @@ class InformativeRx(threading.Thread):
         self.rx_frames_thousand = []
         self.rx_frames_two_thousand = []
         self.results = {'type': 'end_of_cycle_rx', 'start_time_str': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
-                        'Time for this set of settings:': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
+                        'start_time_epoch': time.time(),
                         'radio_settings': None, 'Results: frames received:': self.count_rx,
-                        'Frames received    8 bytes long:': None, 'Frames received  127 bytes long:': None,
-                        'Frames received 1000 bytes long:': None, 'Frames received 2047 bytes long:': None,
-                        'RSSI_by_length': None}
+                        'RSSI_by_length': None, 'RX_string': None}
 
         self.results_per_settings = {}
         self.program_running = threading.Event()
@@ -60,19 +58,19 @@ class InformativeRx(threading.Thread):
         self.daemon = True
         self.start()
 
-    def rssi_avg_func(self):
-        avg = 0
-        val = 0
-        for rssi_val in self.rssi_values:
-            if rssi_val < -4 and rssi_val is not 127:
-                val += 1
-                avg += rssi_val
-        if val != 0:
-            result = avg / val
-        else:
-            result = 0
-        # logging.warning(self.rssi_values)
-        return result
+    # def rssi_avg_func(self):
+    #     avg = 0
+    #     val = 0
+    #     for rssi_val in self.rssi_values:
+    #         if rssi_val < -4 and rssi_val is not 127:
+    #             val += 1
+    #             avg += rssi_val
+    #     if val != 0:
+    #         result = avg / val
+    #     else:
+    #         result = 0
+    #     # logging.warning(self.rssi_values)
+    #     return result
 
     def rx_frames_psize(self):
         """
@@ -83,29 +81,41 @@ class InformativeRx(threading.Thread):
         :returns: Nothing
         """
         self.results = {
-            'Modulation used is:': self.current_modulation,
-            'Results: frames received:': self.count_rx,
-            'Frames received    8 bytes long:': ''.join(self.rx_frames[0:100]),
-            'Frames received  127 bytes long:': ''.join(self.rx_frames[100:200]),
-            'Frames received 1000 bytes long:': ''.join(self.rx_frames[200:300]),
-            'Frames received 2047 bytes long:': ''.join(self.rx_frames[300:400]),
-            'RSSI average value:': round(self.rssi_avg_func(), 2)
+            'radio_settings': self.current_modulation,
+            'Frames received:': self.count_rx,
+            'RSSI_by_length': {
+                '8':    self.rssi_values[0:self.settings['test_settings']['numframes']],
+                '127':  self.rssi_values[
+                        self.settings['test_settings']['numframes']:2*self.settings['test_settings']['numframes']],
+                '1000': self.rssi_values[
+                        2*self.settings['test_settings']['numframes']:3*self.settings['test_settings']['numframes']],
+                '2047': self.rssi_values[
+                        3*self.settings['test_settings']['numframes']:4*self.settings['test_settings']['numframes']]
+            },
+            'RX_string': {
+                '8':    ''.join(self.rx_frames[0:self.settings['test_settings']['numframes']]),
+                '127':  ''.join(self.rx_frames[self.settings['test_settings']['numframes']:2*self.settings['test_settings']['numframes']]),
+                '1000': ''.join(self.rx_frames[2*self.settings['test_settings']['numframes']:3*self.settings['test_settings']['numframes']]),
+                '2047': ''.join(self.rx_frames[3*self.settings['test_settings']['numframes']:4*self.settings['test_settings']['numframes']])
+            }
         }
 
     def show_results(self):
         self.rx_frames_psize()
         self.results_per_settings[self.current_modulation] = self.results.copy()
+        with open(self.name_file, 'a') as f:
+            f.write(json.dumps(self.results_per_settings))
 
     def run(self):
         logging.warning('THREAD INFORMATIVE RX 1')
         while not self.end:
-            # logging.warning('THREAD INFORMATIVE INSIDE LOOP')
+
             item = self.queue.get()
             if item == 'Start':
                 if self.current_modulation is not None:
-                    self.show_results()
-                    self.rx_frames = ['!' for i in range(400)]
-                    self.rssi_values *= 0
+                    self.show_results()  # print to log file
+                    self.rx_frames = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['test_settings']['numframes'])]
+                    self.rssi_values = [None for i in range(len(self.settings['frame_lengths'])*self.settings['test_settings']['numframes'])]
                     self.count_rx = 0
 
             else:
@@ -156,6 +166,8 @@ class ExperimentRx(threading.Thread):
         # start the threads
         self.program_running = threading.Event()
         self.program_running.clear()
+        self.write_to_file = threading.Event()
+        self.write_to_file.clear()
         threading.Thread.__init__(self)
         self.name = 'ExperimentRx'
         self.daemon = True
