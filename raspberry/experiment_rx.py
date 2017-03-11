@@ -32,18 +32,12 @@ class InformativeRx(threading.Thread):
         self.end = end
         self.settings = settings
         # local variables
-        self.rssi_avg = 0
-        self.rssi_max = 0
-        self.rssi_min = 0
         self.count_rx = 0
-        self.rx_frames = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['test_settings']['numframes'])]
-        self.rssi_values = [None for i in range(len(self.settings['frame_lengths'])*self.settings['test_settings']['numframes'])]
-        self.name_file = '/home/pi/results/' + dt.now().strftime("%D_%H:%M:%S").replace('/', '_') + '_results.json'
+        self.rx_frames = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
+        self.rssi_values = [None for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
+        # self.name_file = '/home/pi/results/' + dt.now().strftime("%D_%H:%M:%S").replace('/', '_') + '_results.json'
+        self.name_file = '/home/pi/outputRX/experiments.json'
         self.current_modulation = None
-        self.rx_frames_eight = []
-        self.rx_frames_hundred = []
-        self.rx_frames_thousand = []
-        self.rx_frames_two_thousand = []
         self.results = {'type': 'end_of_cycle_rx', 'start_time_str': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
                         'start_time_epoch': time.time(),
                         'radio_settings': None, 'Results: frames received:': self.count_rx,
@@ -95,7 +89,7 @@ class InformativeRx(threading.Thread):
 
             item = self.queue.get()
             if item == 'Start':
-                if self.current_modulation is not None:
+                if self.results['radio_settings'] is not None:
                     self.show_results()  # print to log file
                     self.rx_frames = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
                     self.rssi_values = [None for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
@@ -286,21 +280,20 @@ def main():
     logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
     experimentRx = ExperimentRx(following_time_to_run(), load_experiment_details())
 
-    experimentRx.informativeRx.program_running.wait()
-    logging.warning('INFORMATIVE THREAD RUNNING PASSED WAIT')
+    # experimentRx.informativeRx.program_running.wait()
+    # logging.warning('INFORMATIVE THREAD RUNNING PASSED WAIT')
     # experimentRx.informativeRx.join()
     # experimentRx.join()
-    logging.warning('MAIN THREAD BEFORE SYS EXIT')
+    # logging.warning('MAIN THREAD BEFORE SYS EXIT')
+
+    while experimentRx.end is False:
+        input = raw_input('>')
+        if input == 's':
+            print experimentRx.getStats()
+        elif input == 'q':
+            sys.exit(0)
+    logging.warning('Experiment END Variable: {0}'.format(experimentRx.end))
     sys.exit(0)
-    # sys.exit()
-    # while experimentRx.end is False:
-    #     input = raw_input('>')
-    #     if input == 's':
-    #         print experimentRx.getStats()
-    #     elif input == 'q':
-    #         sys.exit(0)
-    # logging.warning('Experiment END Variable: {0}'.format(experimentRx.end))
-    # sys.exit(0)
 
 if __name__ == '__main__':
     main()
