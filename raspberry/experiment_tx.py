@@ -44,8 +44,8 @@ class InformativeTx(threading.Thread):
 
     def run(self):
         logging.warning('THREAD INFORMATIVE TX 1')
-        while not self.end:
-            logging.warning('THREAD INFORMATIVE TX INSIDE LOOP')
+        # while not self.end:
+        while True:
             item = self.queue.get()
             if type(item) is tuple:
                 logging.warning('Time to send the frames {0} - {1} was {2} seconds\n'.format(item[0] - 100, item[0],
@@ -72,9 +72,10 @@ class ExperimentTx(threading.Thread):
         self.queue_tx = Queue.Queue()
         self.started_time = time.time()
         self.schedule = ['time' for i in range(len(self.settings["test_settings"]))]
-        self.program_running = threading.Event()
-        self.program_running.clear()
-        self.end = False
+        # self.program_running = threading.Event()
+        # self.program_running.clear()
+        self.end = threading.Event()
+        self.end.clear()
         # start the thread
         threading.Thread.__init__(self)
         self.name = 'ExperimentTx_'
@@ -94,6 +95,25 @@ class ExperimentTx(threading.Thread):
         self.radio_driver.radio_reset()
         # self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
 
+    def next_run_time(self):
+        """
+        it sets the next runtime for the whole experiment sequence in hours, minutes
+        :return: hours, minutes
+        """
+        current_time = time.gmtime()
+        if current_time[5] < 50:
+            if current_time[4] is not 59:
+                new_time = current_time[3], current_time[4] + 1
+            else:
+                new_time = (current_time[3] + 1) % 24, 0
+        else:
+            if current_time[4] is 59:
+                new_time = (current_time[3] + 1) % 24, 1
+            else:
+                new_time = current_time[3], current_time[4] + 2
+
+        return new_time
+
     def experiment_scheduling(self):
         s = sched.scheduler(time.time, time.sleep)
         time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
@@ -103,15 +123,16 @@ class ExperimentTx(threading.Thread):
             self.schedule[self.settings['test_settings'].index(item)] = offset
             offset += item['durationtx_s'] + SECURITY_TIME
         logging.warning(self.schedule)
-        s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
+        # s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
+        s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.end.set, ())
         s.run()
 
-    def stop_exp(self):
+    # def stop_exp(self):
         """
         it makes print the last modulation results
         """
-        self.end = True
-        self.program_running.set()
+        # self.end.set()
+        # self.program_running.set()
 
     def execute_exp(self, item):
         self.queue_tx.put(time.time() - self.started_time)
@@ -140,7 +161,8 @@ class ExperimentTx(threading.Thread):
             # now = time.time()
             self.radio_driver.radio_trx_enable()
             # send burst of frames
-            for i in range(item["numframes"]):
+            #for i in range(item["numframes"]):
+            for i in range(self.settings['numframes']):
 
                 # create frame
                 frameToSend = [frame_counter >> 8, frame_counter & 0xFF] + [i & 0xFF for i in range(FRAME_LENGTH - 2)]
@@ -159,10 +181,15 @@ class ExperimentTx(threading.Thread):
                 time.sleep(ifs)
     
     def run(self):
-        while not self.end:
-            logging.warning('THREAD EXPERIMENT TX')
-            self.radio_setup()
+        self.radio_setup()
+        # while not self.end:
+        while True:
+            # logging.warning('THREAD EXPERIMENT TX')
+            # self.radio_setup()
             self.experiment_scheduling()
+            self.end.wait()
+            self.end.clear()
+            self.hours, self.minutes = self.next_run_time()
 
     #  ======================== private =======================================
     
@@ -202,20 +229,20 @@ def main():
     logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
     experimentTx = ExperimentTx(following_time_to_run(), load_experiment_details())
 
-    experimentTx.program_running.wait()
+    # experimentTx.program_running.wait()
 
     # experimentTx.informativeTx.join()
     # experimentTx.join()
 
-    sys.exit(0)
-    # sys.exit()
-    # while True:
-    #    input = raw_input('>')
-    #     if input == 's':
-    #         print experimentTx.getStats()
-    #         # print 'print stats TX'
-    #     if input == 'q':
-    #         sys.exit(0)
+    # sys.exit(0)
+
+    while True:
+        input = raw_input('>')
+        if input == 's':
+            print experimentTx.getStats()
+            # print 'print stats TX'
+        if input == 'q':
+            sys.exit(0)
 
 if __name__ == '__main__':
     main()

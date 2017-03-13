@@ -37,15 +37,14 @@ class InformativeRx(threading.Thread):
         self.rssi_values = [None for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
         # self.name_file = '/home/pi/results/' + dt.now().strftime("%D_%H:%M:%S").replace('/', '_') + '_results.json'
         self.name_file = '/home/pi/outputRX/experiments.json'
-        self.current_modulation = None
+        # self.current_modulation = None
         self.results = {'type': 'end_of_cycle_rx', 'start_time_str': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
                         'start_time_epoch': time.time(),
-                        'radio_settings': None, 'Results: frames received:': self.count_rx,
-                        'RSSI_by_length': None, 'RX_string': None}
+                        'radio_settings': None, 'Rx_frames': 0, 'RSSI_by_length': None, 'RX_string': None}
 
-        self.results_per_settings = {}
-        self.program_running = threading.Event()
-        self.program_running.clear()
+        # self.results_per_settings = {}
+        # self.program_running = threading.Event()
+        # self.program_running.clear()
         # start the thread
         threading.Thread.__init__(self)
         self.name = 'InformativeRx'
@@ -60,21 +59,18 @@ class InformativeRx(threading.Thread):
         experiment and the modulation used.
         :returns: Nothing
         """
-        self.results = {
-            'radio_settings': self.current_modulation,
-            'Frames received:': self.count_rx,
-            'RSSI_by_length': {
+        # self.results['Frames received'] = self.count_rx
+        self.results['RSSI_by_length'] = {
                 '8':    self.rssi_values[0:self.settings['numframes']],
                 '127':  self.rssi_values[self.settings['numframes']:2*self.settings['numframes']],
                 '1000': self.rssi_values[2*self.settings['numframes']:3*self.settings['numframes']],
                 '2047': self.rssi_values[3*self.settings['numframes']:4*self.settings['numframes']]
             },
-            'RX_string': {
+        self.results['RX_string'] = {
                 '8':    ''.join(self.rx_frames[0:self.settings['numframes']]),
                 '127':  ''.join(self.rx_frames[self.settings['numframes']:2*self.settings['numframes']]),
                 '1000': ''.join(self.rx_frames[2*self.settings['numframes']:3*self.settings['numframes']]),
                 '2047': ''.join(self.rx_frames[3*self.settings['numframes']:4*self.settings['numframes']])
-            }
         }
 
     def show_results(self):
@@ -85,21 +81,21 @@ class InformativeRx(threading.Thread):
 
     def run(self):
         # logging.warning('THREAD INFORMATIVE RX 1')
-        while not self.end:
-
+        # while not self.end:
+        while True:
             item = self.queue.get()
             if item == 'Start':
                 if self.results['radio_settings'] is not None:
                     self.show_results()  # print to log file
                     self.rx_frames = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
                     self.rssi_values = [None for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
-                    self.count_rx = 0
+                    #self.count_rx = 0
+                    self.results['Rx_frames'] = 0
                     self.results['start_time_str'] = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime())
                     self.results['start_time_epoch'] = time.time()
                 else:
                     self.results['start_time_str'] = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime())
                     self.results['start_time_epoch'] = time.time()
-
 
             else:
                 if type(item) is tuple:
@@ -110,16 +106,18 @@ class InformativeRx(threading.Thread):
                         if item[0][0] * 256 + item[0][1] < 400:
                             self.rx_frames[item[0][0] * 256 + item[0][1]] = '.'
                             self.rssi_values[item[0][0] * 256 + item[0][1]] = float(item[1])
-                            self.count_rx += 1
+                            # self.count_rx += 1
+                            self.results['Rx_frames'] += 1
                     except Exception:
                         logging.warning('item: {0}'.format(item))
 
                 elif item == 'Print last':
                     self.show_results()
                     with open(self.name_file, 'a') as f:
-                        f.write(json.dumps(self.results_per_settings))
-                    self.program_running.set()
-                    self.end = True
+                        # f.write(json.dumps(self.results_per_settings))
+                        f.write(json.dumps(self.results))
+                    # self.program_running.set()
+                    # self.end = True
 
                 elif type(item) == float:
                     logging.warning('TIME: {0}'.format(item))
@@ -128,7 +126,7 @@ class InformativeRx(threading.Thread):
                     self.results['radio_settings'] = item
                     # logging.warning('Modulation: {0}'.format(item))
 
-        logging.warning('THREAD INFORMATIVE RX 2')
+        # logging.warning('THREAD INFORMATIVE RX 2')
 
 
 class ExperimentRx(threading.Thread):
@@ -141,17 +139,16 @@ class ExperimentRx(threading.Thread):
         self.settings = settings
         self.hours = time_to_run[0]
         self.minutes = time_to_run[1]
-        self.end = False
         self.queue_rx = Queue.Queue()
         self.count_frames_rx = 0
         self.started_time = time.time()
         self.schedule = [None for i in range(len(self.settings["test_settings"]))]
 
         # start the threads
-        self.program_running = threading.Event()
-        self.program_running.clear()
-        self.write_to_file = threading.Event()
-        self.write_to_file.clear()
+        self.end = threading.Event()
+        self.end.clear()
+        # self.program_running = threading.Event()
+        # self.program_running.clear()
         threading.Thread.__init__(self)
         self.name = 'ExperimentRx'
         self.daemon = True
@@ -176,6 +173,7 @@ class ExperimentRx(threading.Thread):
         it makes print the last modulation results
         """
         self.queue_rx.put('Print last')
+        self.end.set()
 
     def experiment_scheduling(self):
         """
@@ -191,8 +189,28 @@ class ExperimentRx(threading.Thread):
             self.schedule[self.settings['test_settings'].index(item)] = offset
             offset += item['durationtx_s'] + SECURITY_TIME
         logging.warning(self.schedule)
+        # s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
         s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
         s.run()
+
+    def next_run_time(self):
+        """
+        it sets the next runtime for the whole experiment sequence in hours, minutes
+        :return: hours, minutes
+        """
+        current_time = time.gmtime()
+        if current_time[5] < 50:
+            if current_time[4] is not 59:
+                new_time = current_time[3], current_time[4]+1
+            else:
+                new_time = (current_time[3] + 1) % 24, 0
+        else:
+            if current_time[4] is 59:
+                new_time = (current_time[3] + 1) % 24, 1
+            else:
+                new_time = current_time[3], current_time[4] + 2
+
+        return new_time
 
     def execute_exp(self, item):
         """
@@ -226,17 +244,24 @@ class ExperimentRx(threading.Thread):
         #    print('TIMER 10 Seconds triggers')
 
     def run(self):
-        while not self.end:
-            logging.warning('THREAD EXPERIMENT RX')
-            self.radio_setup()
+        self.radio_setup()
+        # while not self.end:
+        while True:
+            # logging.warning('THREAD EXPERIMENT RX')
+            # self.radio_setup()
             self.experiment_scheduling()
-        logging.warning('THREAD EXPERIMENT RX OUT')
+            self.end.wait()
+            self.end.clear()
+            self.hours, self.minutes = self.next_run_time()
+        # logging.warning('THREAD EXPERIMENT RX OUT')
         # FIXME: replace by an event from the GPS thread
 
     #  ======================== public ========================================
 
     def getStats(self):
-        logging.warning('Results ongoing {0}'.format(self.informativeRx.results_per_settings))
+        # logging.warning('Results ongoing {0}'.format(self.informativeRx.results_per_settings))
+        logging.warning('SHOW SOMETHING HERE')
+
 
     #  ====================== private =========================================
 
@@ -280,20 +305,15 @@ def main():
     logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
     experimentRx = ExperimentRx(following_time_to_run(), load_experiment_details())
 
-    # experimentRx.informativeRx.program_running.wait()
-    # logging.warning('INFORMATIVE THREAD RUNNING PASSED WAIT')
-    # experimentRx.informativeRx.join()
-    # experimentRx.join()
-    # logging.warning('MAIN THREAD BEFORE SYS EXIT')
-
-    while experimentRx.end is False:
+    # while experimentRx.end is False:
+    while True:
         input = raw_input('>')
         if input == 's':
             print experimentRx.getStats()
         elif input == 'q':
             sys.exit(0)
-    logging.warning('Experiment END Variable: {0}'.format(experimentRx.end))
-    sys.exit(0)
+    # logging.warning('Experiment END Variable: {0}'.format(experimentRx.end))
+    # sys.exit(0)
 
 if __name__ == '__main__':
     main()
