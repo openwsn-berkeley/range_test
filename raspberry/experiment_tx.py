@@ -25,14 +25,20 @@ START_OFFSET  = 4.5  # 4.5 seconds after the starting time arrives.
 
 class InformativeTx(threading.Thread):
 
-    def __init__(self, queue, end):
+    def __init__(self, queue, end, settings):
 
         # store parameters
         self.queue = queue
         self.results = {'Time Experiment:': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
                         'Time for this set of settings:': None}
+        self.settings = settings
         self.end = end
         # local variables
+        self.name_file = '/home/pi/range_test_raw_data/experiments.json'
+        # self.current_modulation = None
+        self.results = {'type': 'end_of_cycle_tx', 'start_time_str': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
+                        'start_time_epoch': time.time(), 'radio_settings': None, 'nmea_at_start': None,
+                        'version': self.settings['version'], 'channel': None, 'frequency_0': None}
 
         # start the thread
         threading.Thread.__init__(self)
@@ -47,14 +53,28 @@ class InformativeTx(threading.Thread):
         # while not self.end:
         while True:
             item = self.queue.get()
-            if type(item) is tuple:
+            if item == 'Start':
+                self.results['start_time_str'] = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime())
+                self.results['start_time_epoch'] = time.time()
+                if self.results['radio_settings'] is not None:
+                    with open(self.name_file, 'a') as f:
+                        f.write(json.dumps(self.results.copy()))
+
+            elif item == 'Print last':
+                with open(self.name_file, 'a') as f:
+                    f.write(json.dumps(self.results.copy()))
+
+            elif type(item) is tuple:
                 logging.warning('Time to send the frames {0} - {1} was {2} seconds\n'.format(item[0] - 100, item[0],
                                                                                              item[1]))
+            elif type(item) is dict:
+                self.results['frequency_0'] = item['frequency_0_kHz']
+                self.results['channel'] = item['channel']
+                self.results['radio_settings'] = item['modulation']
             elif type(item) is float:
                 logging.warning('Time {0}'.format(item))
             else:
-                logging.warning('Modulation used is: {0}\n'.format(item))
-        logging.warning('THREAD INFORMATIVE TX 2')
+                logging.warning('UNKNOWN ITEM')
 
 
 class ExperimentTx(threading.Thread):
@@ -82,7 +102,7 @@ class ExperimentTx(threading.Thread):
         self.daemon = True
         self.start()
 
-        self.informativeTx = InformativeTx(self.queue_tx, self.end)
+        self.informativeTx = InformativeTx(self.queue_tx, self.end, self.settings)
 
         # configure the logging module
         logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
@@ -114,6 +134,13 @@ class ExperimentTx(threading.Thread):
 
         return new_time
 
+    def stop_exp(self):
+        """
+        it makes print the last modulation results
+        """
+        self.queue_tx.put('Print last')
+        self.end.set()
+
     def experiment_scheduling(self):
         s = sched.scheduler(time.time, time.sleep)
         time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
@@ -124,7 +151,7 @@ class ExperimentTx(threading.Thread):
             offset += item['durationtx_s'] + SECURITY_TIME
         logging.warning(self.schedule)
         # s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
-        s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.end.set, ())
+        s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
         s.run()
 
     # def stop_exp(self):
@@ -151,17 +178,18 @@ class ExperimentTx(threading.Thread):
                                                item['frequency_0_kHz'],
                                                item['channel']))
 
-        # log the config name
-        self.queue_tx.put(item['modulation'])
+        # let know to the informative class the beginning of a new experiment
+        self.queue_tx.put('Start')
 
-        # noww = time.time()
+        # log the config name
+        self.queue_tx.put(item)
+
         # loop through packet lengths
         for frame_length, ifs in zip(self.settings["frame_lengths"], self.settings["IFS"]):
 
             # now = time.time()
             self.radio_driver.radio_trx_enable()
             # send burst of frames
-            #for i in range(item["numframes"]):
             for i in range(self.settings['numframes']):
 
                 # create frame
@@ -173,9 +201,6 @@ class ExperimentTx(threading.Thread):
                 # send frame
                 self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE])
                 self.radio_driver.radio_tx_now()
-
-                # checking what I'm sending
-                # self.queue_tx.put(frameToSend[:frame_length - CRC_SIZE])
 
                 # IFS
                 time.sleep(ifs)
@@ -208,33 +233,29 @@ def load_experiment_details():
 
 def following_time_to_run():
     """
-    according to the current time, it sets the time for the next experiment either at the current hour and 30 minutes
-    or at the next hour and cero minutes
-    :return: the time for the next experiment.
+    it sets the next runtime for the whole experiment sequence in hours, minutes
+    current_time[3] = hours, current_time[4] = minutes, current_time[5] = seconds
+    :return: hours, minutes
     """
     current_time = time.gmtime()
-    # if current_time[4] < 30:
-    #     time_to_run = (current_time[3], 30)  # Same hour, at 30 minutes
-    # else:
-    #     time_to_run = (current_time[3] + 1, 0)  # Next hour, 00 minutes
-    #
-    # return time_to_run
-    return current_time[3], current_time[4] + 1
+    if current_time[5] < 50:
+        if current_time[4] is not 59:
+            new_time = current_time[3], current_time[4] + 1
+        else:
+            new_time = (current_time[3] + 1) % 24, 0
+    else:
+        if current_time[4] is 59:
+            new_time = (current_time[3] + 1) % 24, 1
+        else:
+            new_time = current_time[3], current_time[4] + 2
+
+    return new_time
 
 
 def main():
-    # hours = int(sys.argv[1])
-    # minutes = int(sys.argv[2])
-    # logging.basicConfig(filename='range_test_rx.log', level=logging.WARNING)
+
     logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
     experimentTx = ExperimentTx(following_time_to_run(), load_experiment_details())
-
-    # experimentTx.program_running.wait()
-
-    # experimentTx.informativeTx.join()
-    # experimentTx.join()
-
-    # sys.exit(0)
 
     while True:
         input = raw_input('>')

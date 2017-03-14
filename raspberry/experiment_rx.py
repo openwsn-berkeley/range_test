@@ -36,11 +36,12 @@ class InformativeRx(threading.Thread):
         self.rx_frames = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
         self.rssi_values = [None for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
         # self.name_file = '/home/pi/results/' + dt.now().strftime("%D_%H:%M:%S").replace('/', '_') + '_results.json'
-        self.name_file = '/home/pi/outputRX/experiments.json'
+        self.name_file = '/home/pi/range_test_raw_data/experiments.json'
         # self.current_modulation = None
         self.results = {'type': 'end_of_cycle_rx', 'start_time_str': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
-                        'start_time_epoch': time.time(),
-                        'radio_settings': None, 'Rx_frames': 0, 'RSSI_by_length': None, 'RX_string': None}
+                        'start_time_epoch': time.time(), 'version': self.settings['version'], 'position_description': None,
+                        'radio_settings': None, 'Rx_frames': 0, 'RSSI_by_length': None, 'RX_string': None,
+                        'nmea_at_start': None, 'channel': None, 'frequency_0': None}
 
         # self.results_per_settings = {}
         # self.program_running = threading.Event()
@@ -121,10 +122,15 @@ class InformativeRx(threading.Thread):
 
                 elif type(item) == float:
                     logging.warning('TIME: {0}'.format(item))
-                else:
+
+                elif type(item) is dict:
+                    self.results['frequency_0'] = item['frequency_0_kHz']
+                    self.results['channel'] = item['channel']
+                    self.results['radio_settings'] = item['modulation']
+
+                else :
                     # self.current_modulation = item
-                    self.results['radio_settings'] = item
-                    # logging.warning('Modulation: {0}'.format(item))
+                    logging.warning('UNKNOWN ITEM')
 
         # logging.warning('THREAD INFORMATIVE RX 2')
 
@@ -196,6 +202,7 @@ class ExperimentRx(threading.Thread):
     def next_run_time(self):
         """
         it sets the next runtime for the whole experiment sequence in hours, minutes
+        current_time[3] = hours, current_time[4] = minutes, current_time[5] = seconds
         :return: hours, minutes
         """
         current_time = time.gmtime()
@@ -230,7 +237,7 @@ class ExperimentRx(threading.Thread):
         self.queue_rx.put('Start')
 
         # show the config
-        self.queue_rx.put(item['modulation'])
+        self.queue_rx.put(item)
 
         # put the radio into RX mode
         self.radio_driver.radio_trx_enable()
@@ -284,36 +291,36 @@ def load_experiment_details():
 
 def following_time_to_run():
     """
-    according to the current time, it sets the time for the next experiment either at the current hour and 30 minutes
-    or at the next hour and cero minutes
-    :return: the time for the next experiment.
+    it sets the next runtime for the whole experiment sequence in hours, minutes
+    current_time[3] = hours, current_time[4] = minutes, current_time[5] = seconds
+    :return: hours, minutes
     """
     current_time = time.gmtime()
-    # if current_time[4] < 30:
-    #     time_to_run = (current_time[3], 30)
-    # else:
-    #     time_to_run = (current_time[3] + 1, 0)
-    #
-    # return time_to_run[0], time_to_run[1]
-    return current_time[3], current_time[4]+1
+    if current_time[5] < 50:
+        if current_time[4] is not 59:
+            new_time = current_time[3], current_time[4] + 1
+        else:
+            new_time = (current_time[3] + 1) % 24, 0
+    else:
+        if current_time[4] is 59:
+            new_time = (current_time[3] + 1) % 24, 1
+        else:
+            new_time = current_time[3], current_time[4] + 2
+
+    return new_time
 
 
 def main():
-    # hours = int(sys.argv[1])
-    # minutes = int(sys.argv[2])
-    # logging.basicConfig(filename='range_test_rx.log', level=logging.WARNING)
+
     logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
     experimentRx = ExperimentRx(following_time_to_run(), load_experiment_details())
 
-    # while experimentRx.end is False:
     while True:
         input = raw_input('>')
         if input == 's':
             print experimentRx.getStats()
         elif input == 'q':
             sys.exit(0)
-    # logging.warning('Experiment END Variable: {0}'.format(experimentRx.end))
-    # sys.exit(0)
 
 if __name__ == '__main__':
     main()
