@@ -150,16 +150,8 @@ class ExperimentTx(threading.Thread):
             self.schedule[self.settings['test_settings'].index(item)] = offset
             offset += item['durationtx_s'] + SECURITY_TIME
         logging.warning(self.schedule)
-        # s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
         s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
         s.run()
-
-    # def stop_exp(self):
-        """
-        it makes print the last modulation results
-        """
-        # self.end.set()
-        # self.program_running.set()
 
     def execute_exp(self, item):
         self.queue_tx.put(time.time() - self.started_time)
@@ -207,10 +199,8 @@ class ExperimentTx(threading.Thread):
     
     def run(self):
         self.radio_setup()
-        # while not self.end:
         while True:
             # logging.warning('THREAD EXPERIMENT TX')
-            # self.radio_setup()
             self.experiment_scheduling()
             self.end.wait()
             self.end.clear()

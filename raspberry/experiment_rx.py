@@ -37,15 +37,11 @@ class InformativeRx(threading.Thread):
         self.rssi_values = [None for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
         # self.name_file = '/home/pi/results/' + dt.now().strftime("%D_%H:%M:%S").replace('/', '_') + '_results.json'
         self.name_file = '/home/pi/range_test_raw_data/experiments.json'
-        # self.current_modulation = None
         self.results = {'type': 'end_of_cycle_rx', 'start_time_str': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
                         'start_time_epoch': time.time(), 'version': self.settings['version'], 'position_description': None,
                         'radio_settings': None, 'Rx_frames': 0, 'RSSI_by_length': None, 'RX_string': None,
                         'nmea_at_start': None, 'channel': None, 'frequency_0': None}
 
-        # self.results_per_settings = {}
-        # self.program_running = threading.Event()
-        # self.program_running.clear()
         # start the thread
         threading.Thread.__init__(self)
         self.name = 'InformativeRx'
@@ -76,13 +72,11 @@ class InformativeRx(threading.Thread):
 
     def show_results(self):
         self.rx_frames_psize()
-        # self.results_per_settings[self.current_modulation] = self.results.copy()
         with open(self.name_file, 'a') as f:
             f.write(json.dumps(self.results.copy()))
 
     def run(self):
         # logging.warning('THREAD INFORMATIVE RX 1')
-        # while not self.end:
         while True:
             item = self.queue.get()
             if item == 'Start':
@@ -100,9 +94,6 @@ class InformativeRx(threading.Thread):
 
             else:
                 if type(item) is tuple:
-                    # logging.warning('item: {0}'.format(item))
-                    # logging.debug('FRAME number: {0}, frame size: {1}, RSSI: {2} dBm,  CRC: {3}, MCS: {4}\n'.
-                    #               format(item[0][0] * 256 + item[0][1], len(item[0]), item[1], item[2], item[3]))
                     try:
                         if item[0][0] * 256 + item[0][1] < 400:
                             self.rx_frames[item[0][0] * 256 + item[0][1]] = '.'
@@ -115,10 +106,7 @@ class InformativeRx(threading.Thread):
                 elif item == 'Print last':
                     self.show_results()
                     with open(self.name_file, 'a') as f:
-                        # f.write(json.dumps(self.results_per_settings))
                         f.write(json.dumps(self.results))
-                    # self.program_running.set()
-                    # self.end = True
 
                 elif type(item) == float:
                     logging.warning('TIME: {0}'.format(item))
@@ -128,8 +116,7 @@ class InformativeRx(threading.Thread):
                     self.results['channel'] = item['channel']
                     self.results['radio_settings'] = item['modulation']
 
-                else :
-                    # self.current_modulation = item
+                else:
                     logging.warning('UNKNOWN ITEM')
 
         # logging.warning('THREAD INFORMATIVE RX 2')
@@ -153,8 +140,6 @@ class ExperimentRx(threading.Thread):
         # start the threads
         self.end = threading.Event()
         self.end.clear()
-        # self.program_running = threading.Event()
-        # self.program_running.clear()
         threading.Thread.__init__(self)
         self.name = 'ExperimentRx'
         self.daemon = True
@@ -195,7 +180,6 @@ class ExperimentRx(threading.Thread):
             self.schedule[self.settings['test_settings'].index(item)] = offset
             offset += item['durationtx_s'] + SECURITY_TIME
         logging.warning(self.schedule)
-        # s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
         s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
         s.run()
 
@@ -252,15 +236,12 @@ class ExperimentRx(threading.Thread):
 
     def run(self):
         self.radio_setup()
-        # while not self.end:
         while True:
-            # logging.warning('THREAD EXPERIMENT RX')
-            # self.radio_setup()
             self.experiment_scheduling()
             self.end.wait()
             self.end.clear()
             self.hours, self.minutes = self.next_run_time()
-        # logging.warning('THREAD EXPERIMENT RX OUT')
+
         # FIXME: replace by an event from the GPS thread
 
     #  ======================== public ========================================
