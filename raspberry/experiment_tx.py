@@ -89,6 +89,7 @@ class ExperimentTx(threading.Thread):
         self.settings = settings
         self.hours = time_to_run[0]
         self.minutes = time_to_run[1]
+        self.first_run = False
         self.queue_tx = Queue.Queue()
         self.started_time = time.time()
         self.schedule = ['time' for i in range(len(self.settings["test_settings"]))]
@@ -144,7 +145,11 @@ class ExperimentTx(threading.Thread):
     def experiment_scheduling(self):
         s = sched.scheduler(time.time, time.sleep)
         time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
-        offset = START_OFFSET
+        if self.first_run is False:
+            offset = START_OFFSET
+            self.first_run = True
+        else:
+            offset = 0
         for item in self.settings['test_settings']:
             s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
             self.schedule[self.settings['test_settings'].index(item)] = offset
@@ -204,7 +209,7 @@ class ExperimentTx(threading.Thread):
             self.experiment_scheduling()
             self.end.wait()
             self.end.clear()
-            self.hours, self.minutes = self.next_run_time()
+            # self.hours, self.minutes = self.next_run_time()
 
     #  ======================== private =======================================
     

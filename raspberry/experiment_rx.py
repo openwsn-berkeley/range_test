@@ -132,6 +132,7 @@ class ExperimentRx(threading.Thread):
         self.settings = settings
         self.hours = time_to_run[0]
         self.minutes = time_to_run[1]
+        self.first_run = False
         self.queue_rx = Queue.Queue()
         self.count_frames_rx = 0
         self.started_time = time.time()
@@ -174,7 +175,11 @@ class ExperimentRx(threading.Thread):
         s = sched.scheduler(time.time, time.sleep)
         time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
         logging.warning('TIME: {0}'.format(time_to_start))
-        offset = START_OFFSET
+        if self.first_run is False:
+            offset = START_OFFSET
+            self.first_run = True
+        else:
+            offset = 0
         for item in self.settings['test_settings']:
             s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
             self.schedule[self.settings['test_settings'].index(item)] = offset
@@ -240,7 +245,7 @@ class ExperimentRx(threading.Thread):
             self.experiment_scheduling()
             self.end.wait()
             self.end.clear()
-            self.hours, self.minutes = self.next_run_time()
+            # self.hours, self.minutes = self.next_run_time()
 
         # FIXME: replace by an event from the GPS thread
 

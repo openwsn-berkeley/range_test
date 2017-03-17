@@ -151,7 +151,7 @@ modulations_settings = {
         (RG_RF09_TXCUTC,        0xC0),
         (RG_RF09_TXDFE,         0x98),
         (RG_RF09_PAC,           0x64),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
-        (RG_BBC0_IRQM,          0x12),  # TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
+        (RG_BBC0_IRQM,          0x12),  # TXFE, RXFE, interrupts enabled
         (RG_BBC1_IRQM,          0x00),
         (RG_BBC0_PC,            0x15),  # // No FCS filter, 32 bits FCS, FSK.
         (RG_BBC0_FSKDM,         0x01),  # //Direct modulation enabled and Pre-emphasis disabled.
