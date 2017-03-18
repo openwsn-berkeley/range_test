@@ -92,9 +92,8 @@ class ExperimentTx(threading.Thread):
         self.first_run = False
         self.queue_tx = Queue.Queue()
         self.started_time = time.time()
+        self.cumulative_time = 0
         self.schedule = ['time' for i in range(len(self.settings["test_settings"]))]
-        # self.program_running = threading.Event()
-        # self.program_running.clear()
         self.end = threading.Event()
         self.end.clear()
         # start the thread
@@ -148,12 +147,14 @@ class ExperimentTx(threading.Thread):
         if self.first_run is False:
             offset = START_OFFSET
             self.first_run = True
+            logging.warning('TIME: {0}'.format(time_to_start))
         else:
-            offset = 0
+            offset = self.cumulative_time + 2
         for item in self.settings['test_settings']:
             s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
             self.schedule[self.settings['test_settings'].index(item)] = offset
             offset += item['durationtx_s'] + SECURITY_TIME
+        self.cumulative_time = offset
         logging.warning(self.schedule)
         s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
         s.run()

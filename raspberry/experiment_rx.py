@@ -73,7 +73,7 @@ class InformativeRx(threading.Thread):
     def show_results(self):
         self.rx_frames_psize()
         with open(self.name_file, 'a') as f:
-            f.write(json.dumps(self.results.copy()))
+            f.write(json.dumps([self.results.copy()]))
 
     def run(self):
         # logging.warning('THREAD INFORMATIVE RX 1')
@@ -105,8 +105,9 @@ class InformativeRx(threading.Thread):
 
                 elif item == 'Print last':
                     self.show_results()
-                    with open(self.name_file, 'a') as f:
-                        f.write(json.dumps(self.results))
+                    self.results['radio_settings'] = None
+                    # with open(self.name_file, 'a') as f:
+                    #    f.write(json.dumps(self.results))
 
                 elif type(item) == float:
                     logging.warning('TIME: {0}'.format(item))
@@ -136,6 +137,7 @@ class ExperimentRx(threading.Thread):
         self.queue_rx = Queue.Queue()
         self.count_frames_rx = 0
         self.started_time = time.time()
+        self.cumulative_time = 0
         self.schedule = [None for i in range(len(self.settings["test_settings"]))]
 
         # start the threads
@@ -174,16 +176,17 @@ class ExperimentRx(threading.Thread):
         """
         s = sched.scheduler(time.time, time.sleep)
         time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
-        logging.warning('TIME: {0}'.format(time_to_start))
         if self.first_run is False:
             offset = START_OFFSET
             self.first_run = True
+            logging.warning('TIME: {0}'.format(time_to_start))
         else:
-            offset = 0
+            offset = self.cumulative_time + 2
         for item in self.settings['test_settings']:
             s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
             self.schedule[self.settings['test_settings'].index(item)] = offset
             offset += item['durationtx_s'] + SECURITY_TIME
+        self.cumulative_time = offset
         logging.warning(self.schedule)
         s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
         s.run()
