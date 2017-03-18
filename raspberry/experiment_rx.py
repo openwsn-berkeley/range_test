@@ -24,12 +24,12 @@ SECURITY_TIME = 3    # 3 seconds to give more time to TRX to complete the 400 fr
 START_OFFSET  = 3.5  # 3.5 seconds after the starting time arrives.
 
 
-class InformativeRx(threading.Thread):
-    def __init__(self, queue, end, settings):
+class LoggerRx(threading.Thread):
+    def __init__(self, queue, settings):
 
         # store parameters
         self.queue = queue
-        self.end = end
+        # self.end_of_series = end_of_series
         self.settings = settings
         # local variables
         self.count_rx = 0
@@ -44,7 +44,7 @@ class InformativeRx(threading.Thread):
 
         # start the thread
         threading.Thread.__init__(self)
-        self.name = 'InformativeRx'
+        self.name = 'LoggerRx'
         self.daemon = True
         self.start()
 
@@ -141,15 +141,16 @@ class ExperimentRx(threading.Thread):
         self.schedule = [None for i in range(len(self.settings["test_settings"]))]
 
         # start the threads
-        self.end = threading.Event()
-        self.end.clear()
+        self.end_of_series = threading.Event()
+        self.end_of_series.clear()
         threading.Thread.__init__(self)
         self.name = 'ExperimentRx'
         self.daemon = True
         self.start()
 
-        # initializes the InformativeRx class, in charge of the logging part
-        self.informativeRx = InformativeRx(self.queue_rx, self.end, self.settings)
+        # initializes the LoggerRx class, in charge of the logging part
+        # self.LoggerRx = LoggerRx(self.queue_rx, self.end_of_series, self.settings)
+        self.LoggerRx = LoggerRx(self.queue_rx, self.settings)
 
     def radio_setup(self):
         """
@@ -167,7 +168,7 @@ class ExperimentRx(threading.Thread):
         it makes print the last modulation results
         """
         self.queue_rx.put('Print last')
-        self.end.set()
+        self.end_of_series.set()
 
     def experiment_scheduling(self):
         """
@@ -191,25 +192,25 @@ class ExperimentRx(threading.Thread):
         s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
         s.run()
 
-    def next_run_time(self):
-        """
-        it sets the next runtime for the whole experiment sequence in hours, minutes
-        current_time[3] = hours, current_time[4] = minutes, current_time[5] = seconds
-        :return: hours, minutes
-        """
-        current_time = time.gmtime()
-        if current_time[5] < 50:
-            if current_time[4] is not 59:
-                new_time = current_time[3], current_time[4]+1
-            else:
-                new_time = (current_time[3] + 1) % 24, 0
-        else:
-            if current_time[4] is 59:
-                new_time = (current_time[3] + 1) % 24, 1
-            else:
-                new_time = current_time[3], current_time[4] + 2
-
-        return new_time
+    # def next_run_time(self):
+    #     """
+    #     it sets the next runtime for the whole experiment sequence in hours, minutes
+    #     current_time[3] = hours, current_time[4] = minutes, current_time[5] = seconds
+    #     :return: hours, minutes
+    #     """
+    #     current_time = time.gmtime()
+    #     if current_time[5] < 50:
+    #         if current_time[4] is not 59:
+    #             new_time = current_time[3], current_time[4]+1
+    #         else:
+    #             new_time = (current_time[3] + 1) % 24, 0
+    #     else:
+    #         if current_time[4] is 59:
+    #             new_time = (current_time[3] + 1) % 24, 1
+    #         else:
+    #             new_time = current_time[3], current_time[4] + 2
+    #
+    #     return new_time
 
     def execute_exp(self, item):
         """
@@ -246,8 +247,8 @@ class ExperimentRx(threading.Thread):
         self.radio_setup()
         while True:
             self.experiment_scheduling()
-            self.end.wait()
-            self.end.clear()
+            self.end_of_series.wait()
+            self.end_of_series.clear()
             # self.hours, self.minutes = self.next_run_time()
 
         # FIXME: replace by an event from the GPS thread
@@ -255,7 +256,7 @@ class ExperimentRx(threading.Thread):
     #  ======================== public ========================================
 
     def getStats(self):
-        # logging.warning('Results ongoing {0}'.format(self.informativeRx.results_per_settings))
+        # logging.warning('Results ongoing {0}'.format(self.LoggerRx.results_per_settings))
         logging.warning('SHOW SOMETHING HERE')
 
 

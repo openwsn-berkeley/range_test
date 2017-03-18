@@ -23,16 +23,16 @@ SECURITY_TIME = 3  # 3 seconds to give more time to TRX to complete the 400 fram
 START_OFFSET  = 4.5  # 4.5 seconds after the starting time arrives.
 
 
-class InformativeTx(threading.Thread):
+class LoggerTx(threading.Thread):
 
-    def __init__(self, queue, end, settings):
+    def __init__(self, queue, settings):
 
         # store parameters
         self.queue = queue
-        self.results = {'Time Experiment:': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
-                        'Time for this set of settings:': None}
+        # self.results = {'Time Experiment:': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
+        #                'Time for this set of settings:': None}
         self.settings = settings
-        self.end = end
+        # self.end = end
         # local variables
         self.name_file = '/home/pi/range_test_raw_data/experiments.json'
         # self.current_modulation = None
@@ -42,7 +42,7 @@ class InformativeTx(threading.Thread):
 
         # start the thread
         threading.Thread.__init__(self)
-        self.name = 'InformativeTx'
+        self.name = 'LoggerTx'
         self.daemon = True
         self.start()
 
@@ -80,6 +80,7 @@ class InformativeTx(threading.Thread):
 class ExperimentTx(threading.Thread):
     """
     :param time_to_run: tuple (hours, minutes) for the next TRX experiment to run
+    :param settings:
     """
     
     def __init__(self, time_to_run, settings):
@@ -94,15 +95,16 @@ class ExperimentTx(threading.Thread):
         self.started_time = time.time()
         self.cumulative_time = 0
         self.schedule = ['time' for i in range(len(self.settings["test_settings"]))]
-        self.end = threading.Event()
-        self.end.clear()
+        self.end_of_series = threading.Event()
+        self.end_of_series.clear()
         # start the thread
         threading.Thread.__init__(self)
         self.name = 'ExperimentTx_'
         self.daemon = True
         self.start()
 
-        self.informativeTx = InformativeTx(self.queue_tx, self.end, self.settings)
+        # self.LoggerTx = LoggerTx(self.queue_tx, self.end_of_series, self.settings)
+        self.LoggerTx = LoggerTx(self.queue_tx, self.settings)
 
         # configure the logging module
         logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
@@ -115,31 +117,31 @@ class ExperimentTx(threading.Thread):
         self.radio_driver.radio_reset()
         # self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
 
-    def next_run_time(self):
-        """
-        it sets the next runtime for the whole experiment sequence in hours, minutes
-        :return: hours, minutes
-        """
-        current_time = time.gmtime()
-        if current_time[5] < 50:
-            if current_time[4] is not 59:
-                new_time = current_time[3], current_time[4] + 1
-            else:
-                new_time = (current_time[3] + 1) % 24, 0
-        else:
-            if current_time[4] is 59:
-                new_time = (current_time[3] + 1) % 24, 1
-            else:
-                new_time = current_time[3], current_time[4] + 2
-
-        return new_time
+    # def next_run_time(self):
+    #     """
+    #     it sets the next runtime for the whole experiment sequence in hours, minutes
+    #     :return: hours, minutes
+    #     """
+    #     current_time = time.gmtime()
+    #     if current_time[5] < 50:
+    #         if current_time[4] is not 59:
+    #             new_time = current_time[3], current_time[4] + 1
+    #         else:
+    #             new_time = (current_time[3] + 1) % 24, 0
+    #     else:
+    #         if current_time[4] is 59:
+    #             new_time = (current_time[3] + 1) % 24, 1
+    #         else:
+    #             new_time = current_time[3], current_time[4] + 2
+    #
+    #     return new_time
 
     def stop_exp(self):
         """
         it makes print the last modulation results
         """
         self.queue_tx.put('Print last')
-        self.end.set()
+        self.end_of_series.set()
 
     def experiment_scheduling(self):
         s = sched.scheduler(time.time, time.sleep)
@@ -208,8 +210,8 @@ class ExperimentTx(threading.Thread):
         while True:
             # logging.warning('THREAD EXPERIMENT TX')
             self.experiment_scheduling()
-            self.end.wait()
-            self.end.clear()
+            self.end_of_series.wait()
+            self.end_of_series.clear()
             # self.hours, self.minutes = self.next_run_time()
 
     #  ======================== private =======================================
