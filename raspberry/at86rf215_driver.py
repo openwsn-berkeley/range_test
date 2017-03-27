@@ -36,7 +36,7 @@ RADIOSTATE_TXRX_DONE = 0x05  # ///< Packet is fully loaded in the radio's TX buf
 
 class At86rf215(object):
     
-    def __init__(self, cb):
+    def __init__(self, cb, start_experiment):
         
         # store params
         self.cb = cb
@@ -48,11 +48,13 @@ class At86rf215(object):
         self.state_tx_now       = threading.Event()
         self.state_IFS          = threading.Event()
         self.state_reset        = threading.Event()
+        self.start_experiment   = start_experiment
         self.count              = 0
-        self.counter = 0
+        self.counter            = 0
 
         self.state              = {'state_TRXprep': self.state_trx_prep, 'state_TXnow': self.state_tx_now,
                                    'state_RF_reset': self.state_reset}
+
         self.state['state_TRXprep'].clear()
         self.state['state_TXnow'].clear()
         self.state['state_RF_reset'].clear()
@@ -74,7 +76,7 @@ class At86rf215(object):
 
         FIXME: document parameter "channel"
         """
-        now = time.time()
+        # now = time.time()
         isr = self.radio_read_spi(defs.RG_RF09_IRQS, 4)
         if isr[0] & defs.IRQS_WAKEUP:
             self.at86_state = RADIOSTATE_RFOFF
@@ -95,10 +97,13 @@ class At86rf215(object):
             (pkt_rcv, rssi, crc, mcs) = self.radio_get_received_frame()
             self.cb(pkt_rcv, rssi, crc, mcs)
 
-    def cb_gpio(self, channel = 3):
+    def cb_gpio_isr(self, channel = 3):
         self.read_isr_source()
 
-    def radio_init(self, channel=3):
+    def cb_gpio_startExp(self, channel = 13):
+        self.start_experiment.set()
+
+    def radio_init(self, channel=3, channel_start_exp = 13):
         """
         Initialize the GPIO and SPI modules.
         :param channel: the number of the GPIO-pin which receives the IRQ pin from the radio.
@@ -112,7 +117,9 @@ class At86rf215(object):
         # GPIO.cleanup()
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(channel, GPIO.IN)
-        GPIO.add_event_detect(channel, GPIO.RISING, self.cb_gpio)
+        GPIO.setup(channel_start_exp, GPIO.IN)
+        GPIO.add_event_detect(channel, GPIO.RISING, self.cb_gpio_isr)
+        GPIO.add_event_detect(channel_start_exp, GPIO.RISING, self.cb_gpio_startExp)
 
     def radio_reset(self):
         """

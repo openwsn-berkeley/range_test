@@ -40,7 +40,8 @@ class LoggerRx(threading.Thread):
         self.results = {'type': 'end_of_cycle_rx', 'start_time_str': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
                         'start_time_epoch': time.time(), 'version': self.settings['version'], 'position_description': None,
                         'radio_settings': None, 'Rx_frames': 0, 'RSSI_by_length': None, 'RX_string': None,
-                        'nmea_at_start': None, 'channel': None, 'frequency_0': None}
+                        'nmea_at_start': None, 'channel': None, 'frequency_0': None,
+                        'burst_size': self.settings['numframes']}
 
         # start the thread
         threading.Thread.__init__(self)
@@ -76,7 +77,7 @@ class LoggerRx(threading.Thread):
             f.write(json.dumps([self.results.copy()]))
 
     def run(self):
-        # logging.warning('THREAD INFORMATIVE RX 1')
+
         while True:
             item = self.queue.get()
             if item == 'Start':
@@ -84,7 +85,6 @@ class LoggerRx(threading.Thread):
                     self.show_results()  # print to log file
                     self.rx_frames = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
                     self.rssi_values = [None for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
-                    #self.count_rx = 0
                     self.results['Rx_frames'] = 0
                     self.results['start_time_str'] = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime())
                     self.results['start_time_epoch'] = time.time()
@@ -98,7 +98,6 @@ class LoggerRx(threading.Thread):
                         if item[0][0] * 256 + item[0][1] < 400:
                             self.rx_frames[item[0][0] * 256 + item[0][1]] = '.'
                             self.rssi_values[item[0][0] * 256 + item[0][1]] = float(item[1])
-                            # self.count_rx += 1
                             self.results['Rx_frames'] += 1
                     except Exception:
                         logging.warning('item: {0}'.format(item))
@@ -124,15 +123,13 @@ class LoggerRx(threading.Thread):
 
 
 class ExperimentRx(threading.Thread):
-    """
-    :param time_to_run: tuple (hours, minutes) for the next TRX experiment to run
-    """
-    def __init__(self, time_to_run, settings):
+
+    def __init__(self, settings):
         # local variables
         self.radio_driver = None
         self.settings = settings
-        self.hours = time_to_run[0]
-        self.minutes = time_to_run[1]
+        self.hours = 0
+        self.minutes = 0
         self.first_run = False
         self.queue_rx = Queue.Queue()
         self.count_frames_rx = 0
@@ -141,7 +138,9 @@ class ExperimentRx(threading.Thread):
         self.schedule = [None for i in range(len(self.settings["test_settings"]))]
 
         # start the threads
+        self.start_experiment = threading.Event()
         self.end_of_series = threading.Event()
+        self.start_experiment.clear()
         self.end_of_series.clear()
         threading.Thread.__init__(self)
         self.name = 'ExperimentRx'
@@ -158,10 +157,32 @@ class ExperimentRx(threading.Thread):
         :return:
         """
         # initialize the radio driver
-        self.radio_driver = radio.At86rf215(self._cb_rx_frame)
-        self.radio_driver.radio_init(3)
+        self.radio_driver = radio.At86rf215(self._cb_rx_frame, self.start_experiment)
+        self.radio_driver.radio_init(3, 13)
         self.radio_driver.radio_reset()
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
+        self.start_experiment.wait()
+        self.start_experiment.clear()
+
+    def following_time_to_run(self):
+        """
+        it sets the next runtime for the whole experiment sequence in hours, minutes
+        current_time[3] = hours, current_time[4] = minutes, current_time[5] = seconds
+        :return: hours, minutes
+        """
+        current_time = time.gmtime()
+        if current_time[5] < 50:
+            if current_time[4] is not 59:
+                new_time = current_time[3], current_time[4] + 1
+            else:
+                new_time = (current_time[3] + 1) % 24, 0
+        else:
+            if current_time[4] is 59:
+                new_time = (current_time[3] + 1) % 24, 1
+            else:
+                new_time = current_time[3], current_time[4] + 2
+
+        return new_time
 
     def stop_exp(self):
         """
@@ -191,26 +212,6 @@ class ExperimentRx(threading.Thread):
         logging.warning(self.schedule)
         s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
         s.run()
-
-    # def next_run_time(self):
-    #     """
-    #     it sets the next runtime for the whole experiment sequence in hours, minutes
-    #     current_time[3] = hours, current_time[4] = minutes, current_time[5] = seconds
-    #     :return: hours, minutes
-    #     """
-    #     current_time = time.gmtime()
-    #     if current_time[5] < 50:
-    #         if current_time[4] is not 59:
-    #             new_time = current_time[3], current_time[4]+1
-    #         else:
-    #             new_time = (current_time[3] + 1) % 24, 0
-    #     else:
-    #         if current_time[4] is 59:
-    #             new_time = (current_time[3] + 1) % 24, 1
-    #         else:
-    #             new_time = current_time[3], current_time[4] + 2
-    #
-    #     return new_time
 
     def execute_exp(self, item):
         """
@@ -245,6 +246,7 @@ class ExperimentRx(threading.Thread):
 
     def run(self):
         self.radio_setup()
+        self.hours, self.minutes = self.following_time_to_run()
         while True:
             self.experiment_scheduling()
             self.end_of_series.wait()
@@ -279,31 +281,10 @@ def load_experiment_details():
         return settings
 
 
-def following_time_to_run():
-    """
-    it sets the next runtime for the whole experiment sequence in hours, minutes
-    current_time[3] = hours, current_time[4] = minutes, current_time[5] = seconds
-    :return: hours, minutes
-    """
-    current_time = time.gmtime()
-    if current_time[5] < 50:
-        if current_time[4] is not 59:
-            new_time = current_time[3], current_time[4] + 1
-        else:
-            new_time = (current_time[3] + 1) % 24, 0
-    else:
-        if current_time[4] is 59:
-            new_time = (current_time[3] + 1) % 24, 1
-        else:
-            new_time = current_time[3], current_time[4] + 2
-
-    return new_time
-
-
 def main():
 
     logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
-    experimentRx = ExperimentRx(following_time_to_run(), load_experiment_details())
+    experimentRx = ExperimentRx(load_experiment_details())
 
     while True:
         input = raw_input('>')
