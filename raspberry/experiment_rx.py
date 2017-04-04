@@ -17,6 +17,7 @@ import datetime
 
 import at86rf215_defs as defs
 import at86rf215_driver as radio
+import GpsThread as gps
 
 PACKET_LENGTH = 2047
 CRC_SIZE      = 4
@@ -126,26 +127,32 @@ class ExperimentRx(threading.Thread):
 
     def __init__(self, settings):
         # local variables
-        self.radio_driver = None
-        self.settings = settings
-        self.hours = 0
-        self.minutes = 0
-        self.first_run = False
-        self.queue_rx = Queue.Queue()
-        self.count_frames_rx = 0
-        self.started_time = time.time()
-        self.cumulative_time = 0
+        self.radio_driver       = None
+        self.settings           = settings
+        self.hours              = 0
+        self.minutes            = 0
+        self.first_run          = False
+        self.queue_rx           = Queue.Queue()
+        self.count_frames_rx    = 0
+        self.started_time       = time.time()
+        self.cumulative_time    = 0
+
         self.schedule = [None for i in range(len(self.settings["test_settings"]))]
 
         # start the threads
-        self.start_experiment = threading.Event()
-        self.end_of_series = threading.Event()
+        self.start_experiment   = threading.Event()
+        self.end_of_series      = threading.Event()
+        self.data_is_valid      = threading.Event()
         self.start_experiment.clear()
         self.end_of_series.clear()
+        self.data_is_valid.clear()
         threading.Thread.__init__(self)
         self.name = 'ExperimentRx'
         self.daemon = True
         self.start()
+
+        # start the gps thread
+        self.gps = gps.GpsThread(self.data_is_valid)
 
         # initializes the LoggerRx class, in charge of the logging part
         # self.LoggerRx = LoggerRx(self.queue_rx, self.end_of_series, self.settings)
@@ -161,6 +168,11 @@ class ExperimentRx(threading.Thread):
         self.radio_driver.radio_init(3, 13)
         self.radio_driver.radio_reset()
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
+        logging.warning('waiting for the current time')
+        self.data_is_valid.wait()
+        logging.warning('GOT CURRENT TIME')
+        self.data_is_valid.clear()
+        logging.warning('WAITING FOR THE START BUTTON TO BE PRESSED')
         self.start_experiment.wait()
         self.start_experiment.clear()
 

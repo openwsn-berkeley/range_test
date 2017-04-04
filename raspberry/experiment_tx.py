@@ -16,6 +16,7 @@ import datetime
 
 import at86rf215_defs as defs
 import at86rf215_driver as radio
+import GpsThread as gps
 
 FRAME_LENGTH  = 2047
 CRC_SIZE      = 4
@@ -92,10 +93,15 @@ class ExperimentTx(threading.Thread):
         self.started_time           = time.time()
         self.cumulative_time        = 0
         self.schedule               = ['time' for i in range(len(self.settings["test_settings"]))]
+
+        # start the threads
         self.end_of_series          = threading.Event()
         self.start_experiment       = threading.Event()
+        self.data_is_valid          = threading.Event()
         self.end_of_series.clear()
         self.start_experiment.clear()
+        self.data_is_valid.clear()
+
         # start the thread
         threading.Thread.__init__(self)
         self.name = 'ExperimentTx_'
@@ -103,7 +109,10 @@ class ExperimentTx(threading.Thread):
         self.start()
 
         # self.LoggerTx = LoggerTx(self.queue_tx, self.end_of_series, self.settings)
-        self.LoggerTx = LoggerTx(self.queue_tx, self.settings)
+        self.LoggerTx               = LoggerTx(self.queue_tx, self.settings)
+
+        # start the gps thread
+        self.gps                    = gps.GpsThread(self.data_is_valid)
 
         # configure the logging module
         logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
@@ -115,6 +124,11 @@ class ExperimentTx(threading.Thread):
         self.radio_driver.radio_init(3, 13)
         self.radio_driver.radio_reset()
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
+        logging.warning('waiting for the current time')
+        self.data_is_valid.wait()
+        logging.warning('GOT CURRENT TIME')
+        self.data_is_valid.clear()
+        logging.warning('WAITING FOR THE START BUTTON TO BE PRESSED')
         self.start_experiment.wait()
         self.start_experiment.clear()
 
