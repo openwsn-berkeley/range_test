@@ -1,17 +1,11 @@
-import math
 import os
-import sys
-import pynmea2
 import serial
 import threading
 import time
-import logging
 
-# import JsonFileLogger
-# import LoraTestUtils as u
+import pynmea2
 
 # =========================== classes =========================================
-
 
 class GpsThread(threading.Thread):
     
@@ -19,30 +13,23 @@ class GpsThread(threading.Thread):
     SERIAL_BAUDRATE    = 9600
     SYSTIMESYNCPERIOD  = 60 # sec
     
-    def __init__(self, data_is_valid):
+    def __init__(self):
         
-        # print banner
-        # print u.formatBanner('GpsThread')
+        # local variables
+        self.tsLastSysTimeSync    = 0
+        self.serial               = None
+        self.dataLock             = threading.RLock()
+        self.f_gps_lock           = f_gps_lock
         
         # Initialize the Thread class
         threading.Thread.__init__(self)
         self.name                 = 'GpsThread'
         
-        # local variables
-        self.cmd_output           = True
-        self.tsLastSysTimeSync    = 0
-        self.serial               = None
-        
-        # log
-        # self.logger               = JsonFileLogger.JsonFileLogger(self.name + ".log")
-        self.data_is_valid        = data_is_valid
-        
-        self.update_counter       = 0
-        
         # start myself
         self.start()
     
     def run(self):
+        
         # connect to serial port of the GPS
         self.serial = serial.Serial(self.SERIAL_PORT, self.SERIAL_BAUDRATE)
         
@@ -138,6 +125,12 @@ class GpsThread(threading.Thread):
                     self._handleGpsData(gpsData)
                     gpsData = {}
     
+    # ======================== public =========================================
+    
+    def isGpsLocked(self):
+        with self.dataLock:
+            return self.f_gps_lock
+    
     # ======================== private ========================================
     
     def _handleGpsData(self, gpsData):
@@ -178,7 +171,7 @@ class GpsThread(threading.Thread):
         if now - self.tsLastSysTimeSync > self.SYSTIMESYNCPERIOD:
             self._syncSysTime(gpsData['datestamp'], gpsData['timestamp'])
             self.tsLastSysTimeSync = now
-
+    
     def format_unix_date(self, datestamp, timestamp):
         """
         datestamp: '270616' (string)
@@ -191,10 +184,10 @@ class GpsThread(threading.Thread):
         year = datestamp[4:6]
         print 'YEAR {0}'.format(year)
         if year != 06:
-            self.data_is_valid.set()
+            with self.dataLock:
+                self.f_gps_lock = True
         else:
             print 'WAITING FOR THE CURRENT TIME'
-            # logging.warning('UNKNOWN ITEM')
 
         timestamp = timestamp.split('.')[0]
         hour = timestamp[0:2]
@@ -219,11 +212,11 @@ class GpsThread(threading.Thread):
 
 # ============================ main ===========================================
 
-
 def main():
-    data_is_valid = False
-    # logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
-    gpsThread = GpsThread(data_is_valid)
+    gpsThread = GpsThread()
+    while True:
+        print 'gps Locked? {0}'.format(gpsThread.isGpsLocked())
+        time.sleep(1)
 
 if __name__=="__main__":
     main()
