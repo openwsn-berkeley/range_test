@@ -10,7 +10,6 @@ import logging
 import threading
 import sched
 import Queue
-import numpy as np
 import json
 from datetime import datetime as dt
 import datetime
@@ -30,9 +29,10 @@ class LoggerRx(threading.Thread):
 
         # store parameters
         self.queue = queue
-        # self.end_of_series = end_of_series
         self.settings = settings
+
         # local variables
+        self.dataLock = threading.RLock()
         self.count_rx = 0
         self.rx_frames = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
         self.rssi_values = [None for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
@@ -136,26 +136,25 @@ class ExperimentRx(threading.Thread):
         self.count_frames_rx    = 0
         self.started_time       = time.time()
         self.cumulative_time    = 0
+        self.led_array_pins     = [29, 31, 33, 35, 37]
 
         self.schedule = [None for i in range(len(self.settings["test_settings"]))]
 
         # start the threads
         self.start_experiment   = threading.Event()
         self.end_of_series      = threading.Event()
-        self.data_is_valid      = threading.Event()
         self.start_experiment.clear()
         self.end_of_series.clear()
-        self.data_is_valid.clear()
+
         threading.Thread.__init__(self)
         self.name = 'ExperimentRx'
         self.daemon = True
         self.start()
 
         # start the gps thread
-        self.gps = gps.GpsThread(self.data_is_valid)
+        # self.gps = gps.GpsThread()
 
         # initializes the LoggerRx class, in charge of the logging part
-        # self.LoggerRx = LoggerRx(self.queue_rx, self.end_of_series, self.settings)
         self.LoggerRx = LoggerRx(self.queue_rx, self.settings)
 
     def radio_setup(self):
@@ -165,16 +164,16 @@ class ExperimentRx(threading.Thread):
         """
         # initialize the radio driver
         self.radio_driver = radio.At86rf215(self._cb_rx_frame, self.start_experiment)
-        self.radio_driver.radio_init(3, 13)
+        self.radio_driver.radio_init(11, 13)
+        self.radio_driver.init_binary_pins(self.led_array_pins)
         self.radio_driver.radio_reset()
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
-        logging.warning('waiting for the current time')
-        self.data_is_valid.wait()
-        logging.warning('GOT CURRENT TIME')
-        self.data_is_valid.clear()
-        logging.warning('WAITING FOR THE START BUTTON TO BE PRESSED')
-        self.start_experiment.wait()
-        self.start_experiment.clear()
+        # logging.warning('waiting for the current time')
+        # logging.warning('self.gps.isGpsTime_valid(): {0}'.format(self.gps.isGpsTime_valid()))
+        # while self.gps.isGpsTime_valid() is False:
+        #     time.sleep(2)
+        #     logging.warning('still waiting')
+
 
     def following_time_to_run(self):
         """
@@ -238,6 +237,7 @@ class ExperimentRx(threading.Thread):
                                                item['frequency_0_kHz'],
                                                item['channel']))
 
+        self.radio_driver.binary_counter(item['index'], self.led_array_pins)
         # RX counter to zero
         self.count_frames_rx = 0
         self.queue_rx.put('Start')
@@ -256,7 +256,11 @@ class ExperimentRx(threading.Thread):
         # FIXME: replace by an event from the GPS thread
         #    print('TIMER 10 Seconds triggers')
 
+
     def run(self):
+        # logging.warning('WAITING FOR THE START BUTTON TO BE PRESSED')
+        # self.start_experiment.wait()
+        # self.start_experiment.clear()
         self.radio_setup()
         self.hours, self.minutes = self.following_time_to_run()
         while True:
@@ -272,7 +276,6 @@ class ExperimentRx(threading.Thread):
     def getStats(self):
         # logging.warning('Results ongoing {0}'.format(self.LoggerRx.results_per_settings))
         logging.warning('SHOW SOMETHING HERE')
-
 
     #  ====================== private =========================================
 
@@ -291,7 +294,6 @@ def load_experiment_details():
         settings = f.read().replace('\n', ' ').replace('\r', '')
         settings = json.loads(settings)
         return settings
-
 
 def main():
 

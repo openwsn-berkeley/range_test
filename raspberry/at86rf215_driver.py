@@ -97,23 +97,24 @@ class At86rf215(object):
             (pkt_rcv, rssi, crc, mcs) = self.radio_get_received_frame()
             self.cb(pkt_rcv, rssi, crc, mcs)
 
-    def cb_gpio_isr(self, channel = 3):
+    def cb_gpio_isr(self, channel = 11):
         self.read_isr_source()
 
     def cb_gpio_startExp(self, channel = 13):
         self.start_experiment.set()
 
-    def radio_init(self, channel=3, channel_start_exp = 13):
+    def radio_init(self, channel=11, channel_start_exp=13):
         """
         Initialize the GPIO and SPI modules.
         :param channel: the number of the GPIO-pin which receives the IRQ pin from the radio.
-        :return:
+        :param channel_start_exp: GPIO connected to press button. It lets the experiment start.
+        :return: nothing
         """
         self.spi.open(0, 0)
 
         # spi speed TEST
         self.spi.max_speed_hz = 7800000
-
+        logging.warning("")
         # GPIO.cleanup()
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(channel, GPIO.IN)
@@ -262,3 +263,40 @@ class At86rf215(object):
         """
         add = defs.RG_RF09_STATE[:] + [0x00]
         return self.spi.xfer2(add)[2]
+
+    def init_binary_pins(self, array):
+        """
+        It initialises the set of pins for the binary counter
+        :param array: set of pins where a LED + resistor are connected.
+        :return: nothing
+        """
+        for pin in array:
+            GPIO.setup(pin, GPIO.OUT)
+
+    def binary_counter(self, number, array):
+        """
+        it switches on the LEDs according to the number, binary system.
+        :param number: The number to be shown in binary
+        :param array: amount of LEDs available
+        :return: light :)
+        """
+        for index in range(0, len(array)):
+            GPIO.output(array[index], GPIO.LOW)
+
+        # LED_val = [0 for i in range(0, len(array))]
+        for index in range(0, len(array)):
+            LED = number >> index
+            if LED & 1:
+                GPIO.output(array[index], GPIO.HIGH)
+        #         LED_val[index] = 1
+        #     else:
+        #         LED_val[index] = 0
+        #
+        # for index in range(0, len(array)):
+        #     if LED_val[index] == 1:
+        #         GPIO.output(LED_val[index], GPIO.HIGH)
+
+
+
+
+

@@ -112,7 +112,7 @@ class ExperimentTx(threading.Thread):
         self.LoggerTx               = LoggerTx(self.queue_tx, self.settings)
 
         # start the gps thread
-        self.gps                    = gps.GpsThread(self.data_is_valid)
+        # self.gps                    = gps.GpsThread()
 
         # configure the logging module
         logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
@@ -121,16 +121,14 @@ class ExperimentTx(threading.Thread):
 
         # initialize the radio driver
         self.radio_driver = radio.At86rf215(self._cb_rx_frame, self.start_experiment)
-        self.radio_driver.radio_init(3, 13)
+        self.radio_driver.radio_init(11, 13)
         self.radio_driver.radio_reset()
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
-        logging.warning('waiting for the current time')
-        self.data_is_valid.wait()
-        logging.warning('GOT CURRENT TIME')
-        self.data_is_valid.clear()
-        logging.warning('WAITING FOR THE START BUTTON TO BE PRESSED')
-        self.start_experiment.wait()
-        self.start_experiment.clear()
+        # logging.warning('waiting for the current time')
+        #
+        # while self.gps.isGpsLocked_GPGGA() is False:
+        #     time.sleep(2)
+        #     logging.warning('still waiting')
 
     def following_time_to_run(self):
         """
@@ -222,14 +220,16 @@ class ExperimentTx(threading.Thread):
                 time.sleep(ifs)
     
     def run(self):
+        # logging.warning('WAITING FOR THE START BUTTON TO BE PRESSED')
+        # self.start_experiment.wait()
+        # self.start_experiment.clear()
         self.radio_setup()
         self.hours, self.minutes = self.following_time_to_run()
         while True:
-            # logging.warning('THREAD EXPERIMENT TX')
             self.experiment_scheduling()
             self.end_of_series.wait()
             self.end_of_series.clear()
-            # self.hours, self.minutes = self.next_run_time()
+
 
     #  ======================== private =======================================
     

@@ -3,6 +3,7 @@ import serial
 import threading
 import time
 
+import RPi.GPIO as GPIO
 import pynmea2
 
 # =========================== classes =========================================
@@ -11,7 +12,7 @@ class GpsThread(threading.Thread):
     
     SERIAL_PORT        = '/dev/ttyS0'
     SERIAL_BAUDRATE    = 9600
-    SYSTIMESYNCPERIOD  = 60 # sec
+    SYSTIMESYNCPERIOD  = 60  # sec
     
     def __init__(self):
         
@@ -19,8 +20,10 @@ class GpsThread(threading.Thread):
         self.tsLastSysTimeSync    = 0
         self.serial               = None
         self.dataLock             = threading.RLock()
-        self.f_gps_lock           = f_gps_lock
-        
+        self.f_gps_lock_GPGGA     = False
+        self.f_gps_lock_GPRMC     = False
+        self.f_gps_time           = False
+
         # Initialize the Thread class
         threading.Thread.__init__(self)
         self.name                 = 'GpsThread'
@@ -66,14 +69,17 @@ class GpsThread(threading.Thread):
                 gpsData = {}
                 try:
                     message = pynmea2.parse(line)
-                    print 'GPGGA sentence: {0}'.format(message)
                 except Exception as err:
                     print err
                     continue
                 else:
                     print 'message is valid: {0}'.format(message.is_valid)
-                    # if not message.is_valid:
-                    #     continue
+                    if not message.is_valid:
+                        with self.dataLock:
+                            self.f_gps_lock_GPGGA = False
+                        continue
+                    with self.dataLock:
+                        self.f_gps_lock_GPGGA = True
                     for n in message.name_to_idx.keys():
                         gpsData[n] = getattr(message, n)
             
@@ -96,20 +102,23 @@ class GpsThread(threading.Thread):
             if line.startswith("$GPRMC"):
                 try:
                     message = pynmea2.parse(line)
-                    print 'GPRMC sentence: {0}'.format(message)
                 except Exception as err:
                     print err
                     gpsData = {}
                     continue
                 else:
                     print 'message is valid: {0}'.format(message.is_valid)
-                    # if not message.is_valid:
-                    #     gpsData = {}
-                    #     continue
+                    if not message.is_valid:
+                        gpsData = {}
+                        with self.dataLock:
+                            self.f_gps_lock_GPRMC = False
+                        continue
+                    with self.dataLock:
+                        self.f_gps_lock_GPRMC = True
                     if not gpsData:
                         gpsData = {}
                         continue
-                    
+
                     same = True
                     for i in ['lon_dir', 'timestamp', 'lon', 'lat', 'lat_dir']:
                         if getattr(message, i) != gpsData[i]:
@@ -120,16 +129,22 @@ class GpsThread(threading.Thread):
                     
                     for (n, i) in message.name_to_idx.items():
                         gpsData[n] = message.data[i]
-                    print 'GPS data: {0}'.format(gpsData)
                     
                     self._handleGpsData(gpsData)
                     gpsData = {}
     
     # ======================== public =========================================
-    
-    def isGpsLocked(self):
+    def isGpsTime_valid(self):
         with self.dataLock:
-            return self.f_gps_lock
+            return self.f_gps_time
+
+    def isGpsLocked_GPGGA(self):
+        with self.dataLock:
+            return self.f_gps_lock_GPGGA
+
+    def isGpsLocked_GPRMC(self):
+        with self.dataLock:
+            return self.f_gps_lock_GPRMC
     
     # ======================== private ========================================
     
@@ -160,12 +175,6 @@ class GpsThread(threading.Thread):
         }
         """
         
-        # log
-        # self.logger.writeLine(
-        #     type   = JsonFileLogger.JsonFileLogger.TYPE_GPSDATA,
-        #     params = gpsData,
-        # )
-        
         # reset system time
         now = time.time()
         if now - self.tsLastSysTimeSync > self.SYSTIMESYNCPERIOD:
@@ -182,12 +191,9 @@ class GpsThread(threading.Thread):
         day = datestamp[0:2]
         month = datestamp[2:4]
         year = datestamp[4:6]
-        print 'YEAR {0}'.format(year)
         if year != 06:
             with self.dataLock:
-                self.f_gps_lock = True
-        else:
-            print 'WAITING FOR THE CURRENT TIME'
+                self.f_gps_time = True
 
         timestamp = timestamp.split('.')[0]
         hour = timestamp[0:2]
