@@ -25,29 +25,33 @@ START_OFFSET  = 3.5  # 3.5 seconds after the starting time arrives.
 
 
 class LoggerRx(threading.Thread):
-    def __init__(self, queue, settings):
+    def __init__(self, queue, settings, radio_driver):
 
         # store parameters
-        self.queue = queue
-        self.settings = settings
+        self.queue              = queue
+        self.settings           = settings
+        self.radio_driver       = radio_driver
 
         # local variables
-        self.dataLock = threading.RLock()
-        self.count_rx = 0
-        self.rx_frames = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
-        self.rssi_values = [None for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
-        # self.name_file = '/home/pi/results/' + dt.now().strftime("%D_%H:%M:%S").replace('/', '_') + '_results.json'
-        self.name_file = '/home/pi/range_test_raw_data/experiments.json'
-        self.results = {'type': 'end_of_cycle_rx', 'start_time_str': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
-                        'start_time_epoch': time.time(), 'version': self.settings['version'], 'position_description': None,
-                        'radio_settings': None, 'Rx_frames': 0, 'RSSI_by_length': None, 'RX_string': None,
-                        'nmea_at_start': None, 'channel': None, 'frequency_0': None,
+        self.dataLock           = threading.RLock()
+        self.count_rx           = 0
+        self.rx_frames          = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
+        self.rssi_values        = [None for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
+        # self.name_file        = '/home/pi/results/' + dt.now().strftime("%D_%H:%M:%S").replace('/', '_') + '_results.json'
+        self.name_file          = '/home/pi/range_test_raw_data/experiments.json'
+        self.results            = {'type': 'end_of_cycle_rx',
+                        'start_time_str': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
+                        'start_time_epoch': time.time(), 'version': self.settings['version'],
+                        'position_description': None, 'radio_settings': None, 'Rx_frames': 0, 'RSSI_by_length': None,
+                        'RX_string': None, 'nmea_at_start': None, 'channel': None, 'frequency_0': None,
                         'burst_size': self.settings['numframes']}
 
+        self.frame_received_pin = [36]
+        self.radio_driver.init_binary_pins(self.frame_received_pin)
         # start the thread
         threading.Thread.__init__(self)
-        self.name = 'LoggerRx'
-        self.daemon = True
+        self.name               = 'LoggerRx'
+        self.daemon             = True
         self.start()
 
     def rx_frames_psize(self):
@@ -97,9 +101,12 @@ class LoggerRx(threading.Thread):
                 if type(item) is tuple:
                     try:
                         if item[0][0] * 256 + item[0][1] < 400:
+                            # self.radio_driver.LED_ON(self.frame_received_pin)
+                            self.radio_driver.LED_toggle(self.frame_received_pin)
                             self.rx_frames[item[0][0] * 256 + item[0][1]] = '.'
                             self.rssi_values[item[0][0] * 256 + item[0][1]] = float(item[1])
                             self.results['Rx_frames'] += 1
+                            # self.radio_driver.LED_OFF(self.frame_received_pin)
                     except Exception:
                         logging.warning('item: {0}'.format(item))
 
@@ -154,8 +161,9 @@ class ExperimentRx(threading.Thread):
         # start the gps thread
         # self.gps = gps.GpsThread()
 
-        # initializes the LoggerRx class, in charge of the logging part
-        self.LoggerRx = LoggerRx(self.queue_rx, self.settings)
+        # # initializes the LoggerRx class, in charge of the logging part
+        # self.LoggerRx = LoggerRx(self.queue_rx, self.settings, self.radio_driver)
+        self.LoggerRx = None
 
     def radio_setup(self):
         """
@@ -165,6 +173,8 @@ class ExperimentRx(threading.Thread):
         # initialize the radio driver
         self.radio_driver = radio.At86rf215(self._cb_rx_frame, self.start_experiment)
         self.radio_driver.radio_init(11, 13)
+        # initializes the LoggerRx class, in charge of the logging part
+        self.LoggerRx = LoggerRx(self.queue_rx, self.settings, self.radio_driver)
         self.radio_driver.init_binary_pins(self.led_array_pins)
         self.radio_driver.radio_reset()
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
@@ -173,7 +183,6 @@ class ExperimentRx(threading.Thread):
         # while self.gps.isGpsTime_valid() is False:
         #     time.sleep(2)
         #     logging.warning('still waiting')
-
 
     def following_time_to_run(self):
         """
@@ -256,12 +265,12 @@ class ExperimentRx(threading.Thread):
         # FIXME: replace by an event from the GPS thread
         #    print('TIMER 10 Seconds triggers')
 
-
     def run(self):
-        # logging.warning('WAITING FOR THE START BUTTON TO BE PRESSED')
-        # self.start_experiment.wait()
-        # self.start_experiment.clear()
+
         self.radio_setup()
+        logging.warning('WAITING FOR THE START BUTTON TO BE PRESSED')
+        self.start_experiment.wait()
+        self.start_experiment.clear()
         self.hours, self.minutes = self.following_time_to_run()
         while True:
             self.experiment_scheduling()

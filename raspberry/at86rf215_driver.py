@@ -35,12 +35,12 @@ RADIOSTATE_TXRX_DONE = 0x05  # ///< Packet is fully loaded in the radio's TX buf
 
 
 class At86rf215(object):
-    
+
     def __init__(self, cb, start_experiment):
-        
+
         # store params
         self.cb = cb
-        
+
         # local variables
         self.at86_state         = RADIOSTATE_RFOFF
         self.spi                = spidev.SpiDev()
@@ -51,6 +51,7 @@ class At86rf215(object):
         self.start_experiment   = start_experiment
         self.count              = 0
         self.counter            = 0
+        self.toggle_LED         = False
 
         self.state              = {'state_TRXprep': self.state_trx_prep, 'state_TXnow': self.state_tx_now,
                                    'state_RF_reset': self.state_reset}
@@ -61,11 +62,11 @@ class At86rf215(object):
 
         # configure the logging module
         # logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
-    
+
     # ======================== public ==========================================
-    
+
     # ======================== private =========================================
-    
+
     def read_isr_source(self):
         """
         Read the interruption source from the radio.
@@ -295,6 +296,23 @@ class At86rf215(object):
         # for index in range(0, len(array)):
         #     if LED_val[index] == 1:
         #         GPIO.output(LED_val[index], GPIO.HIGH)
+    def LED_ON(self, pin):
+        GPIO.output(pin, GPIO.HIGH)
+
+    def LED_OFF(self, pin):
+        GPIO.output(pin, GPIO.LOW)
+
+    def LED_toggle(self, pin):
+        if self.toggle_LED is False:
+            self.toggle_LED = True
+            GPIO.output(pin, GPIO.HIGH)
+        else:
+            self.toggle_LED = False
+            GPIO.output(pin, GPIO.LOW)
+
+
+
+
 
 
 

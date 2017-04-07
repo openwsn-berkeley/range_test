@@ -51,7 +51,7 @@ class LoggerTx(threading.Thread):
         logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
 
     def run(self):
-        logging.warning('THREAD INFORMATIVE TX 1')
+        # logging.warning('THREAD INFORMATIVE TX 1')
         # while not self.end:
         while True:
             item = self.queue.get()
@@ -93,6 +93,7 @@ class ExperimentTx(threading.Thread):
         self.started_time           = time.time()
         self.cumulative_time        = 0
         self.schedule               = ['time' for i in range(len(self.settings["test_settings"]))]
+        self.led_array_pins         = [29, 31, 33, 35, 37]
 
         # start the threads
         self.end_of_series          = threading.Event()
@@ -122,6 +123,7 @@ class ExperimentTx(threading.Thread):
         # initialize the radio driver
         self.radio_driver = radio.At86rf215(self._cb_rx_frame, self.start_experiment)
         self.radio_driver.radio_init(11, 13)
+        self.radio_driver.init_binary_pins(self.led_array_pins)
         self.radio_driver.radio_reset()
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
         # logging.warning('waiting for the current time')
@@ -192,6 +194,7 @@ class ExperimentTx(threading.Thread):
                                                item['frequency_0_kHz'],
                                                item['channel']))
 
+        self.radio_driver.binary_counter(item['index'], self.led_array_pins)
         # let know to the informative class the beginning of a new experiment
         self.queue_tx.put('Start')
 
@@ -220,10 +223,11 @@ class ExperimentTx(threading.Thread):
                 time.sleep(ifs)
     
     def run(self):
-        # logging.warning('WAITING FOR THE START BUTTON TO BE PRESSED')
-        # self.start_experiment.wait()
-        # self.start_experiment.clear()
+
         self.radio_setup()
+        logging.warning('WAITING FOR THE START BUTTON TO BE PRESSED')
+        self.start_experiment.wait()
+        self.start_experiment.clear()
         self.hours, self.minutes = self.following_time_to_run()
         while True:
             self.experiment_scheduling()
