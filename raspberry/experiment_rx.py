@@ -144,8 +144,10 @@ class ExperimentRx(threading.Thread):
         self.started_time       = time.time()
         self.cumulative_time    = 0
         self.led_array_pins     = [29, 31, 33, 35, 37]
+        self.scheduler          = None
+        self.list_events_sched  = [None for i in range(len(self.settings["test_settings"]))]
 
-        self.schedule = [None for i in range(len(self.settings["test_settings"]))]
+        self.schedule_time      = [None for i in range(len(self.settings["test_settings"]))]
 
         # start the threads
         self.start_experiment   = threading.Event()
@@ -216,7 +218,7 @@ class ExperimentRx(threading.Thread):
         it schedules each set of settings to be run
         :return: Nothing
         """
-        s = sched.scheduler(time.time, time.sleep)
+        self.scheduler = sched.scheduler(time.time, time.sleep)
         time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
         if self.first_run is False:
             offset = START_OFFSET
@@ -225,13 +227,14 @@ class ExperimentRx(threading.Thread):
         else:
             offset = self.cumulative_time + 2
         for item in self.settings['test_settings']:
-            s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
-            self.schedule[self.settings['test_settings'].index(item)] = offset
+            self.list_events_sched[self.settings['test_settings'].index(item)] = self.scheduler.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
+            self.schedule_time[self.settings['test_settings'].index(item)] = offset
             offset += item['durationtx_s'] + SECURITY_TIME
         self.cumulative_time = offset
-        logging.warning(self.schedule)
-        s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
-        s.run()
+        logging.warning('list of events scheduled:: {0}'.format(self.list_events_sched))
+        logging.warning('time for each set of settings: {0}'.format(self.schedule_time))
+        self.scheduler.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
+        self.scheduler.run()
 
     def execute_exp(self, item):
         """
@@ -303,6 +306,7 @@ def load_experiment_details():
         settings = f.read().replace('\n', ' ').replace('\r', '')
         settings = json.loads(settings)
         return settings
+
 
 def main():
 
