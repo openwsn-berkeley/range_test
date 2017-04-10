@@ -119,7 +119,7 @@ class At86rf215(object):
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(channel, GPIO.IN)
         GPIO.setup(channel_start_exp, GPIO.IN)
-		GPIO.add_event_detect(channel, GPIO.RISING, callback=self.cb_gpio_isr)
+        GPIO.add_event_detect(channel, GPIO.RISING, callback=self.cb_gpio_isr)
         GPIO.add_event_detect(channel_start_exp, GPIO.RISING, callback=self.cb_gpio_startExp, bouncetime=50)
 
     def radio_reset(self):
