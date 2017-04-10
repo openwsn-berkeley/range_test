@@ -60,8 +60,7 @@ class At86rf215(object):
         self.state['state_TXnow'].clear()
         self.state['state_RF_reset'].clear()
 
-        # configure the logging module
-        # logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
+
 
     # ======================== public ==========================================
 
@@ -120,8 +119,8 @@ class At86rf215(object):
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(channel, GPIO.IN)
         GPIO.setup(channel_start_exp, GPIO.IN)
-        GPIO.add_event_detect(channel, GPIO.RISING, callback=self.cb_gpio_isr, bouncetime=75)
-        GPIO.add_event_detect(channel_start_exp, GPIO.RISING, callback=self.cb_gpio_startExp, bouncetime=75)
+		GPIO.add_event_detect(channel, GPIO.RISING, callback=self.cb_gpio_isr)
+        GPIO.add_event_detect(channel_start_exp, GPIO.RISING, callback=self.cb_gpio_startExp, bouncetime=50)
 
     def radio_reset(self):
         """
@@ -273,6 +272,7 @@ class At86rf215(object):
         """
         for pin in array:
             GPIO.setup(pin, GPIO.OUT)
+            self.LED_OFF(pin)
 
     def binary_counter(self, number, array):
         """
@@ -289,13 +289,7 @@ class At86rf215(object):
             LED = number >> index
             if LED & 1:
                 GPIO.output(array[index], GPIO.HIGH)
-        #         LED_val[index] = 1
-        #     else:
-        #         LED_val[index] = 0
-        #
-        # for index in range(0, len(array)):
-        #     if LED_val[index] == 1:
-        #         GPIO.output(LED_val[index], GPIO.HIGH)
+
     def LED_ON(self, pin):
         GPIO.output(pin, GPIO.HIGH)
 
