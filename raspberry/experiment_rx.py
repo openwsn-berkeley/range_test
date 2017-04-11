@@ -143,6 +143,7 @@ class ExperimentRx(threading.Thread):
         self.count_frames_rx    = 0
         self.started_time       = time.time()
         self.cumulative_time    = 0
+        self.index_modulation   = 0
         self.led_array_pins     = [29, 31, 33, 35, 37]
         self.scheduler          = None
         self.list_events_sched  = [None for i in range(len(self.settings["test_settings"]))]
@@ -249,7 +250,8 @@ class ExperimentRx(threading.Thread):
                                                item['frequency_0_kHz'],
                                                item['channel']))
 
-        self.radio_driver.binary_counter(item['index'], self.led_array_pins)
+        self.index_modulation += 1
+        self.radio_driver.binary_counter((self.index_modulation % 31), self.led_array_pins)
         # RX counter to zero
         self.count_frames_rx = 0
         self.queue_rx.put('Start')
