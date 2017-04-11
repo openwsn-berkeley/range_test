@@ -146,7 +146,7 @@ class ExperimentRx(threading.Thread):
         self.led_array_pins     = [29, 31, 33, 35, 37]
         self.scheduler          = None
         self.list_events_sched  = [None for i in range(len(self.settings["test_settings"]))]
-
+        self.scheduler_aux      = None
         self.schedule_time      = [None for i in range(len(self.settings["test_settings"]))]
 
         # start the threads
@@ -276,7 +276,10 @@ class ExperimentRx(threading.Thread):
         self.start_experiment.clear()
         self.hours, self.minutes = self.following_time_to_run()
         while True:
-            self.experiment_scheduling()
+            self.scheduler_aux = threading.Thread(target=self.experiment_scheduling)
+            self.scheduler_aux.start()
+            self.scheduler_aux.name = 'Scheduler'
+            logging.warning('waiting the end of the experiment')
             self.end_of_series.wait()
             self.end_of_series.clear()
             # self.hours, self.minutes = self.next_run_time()
