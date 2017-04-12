@@ -94,6 +94,8 @@ class ExperimentTx(threading.Thread):
         self.cumulative_time        = 0
         self.schedule               = ['time' for i in range(len(self.settings["test_settings"]))]
         self.led_array_pins         = [29, 31, 33, 35, 37]
+        self.scheduler_aux          = None
+        self.time_to_start          = None
 
         # start the threads
         self.end_of_series          = threading.Event()
@@ -161,20 +163,20 @@ class ExperimentTx(threading.Thread):
 
     def experiment_scheduling(self):
         s = sched.scheduler(time.time, time.sleep)
-        time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
+        # time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
         if self.first_run is False:
             offset = START_OFFSET
             self.first_run = True
-            logging.warning('TIME: {0}'.format(time_to_start))
+            logging.warning('TIME: {0}'.format(self.time_to_start))
         else:
             offset = self.cumulative_time + 2
         for item in self.settings['test_settings']:
-            s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
+            s.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
             self.schedule[self.settings['test_settings'].index(item)] = offset
             offset += item['durationtx_s'] + SECURITY_TIME
         self.cumulative_time = offset
         logging.warning(self.schedule)
-        s.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
+        s.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
         s.run()
 
     def execute_exp(self, item):
@@ -229,8 +231,12 @@ class ExperimentTx(threading.Thread):
         self.start_experiment.wait()
         self.start_experiment.clear()
         self.hours, self.minutes = self.following_time_to_run()
+        self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
         while True:
-            self.experiment_scheduling()
+            self.scheduler_aux = threading.Thread(target=self.experiment_scheduling)
+            self.scheduler_aux.start()
+            self.scheduler_aux.name = 'Scheduler Tx'
+            # self.experiment_scheduling()
             self.end_of_series.wait()
             self.end_of_series.clear()
 

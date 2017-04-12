@@ -145,16 +145,18 @@ class ExperimentRx(threading.Thread):
         self.cumulative_time    = 0
         self.index_modulation   = 0
         self.led_array_pins     = [29, 31, 33, 35, 37]
-        self.scheduler          = None
+        self.scheduler          = sched.scheduler(time.time, time.sleep)
         self.list_events_sched  = [None for i in range(len(self.settings["test_settings"]))]
         self.scheduler_aux      = None
         self.schedule_time      = [None for i in range(len(self.settings["test_settings"]))]
-
+        self.time_to_start      = None
         # start the threads
         self.start_experiment   = threading.Event()
         self.end_of_series      = threading.Event()
+        self.f_schedule         = threading.Event()
         self.start_experiment.clear()
         self.end_of_series.clear()
+        self.f_schedule.clear()
 
         threading.Thread.__init__(self)
         self.name = 'ExperimentRx'
@@ -174,7 +176,7 @@ class ExperimentRx(threading.Thread):
         :return:
         """
         # initialize the radio driver
-        self.radio_driver = radio.At86rf215(self._cb_rx_frame, self.start_experiment)
+        self.radio_driver = radio.At86rf215(self._cb_rx_frame, self.start_experiment, self.end_of_series)
         self.radio_driver.radio_init(11, 13)
         # initializes the LoggerRx class, in charge of the logging part
         self.LoggerRx = LoggerRx(self.queue_rx, self.settings, self.radio_driver)
@@ -219,22 +221,24 @@ class ExperimentRx(threading.Thread):
         it schedules each set of settings to be run
         :return: Nothing
         """
-        self.scheduler = sched.scheduler(time.time, time.sleep)
-        time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
+        # self.scheduler = sched.scheduler(time.time, time.sleep)
+        # self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
+        self.f_schedule.wait()
+        self.f_schedule.clear()
         if self.first_run is False:
             offset = START_OFFSET
             self.first_run = True
-            logging.warning('TIME: {0}'.format(time_to_start))
+            logging.warning('TIME: {0}'.format(self.time_to_start))
         else:
             offset = self.cumulative_time + 2
         for item in self.settings['test_settings']:
-            self.list_events_sched[self.settings['test_settings'].index(item)] = self.scheduler.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
+            self.list_events_sched[self.settings['test_settings'].index(item)] = self.scheduler.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
             self.schedule_time[self.settings['test_settings'].index(item)] = offset
             offset += item['durationtx_s'] + SECURITY_TIME
         self.cumulative_time = offset
         logging.warning('list of events scheduled:: {0}'.format(self.list_events_sched))
         logging.warning('time for each set of settings: {0}'.format(self.schedule_time))
-        self.scheduler.enterabs(time.mktime(time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
+        self.scheduler.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
         self.scheduler.run()
 
     def execute_exp(self, item):
@@ -270,6 +274,7 @@ class ExperimentRx(threading.Thread):
         # FIXME: replace by an event from the GPS thread
         #    print('TIMER 10 Seconds triggers')
 
+
     def run(self):
 
         self.radio_setup()
@@ -277,13 +282,21 @@ class ExperimentRx(threading.Thread):
         self.start_experiment.wait()
         self.start_experiment.clear()
         self.hours, self.minutes = self.following_time_to_run()
+        self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
+        self.f_schedule.set()
+        self.scheduler_aux = threading.Thread(target=self.experiment_scheduling)
+        self.scheduler_aux.start()
+        self.scheduler_aux.name = 'Scheduler Rx'
+        logging.warning('waiting the end of the experiment')
+
         while True:
-            self.scheduler_aux = threading.Thread(target=self.experiment_scheduling)
-            self.scheduler_aux.start()
-            self.scheduler_aux.name = 'Scheduler'
-            logging.warning('waiting the end of the experiment')
             self.end_of_series.wait()
             self.end_of_series.clear()
+            if self.radio_driver.read_reset_cmd():
+                self.time_to_start += datetime.timedelta(minutes=1)
+                self.radio_driver.clean_reset_cmd()
+                self.re_schedule_exp()
+
             # self.hours, self.minutes = self.next_run_time()
 
         # FIXME: replace by an event from the GPS thread

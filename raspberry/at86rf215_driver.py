@@ -36,10 +36,12 @@ RADIOSTATE_TXRX_DONE = 0x05  # ///< Packet is fully loaded in the radio's TX buf
 
 class At86rf215(object):
 
-    def __init__(self, cb, start_experiment):
+    def __init__(self, cb, start_experiment, end_of_series):
 
         # store params
-        self.cb = cb
+        self.cb                 = cb
+        self.start_experiment   = start_experiment
+        self.end_of_series      = end_of_series
 
         # local variables
         self.at86_state         = RADIOSTATE_RFOFF
@@ -48,10 +50,11 @@ class At86rf215(object):
         self.state_tx_now       = threading.Event()
         self.state_IFS          = threading.Event()
         self.state_reset        = threading.Event()
-        self.start_experiment   = start_experiment
         self.count              = 0
         self.counter            = 0
         self.toggle_LED         = False
+        self.f_reset_button     = False
+        self.f_reset_cmd        = False
 
         self.state              = {'state_TRXprep': self.state_trx_prep, 'state_TXnow': self.state_tx_now,
                                    'state_RF_reset': self.state_reset}
@@ -101,7 +104,13 @@ class At86rf215(object):
         self.read_isr_source()
 
     def cb_gpio_startExp(self, channel = 13):
-        self.start_experiment.set()
+        if not self.f_reset_button:
+            self.start_experiment.set()
+            self.f_reset_button         = True
+
+        else:
+            self.end_of_series.set()
+            self.f_reset_cmd            = True
 
     def radio_init(self, channel=11, channel_start_exp=13):
         """
@@ -114,13 +123,11 @@ class At86rf215(object):
 
         # spi speed TEST
         self.spi.max_speed_hz = 7800000
-        logging.warning("")
-        # GPIO.cleanup()
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(channel, GPIO.IN)
         GPIO.setup(channel_start_exp, GPIO.IN)
         GPIO.add_event_detect(channel, GPIO.RISING, callback=self.cb_gpio_isr)
-        GPIO.add_event_detect(channel_start_exp, GPIO.RISING, callback=self.cb_gpio_startExp, bouncetime=50)
+        GPIO.add_event_detect(channel_start_exp, GPIO.RISING, callback=self.cb_gpio_startExp, bouncetime=150)
 
     def radio_reset(self):
         """
@@ -303,6 +310,12 @@ class At86rf215(object):
         else:
             self.toggle_LED = False
             GPIO.output(pin, GPIO.LOW)
+
+    def read_reset_cmd(self):
+        return self.f_reset_cmd
+
+    def clean_reset_cmd(self):
+        self.f_reset_cmd = False
 
 
 
