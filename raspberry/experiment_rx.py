@@ -25,12 +25,12 @@ START_OFFSET  = 3.5  # 3.5 seconds after the starting time arrives.
 
 
 class LoggerRx(threading.Thread):
-    def __init__(self, queue, settings, radio_driver):
+    def __init__(self, queue, settings):
 
         # store parameters
         self.queue              = queue
         self.settings           = settings
-        self.radio_driver       = radio_driver
+        # self.radio_driver       = radio_driver
 
         # local variables
         self.dataLock           = threading.RLock()
@@ -46,8 +46,8 @@ class LoggerRx(threading.Thread):
                         'RX_string': None, 'nmea_at_start': None, 'channel': None, 'frequency_0': None,
                         'burst_size': self.settings['numframes']}
 
-        self.frame_received_pin = [36]
-        self.radio_driver.init_binary_pins(self.frame_received_pin)
+        # self.frame_received_pin = [36]
+        # self.radio_driver.init_binary_pins(self.frame_received_pin)
         # start the thread
         threading.Thread.__init__(self)
         self.name               = 'LoggerRx'
@@ -102,7 +102,7 @@ class LoggerRx(threading.Thread):
                     try:
                         if item[0][0] * 256 + item[0][1] < 400:
                             # self.radio_driver.LED_ON(self.frame_received_pin)
-                            self.radio_driver.LED_toggle(self.frame_received_pin)
+                            # self.radio_driver.LED_toggle(self.frame_received_pin)
                             self.rx_frames[item[0][0] * 256 + item[0][1]] = '.'
                             self.rssi_values[item[0][0] * 256 + item[0][1]] = float(item[1])
                             self.results['Rx_frames'] += 1
@@ -141,10 +141,11 @@ class ExperimentRx(threading.Thread):
         self.first_run          = False
         self.queue_rx           = Queue.Queue()
         self.count_frames_rx    = 0
-        self.started_time       = time.time()
+        self.started_time       = None
         self.cumulative_time    = 0
         self.index_modulation   = 0
         self.led_array_pins     = [29, 31, 33, 35, 37]
+        self.frame_received_pin = [36]
         self.scheduler          = sched.scheduler(time.time, time.sleep)
         self.list_events_sched  = [None for i in range(len(self.settings["test_settings"]))]
         self.scheduler_aux      = None
@@ -179,8 +180,9 @@ class ExperimentRx(threading.Thread):
         self.radio_driver = radio.At86rf215(self._cb_rx_frame, self.start_experiment, self.end_of_series)
         self.radio_driver.radio_init(11, 13)
         # initializes the LoggerRx class, in charge of the logging part
-        self.LoggerRx = LoggerRx(self.queue_rx, self.settings, self.radio_driver)
+        self.LoggerRx = LoggerRx(self.queue_rx, self.settings)
         self.radio_driver.init_binary_pins(self.led_array_pins)
+        self.radio_driver.init_binary_pins(self.frame_received_pin)
         self.radio_driver.radio_reset()
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
         # logging.warning('waiting for the current time')
@@ -236,7 +238,7 @@ class ExperimentRx(threading.Thread):
             self.schedule_time[self.settings['test_settings'].index(item)] = offset
             offset += item['durationtx_s'] + SECURITY_TIME
         self.cumulative_time = offset
-        logging.warning('list of events scheduled:: {0}'.format(self.list_events_sched))
+        # logging.warning('list of events scheduled:: {0}'.format(self.list_events_sched))
         logging.warning('time for each set of settings: {0}'.format(self.schedule_time))
         self.scheduler.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
         self.scheduler.run()
@@ -248,6 +250,7 @@ class ExperimentRx(threading.Thread):
         """
         # reset the radio to erase previous configuration
         self.radio_driver.radio_reset()
+        self.radio_driver.LED_OFF(self.frame_received_pin)
 
         self.radio_driver.radio_write_config(defs.modulations_settings[item['modulation']])
         self.radio_driver.radio_set_frequency((item['channel_spacing_kHz'],
@@ -274,6 +277,13 @@ class ExperimentRx(threading.Thread):
         # FIXME: replace by an event from the GPS thread
         #    print('TIMER 10 Seconds triggers')
 
+    def remove_scheduled_experiment(self):
+        events = self.scheduler.queue
+        # logging.warning('events in list: {0}'.format(self.scheduler.queue))
+        for ev in events:
+            logging.warning('event cancelled: {0}'.format(ev))
+            self.scheduler.cancel(ev)
+        logging.warning('events in queue: {0}'.format(self.scheduler.queue))
 
     def run(self):
 
@@ -281,21 +291,27 @@ class ExperimentRx(threading.Thread):
         logging.warning('WAITING FOR THE START BUTTON TO BE PRESSED')
         self.start_experiment.wait()
         self.start_experiment.clear()
+        self.started_time = time.time()
         self.hours, self.minutes = self.following_time_to_run()
         self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
         self.f_schedule.set()
-        self.scheduler_aux = threading.Thread(target=self.experiment_scheduling)
-        self.scheduler_aux.start()
-        self.scheduler_aux.name = 'Scheduler Rx'
-        logging.warning('waiting the end of the experiment')
 
         while True:
+            self.scheduler_aux = threading.Thread(target=self.experiment_scheduling)
+            self.scheduler_aux.start()
+            self.scheduler_aux.name = 'Scheduler Rx'
+            logging.warning('waiting the end of the experiment')
             self.end_of_series.wait()
             self.end_of_series.clear()
             if self.radio_driver.read_reset_cmd():
+                logging.warning('RESETTING SCHEDULE')
+                self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
                 self.time_to_start += datetime.timedelta(minutes=1)
                 self.radio_driver.clean_reset_cmd()
-                self.re_schedule_exp()
+                self.remove_scheduled_experiment()
+                self.cumulative_time = 0
+                self.first_run = False
+            self.f_schedule.set()
 
             # self.hours, self.minutes = self.next_run_time()
 
@@ -310,6 +326,7 @@ class ExperimentRx(threading.Thread):
     #  ====================== private =========================================
 
     def _cb_rx_frame(self, frame_rcv, rssi, crc, mcs):
+        self.radio_driver.LED_toggle(self.frame_received_pin)
         self.count_frames_rx += 1
         self.queue_rx.put((frame_rcv, rssi, crc, mcs))
 

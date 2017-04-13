@@ -90,9 +90,12 @@ class ExperimentTx(threading.Thread):
         self.minutes                = 0
         self.first_run              = False
         self.queue_tx               = Queue.Queue()
-        self.started_time           = time.time()
+        self.started_time           = None
         self.cumulative_time        = 0
-        self.schedule               = ['time' for i in range(len(self.settings["test_settings"]))]
+        self.index_modulation       = 0
+        self.scheduler              = sched.scheduler(time.time, time.sleep)
+        self.list_events_sched      = [None for i in range(len(self.settings["test_settings"]))]
+        self.schedule_time          = ['time' for i in range(len(self.settings["test_settings"]))]
         self.led_array_pins         = [29, 31, 33, 35, 37]
         self.scheduler_aux          = None
         self.time_to_start          = None
@@ -101,9 +104,11 @@ class ExperimentTx(threading.Thread):
         self.end_of_series          = threading.Event()
         self.start_experiment       = threading.Event()
         self.data_is_valid          = threading.Event()
+        self.f_schedule             = threading.Event()
         self.end_of_series.clear()
         self.start_experiment.clear()
         self.data_is_valid.clear()
+        self.f_schedule.clear()
 
         # start the thread
         threading.Thread.__init__(self)
@@ -123,8 +128,9 @@ class ExperimentTx(threading.Thread):
     def radio_setup(self):
 
         # initialize the radio driver
-        self.radio_driver = radio.At86rf215(self._cb_rx_frame, self.start_experiment)
+        self.radio_driver = radio.At86rf215(self._cb_rx_frame, self.start_experiment, self.end_of_series)
         self.radio_driver.radio_init(11, 13)
+        self.LoggerTx = LoggerTx(self.queue_tx, self.settings)
         self.radio_driver.init_binary_pins(self.led_array_pins)
         self.radio_driver.radio_reset()
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
@@ -162,8 +168,10 @@ class ExperimentTx(threading.Thread):
         self.end_of_series.set()
 
     def experiment_scheduling(self):
-        s = sched.scheduler(time.time, time.sleep)
+        # s = sched.scheduler(time.time, time.sleep)
         # time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
+        self.f_schedule.wait()
+        self.f_schedule.clear()
         if self.first_run is False:
             offset = START_OFFSET
             self.first_run = True
@@ -171,13 +179,13 @@ class ExperimentTx(threading.Thread):
         else:
             offset = self.cumulative_time + 2
         for item in self.settings['test_settings']:
-            s.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
-            self.schedule[self.settings['test_settings'].index(item)] = offset
+            self.list_events_sched[self.settings['test_settings'].index(item)] = self.scheduler.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
+            self.schedule_time[self.settings['test_settings'].index(item)] = offset
             offset += item['durationtx_s'] + SECURITY_TIME
         self.cumulative_time = offset
-        logging.warning(self.schedule)
-        s.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
-        s.run()
+        logging.warning(self.schedule_time)
+        self.scheduler.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
+        self.scheduler.run()
 
     def execute_exp(self, item):
         self.queue_tx.put(time.time() - self.started_time)
@@ -196,7 +204,8 @@ class ExperimentTx(threading.Thread):
                                                item['frequency_0_kHz'],
                                                item['channel']))
 
-        self.radio_driver.binary_counter(item['index'], self.led_array_pins)
+        self.index_modulation += 1
+        self.radio_driver.binary_counter((self.index_modulation % 31), self.led_array_pins)
         # let know to the informative class the beginning of a new experiment
         self.queue_tx.put('Start')
 
@@ -223,6 +232,14 @@ class ExperimentTx(threading.Thread):
 
                 # IFS
                 time.sleep(ifs)
+
+    def remove_scheduled_experiment(self):
+        events = self.scheduler.queue
+        logging.warning('events in list: {0}'.format(self.scheduler.queue))
+        for ev in events:
+            logging.warning('event cancelled: {0}'.format(ev))
+            self.scheduler.cancel(ev)
+        logging.warning('events in queue: {0}'.format(self.scheduler.queue))
     
     def run(self):
 
@@ -230,15 +247,28 @@ class ExperimentTx(threading.Thread):
         logging.warning('WAITING FOR THE START BUTTON TO BE PRESSED')
         self.start_experiment.wait()
         self.start_experiment.clear()
+        self.started_time = time.time()
         self.hours, self.minutes = self.following_time_to_run()
         self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
+        self.f_schedule.set()
+
         while True:
             self.scheduler_aux = threading.Thread(target=self.experiment_scheduling)
             self.scheduler_aux.start()
             self.scheduler_aux.name = 'Scheduler Tx'
-            # self.experiment_scheduling()
+            logging.warning('waiting the end of the experiment')
             self.end_of_series.wait()
             self.end_of_series.clear()
+            if self.radio_driver.read_reset_cmd():
+                self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
+                self.time_to_start += datetime.timedelta(minutes=1)
+                self.radio_driver.clean_reset_cmd()
+                self.remove_scheduled_experiment()
+                self.cumulative_time = 0
+                self.first_run = False
+            self.f_schedule.set()
+
+
 
 
     #  ======================== private =======================================
