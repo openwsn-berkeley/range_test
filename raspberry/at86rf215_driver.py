@@ -109,6 +109,7 @@ class At86rf215(object):
             self.f_reset_button         = True
 
         else:
+            logging.warning('RESET BUTTON PRESSED')
             self.end_of_series.set()
             self.f_reset_cmd            = True
 

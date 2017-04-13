@@ -225,23 +225,23 @@ class ExperimentRx(threading.Thread):
         """
         # self.scheduler = sched.scheduler(time.time, time.sleep)
         # self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
-        self.f_schedule.wait()
-        self.f_schedule.clear()
-        if self.first_run is False:
-            offset = START_OFFSET
-            self.first_run = True
-            logging.warning('TIME: {0}'.format(self.time_to_start))
-        else:
-            offset = self.cumulative_time + 2
-        for item in self.settings['test_settings']:
-            self.list_events_sched[self.settings['test_settings'].index(item)] = self.scheduler.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
-            self.schedule_time[self.settings['test_settings'].index(item)] = offset
-            offset += item['durationtx_s'] + SECURITY_TIME
-        self.cumulative_time = offset
-        # logging.warning('list of events scheduled:: {0}'.format(self.list_events_sched))
-        logging.warning('time for each set of settings: {0}'.format(self.schedule_time))
-        self.scheduler.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
-        self.scheduler.run()
+        while True:
+            self.f_schedule.wait()
+            self.f_schedule.clear()
+            if self.first_run is False:
+                offset = START_OFFSET
+                self.first_run = True
+                logging.warning('TIME time_to_start: {0}'.format(self.time_to_start))
+            else:
+                offset = self.cumulative_time + 2
+            for item in self.settings['test_settings']:
+                self.list_events_sched[self.settings['test_settings'].index(item)] = self.scheduler.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
+                self.schedule_time[self.settings['test_settings'].index(item)] = offset
+                offset += item['durationtx_s'] + SECURITY_TIME
+            self.cumulative_time = offset
+            logging.warning('time for each set of settings: {0}'.format(self.schedule_time))
+            self.scheduler.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
+            self.scheduler.run()
 
     def execute_exp(self, item):
         """
@@ -257,8 +257,8 @@ class ExperimentRx(threading.Thread):
                                                item['frequency_0_kHz'],
                                                item['channel']))
 
-        self.index_modulation += 1
-        self.radio_driver.binary_counter((self.index_modulation % 31), self.led_array_pins)
+        self.radio_driver.binary_counter(item['index'], self.led_array_pins)
+        logging.warning('modulation: {0}'.format(item["modulation"]))
         # RX counter to zero
         self.count_frames_rx = 0
         self.queue_rx.put('Start')
@@ -278,6 +278,11 @@ class ExperimentRx(threading.Thread):
         #    print('TIMER 10 Seconds triggers')
 
     def remove_scheduled_experiment(self):
+
+        # reset the radio
+        self.radio_driver.radio_reset()
+
+        # get the scheduled events
         events = self.scheduler.queue
         # logging.warning('events in list: {0}'.format(self.scheduler.queue))
         for ev in events:
@@ -294,23 +299,27 @@ class ExperimentRx(threading.Thread):
         self.started_time = time.time()
         self.hours, self.minutes = self.following_time_to_run()
         self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
+        self.scheduler_aux = threading.Thread(target=self.experiment_scheduling)
+        self.scheduler_aux.start()
+        self.scheduler_aux.name = 'Scheduler Rx'
+        logging.warning('waiting the end of the experiment')
         self.f_schedule.set()
 
         while True:
-            self.scheduler_aux = threading.Thread(target=self.experiment_scheduling)
-            self.scheduler_aux.start()
-            self.scheduler_aux.name = 'Scheduler Rx'
-            logging.warning('waiting the end of the experiment')
+
             self.end_of_series.wait()
             self.end_of_series.clear()
             if self.radio_driver.read_reset_cmd():
                 logging.warning('RESETTING SCHEDULE')
+                self.radio_driver.radio_off()
+                self.hours, self.minutes = self.following_time_to_run()
                 self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
-                self.time_to_start += datetime.timedelta(minutes=1)
+                # self.time_to_start += datetime.timedelta(minutes=1)
                 self.radio_driver.clean_reset_cmd()
                 self.remove_scheduled_experiment()
                 self.cumulative_time = 0
                 self.first_run = False
+                self.radio_driver.binary_counter(0, self.led_array_pins)
             self.f_schedule.set()
 
             # self.hours, self.minutes = self.next_run_time()
