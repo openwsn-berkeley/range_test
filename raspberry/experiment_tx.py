@@ -211,8 +211,8 @@ class ExperimentTx(threading.Thread):
         for frame_length, ifs in zip(self.settings["frame_lengths"], self.settings["IFS"]):
 
             # check if the reset button has been pressed
-            if self.radio_driver.read_reset_cmd is True:
-                logging.warning('RESET TRUE')
+            if self.radio_driver.read_reset_cmd() is True:
+                logging.warning('RESET TRUE STOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOP')
                 break
 
             self.radio_driver.radio_trx_enable()
@@ -231,16 +231,16 @@ class ExperimentTx(threading.Thread):
 
                 # IFS
                 time.sleep(ifs)
-                with self.dataLock:
-                    if self.radio_driver.read_reset_cmd is True:
-                        logging.warning('RESET TRUE')
-                        break
+                # logging.warning('self.radio_driver.read_reset_cmd(): {0}'.format(self.radio_driver.read_reset_cmd()))
+                if self.radio_driver.read_reset_cmd() is True:
+                    logging.warning('RESET TRUE STOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOP')
+                    break
 
     def remove_scheduled_experiment(self):
         events = self.scheduler.queue
-        logging.warning('events in list: {0}'.format(self.scheduler.queue))
+        # logging.warning('events in list: {0}'.format(self.scheduler.queue))
         for ev in events:
-            logging.warning('event cancelled: {0}'.format(ev))
+            # logging.warning('event cancelled: {0}'.format(ev))
             self.scheduler.cancel(ev)
         logging.warning('events in queue: {0}'.format(self.scheduler.queue))
     
@@ -275,9 +275,6 @@ class ExperimentTx(threading.Thread):
                     self.first_run = False
                     self.radio_driver.binary_counter(0, self.led_array_pins)
             self.f_schedule.set()
-
-
-
 
     #  ======================== private =======================================
     

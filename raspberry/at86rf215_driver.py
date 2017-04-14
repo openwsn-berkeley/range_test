@@ -319,7 +319,8 @@ class At86rf215(object):
             return self.f_reset_cmd
 
     def clean_reset_cmd(self):
-        self.f_reset_cmd = False
+        with self.dataLock:
+            self.f_reset_cmd = False
 
 
 

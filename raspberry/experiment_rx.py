@@ -218,6 +218,7 @@ class ExperimentRx(threading.Thread):
         """
         # self.scheduler = sched.scheduler(time.time, time.sleep)
         # self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
+        logging.warning('entering the experiment_scheduling')
         while True:
             self.f_schedule.wait()
             self.f_schedule.clear()
@@ -279,7 +280,7 @@ class ExperimentRx(threading.Thread):
         events = self.scheduler.queue
         # logging.warning('events in list: {0}'.format(self.scheduler.queue))
         for ev in events:
-            logging.warning('event cancelled: {0}'.format(ev))
+            # logging.warning('event cancelled: {0}'.format(ev))
             self.scheduler.cancel(ev)
         logging.warning('events in queue: {0}'.format(self.scheduler.queue))
 
