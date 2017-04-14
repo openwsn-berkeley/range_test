@@ -30,13 +30,9 @@ class LoggerTx(threading.Thread):
 
         # store parameters
         self.queue = queue
-        # self.results = {'Time Experiment:': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
-        #                'Time for this set of settings:': None}
         self.settings = settings
-        # self.end = end
         # local variables
         self.name_file = '/home/pi/range_test_raw_data/experiments.json'
-        # self.current_modulation = None
         self.results = {'type': 'end_of_cycle_tx', 'start_time_str': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
                         'start_time_epoch': time.time(), 'radio_settings': None, 'nmea_at_start': None,
                         'version': self.settings['version'], 'channel': None, 'frequency_0': None,
@@ -51,8 +47,6 @@ class LoggerTx(threading.Thread):
         logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
 
     def run(self):
-        # logging.warning('THREAD INFORMATIVE TX 1')
-        # while not self.end:
         while True:
             item = self.queue.get()
             if item == 'Start':
@@ -99,6 +93,7 @@ class ExperimentTx(threading.Thread):
         self.led_array_pins         = [29, 31, 33, 35, 37]
         self.scheduler_aux          = None
         self.time_to_start          = None
+        self.dataLock               = threading.RLock()
 
         # start the threads
         self.end_of_series          = threading.Event()
@@ -168,8 +163,7 @@ class ExperimentTx(threading.Thread):
         self.end_of_series.set()
 
     def experiment_scheduling(self):
-        # s = sched.scheduler(time.time, time.sleep)
-        # time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
+
         while True:
             self.f_schedule.wait()
             self.f_schedule.clear()
@@ -237,9 +231,10 @@ class ExperimentTx(threading.Thread):
 
                 # IFS
                 time.sleep(ifs)
-                if self.radio_driver.read_reset_cmd is True:
-                    logging.warning('RESET TRUE')
-                    break
+                with self.dataLock:
+                    if self.radio_driver.read_reset_cmd is True:
+                        logging.warning('RESET TRUE')
+                        break
 
     def remove_scheduled_experiment(self):
         events = self.scheduler.queue
@@ -268,17 +263,17 @@ class ExperimentTx(threading.Thread):
 
             self.end_of_series.wait()
             self.end_of_series.clear()
-            if self.radio_driver.read_reset_cmd():
-                logging.warning('button pressed')
-                self.started_time = time.time()
-                self.hours, self.minutes = self.following_time_to_run()
-                self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
-                # self.time_to_start += datetime.timedelta(minutes=1)
-                self.radio_driver.clean_reset_cmd()
-                self.remove_scheduled_experiment()
-                self.cumulative_time = 0
-                self.first_run = False
-                self.radio_driver.binary_counter(0, self.led_array_pins)
+            with self.dataLock:
+                if self.radio_driver.read_reset_cmd():
+                    logging.warning('button pressed')
+                    self.started_time = time.time()
+                    self.hours, self.minutes = self.following_time_to_run()
+                    self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
+                    self.radio_driver.clean_reset_cmd()
+                    self.remove_scheduled_experiment()
+                    self.cumulative_time = 0
+                    self.first_run = False
+                    self.radio_driver.binary_counter(0, self.led_array_pins)
             self.f_schedule.set()
 
 

@@ -50,6 +50,7 @@ class At86rf215(object):
         self.state_tx_now       = threading.Event()
         self.state_IFS          = threading.Event()
         self.state_reset        = threading.Event()
+        self.dataLock           = threading.RLock()
         self.count              = 0
         self.counter            = 0
         self.toggle_LED         = False
@@ -111,7 +112,8 @@ class At86rf215(object):
         else:
             logging.warning('RESET BUTTON PRESSED')
             self.end_of_series.set()
-            self.f_reset_cmd            = True
+            with self.dataLock:
+                self.f_reset_cmd        = True
 
     def radio_init(self, channel=11, channel_start_exp=13):
         """
@@ -313,7 +315,8 @@ class At86rf215(object):
             GPIO.output(pin, GPIO.LOW)
 
     def read_reset_cmd(self):
-        return self.f_reset_cmd
+        with self.dataLock:
+            return self.f_reset_cmd
 
     def clean_reset_cmd(self):
         self.f_reset_cmd = False

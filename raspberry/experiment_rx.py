@@ -37,7 +37,6 @@ class LoggerRx(threading.Thread):
         self.count_rx           = 0
         self.rx_frames          = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
         self.rssi_values        = [None for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
-        # self.name_file        = '/home/pi/results/' + dt.now().strftime("%D_%H:%M:%S").replace('/', '_') + '_results.json'
         self.name_file          = '/home/pi/range_test_raw_data/experiments.json'
         self.results            = {'type': 'end_of_cycle_rx',
                         'start_time_str': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
@@ -46,8 +45,6 @@ class LoggerRx(threading.Thread):
                         'RX_string': None, 'nmea_at_start': None, 'channel': None, 'frequency_0': None,
                         'burst_size': self.settings['numframes']}
 
-        # self.frame_received_pin = [36]
-        # self.radio_driver.init_binary_pins(self.frame_received_pin)
         # start the thread
         threading.Thread.__init__(self)
         self.name               = 'LoggerRx'
@@ -62,7 +59,7 @@ class LoggerRx(threading.Thread):
         experiment and the modulation used.
         :returns: Nothing
         """
-        # self.results['Frames received'] = self.count_rx
+
         self.results['RSSI_by_length'] = {
                 '8':    self.rssi_values[0:self.settings['numframes']],
                 '127':  self.rssi_values[self.settings['numframes']:2*self.settings['numframes']],
@@ -101,20 +98,17 @@ class LoggerRx(threading.Thread):
                 if type(item) is tuple:
                     try:
                         if item[0][0] * 256 + item[0][1] < 400:
-                            # self.radio_driver.LED_ON(self.frame_received_pin)
-                            # self.radio_driver.LED_toggle(self.frame_received_pin)
+
                             self.rx_frames[item[0][0] * 256 + item[0][1]] = '.'
                             self.rssi_values[item[0][0] * 256 + item[0][1]] = float(item[1])
                             self.results['Rx_frames'] += 1
-                            # self.radio_driver.LED_OFF(self.frame_received_pin)
+
                     except Exception:
                         logging.warning('item: {0}'.format(item))
 
                 elif item == 'Print last':
                     self.show_results()
                     self.results['radio_settings'] = None
-                    # with open(self.name_file, 'a') as f:
-                    #    f.write(json.dumps(self.results))
 
                 elif type(item) == float:
                     logging.warning('TIME: {0}'.format(item))
@@ -155,6 +149,7 @@ class ExperimentRx(threading.Thread):
         self.start_experiment   = threading.Event()
         self.end_of_series      = threading.Event()
         self.f_schedule         = threading.Event()
+        self.dataLock           = threading.RLock()
         self.start_experiment.clear()
         self.end_of_series.clear()
         self.f_schedule.clear()
@@ -167,8 +162,6 @@ class ExperimentRx(threading.Thread):
         # start the gps thread
         # self.gps = gps.GpsThread()
 
-        # # initializes the LoggerRx class, in charge of the logging part
-        # self.LoggerRx = LoggerRx(self.queue_rx, self.settings, self.radio_driver)
         self.LoggerRx = None
 
     def radio_setup(self):
@@ -309,20 +302,21 @@ class ExperimentRx(threading.Thread):
 
             self.end_of_series.wait()
             self.end_of_series.clear()
-            if self.radio_driver.read_reset_cmd():
-                logging.warning('RESETTING SCHEDULE')
-                self.radio_driver.radio_off()
-                self.hours, self.minutes = self.following_time_to_run()
-                self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
-                # self.time_to_start += datetime.timedelta(minutes=1)
-                self.radio_driver.clean_reset_cmd()
-                self.remove_scheduled_experiment()
-                self.cumulative_time = 0
-                self.first_run = False
-                self.radio_driver.binary_counter(0, self.led_array_pins)
+            with self.dataLock:
+                if self.radio_driver.read_reset_cmd():
+                    logging.warning('RESETTING SCHEDULE')
+                    self.radio_driver.radio_off()
+                    self.started_time = time.time()
+                    self.hours, self.minutes = self.following_time_to_run()
+                    self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
+                    # self.time_to_start += datetime.timedelta(minutes=1)
+                    self.radio_driver.clean_reset_cmd()
+                    self.remove_scheduled_experiment()
+                    self.cumulative_time = 0
+                    self.first_run = False
+                    self.radio_driver.binary_counter(0, self.led_array_pins)
+                    self.radio_driver.LED_OFF(self.frame_received_pin)
             self.f_schedule.set()
-
-            # self.hours, self.minutes = self.next_run_time()
 
         # FIXME: replace by an event from the GPS thread
 
