@@ -1,38 +1,34 @@
 import os
+import pynmea2
 import serial
 import threading
 import time
 
-import RPi.GPIO as GPIO
-import pynmea2
-
 # =========================== classes =========================================
+
 
 class GpsThread(threading.Thread):
     
     SERIAL_PORT        = '/dev/ttyS0'
     SERIAL_BAUDRATE    = 9600
-    SYSTIMESYNCPERIOD  = 60  # sec
+    SYSTIMESYNCPERIOD  = 60 # sec
     
     def __init__(self):
         
-        # local variables
-        self.tsLastSysTimeSync    = 0
-        self.serial               = None
-        self.dataLock             = threading.RLock()
-        self.f_gps_lock_GPGGA     = False
-        self.f_gps_lock_GPRMC     = False
-        self.f_gps_time           = False
-
         # Initialize the Thread class
         threading.Thread.__init__(self)
         self.name                 = 'GpsThread'
         
+        # local variables
+        self.cmd_output           = True
+        self.tsLastSysTimeSync    = 0
+        self.serial               = None
+        self.update_counter       = 0
+
         # start myself
         self.start()
     
     def run(self):
-        
         # connect to serial port of the GPS
         self.serial = serial.Serial(self.SERIAL_PORT, self.SERIAL_BAUDRATE)
         
@@ -73,15 +69,10 @@ class GpsThread(threading.Thread):
                     print err
                     continue
                 else:
-                    print 'message is valid: {0}'.format(message.is_valid)
                     if not message.is_valid:
-                        with self.dataLock:
-                            self.f_gps_lock_GPGGA = False
-                        continue
-                    with self.dataLock:
-                        self.f_gps_lock_GPGGA = True
+                       continue
                     for n in message.name_to_idx.keys():
-                        gpsData[n] = getattr(message, n)
+                        gpsData[n] = getattr(message,n)
             
             # Extract RMC "recommended minimum data for gps" messages
             # http://www.gpsinformation.org/dale/nmea.htm#RMC
@@ -107,48 +98,30 @@ class GpsThread(threading.Thread):
                     gpsData = {}
                     continue
                 else:
-                    print 'message is valid: {0}'.format(message.is_valid)
                     if not message.is_valid:
-                        gpsData = {}
-                        with self.dataLock:
-                            self.f_gps_lock_GPRMC = False
-                        continue
-                    with self.dataLock:
-                        self.f_gps_lock_GPRMC = True
+                       gpsData = {}
+                       continue
                     if not gpsData:
-                        gpsData = {}
-                        continue
-
+                       gpsData = {}
+                       continue
+                    
                     same = True
-                    for i in ['lon_dir', 'timestamp', 'lon', 'lat', 'lat_dir']:
-                        if getattr(message, i) != gpsData[i]:
+                    for i in ['lon_dir','timestamp','lon','lat','lat_dir']:
+                        if getattr(message,i)!=gpsData[i]:
                             same = False
                     if not same:
                         gpsData = {}
                         continue
                     
-                    for (n, i) in message.name_to_idx.items():
+                    for (n,i) in message.name_to_idx.items():
                         gpsData[n] = message.data[i]
                     
                     self._handleGpsData(gpsData)
                     gpsData = {}
     
-    # ======================== public =========================================
-    def isGpsTime_valid(self):
-        with self.dataLock:
-            return self.f_gps_time
-
-    def isGpsLocked_GPGGA(self):
-        with self.dataLock:
-            return self.f_gps_lock_GPGGA
-
-    def isGpsLocked_GPRMC(self):
-        with self.dataLock:
-            return self.f_gps_lock_GPRMC
+    # ======================= private =========================================
     
-    # ======================== private ========================================
-    
-    def _handleGpsData(self, gpsData):
+    def _handleGpsData(self,gpsData):
         """
         gpsData contains the union of the GGA and RMC formats. Example:
         {
@@ -175,12 +148,18 @@ class GpsThread(threading.Thread):
         }
         """
         
+        # log
+        # self.logger.writeLine(
+        #     type   = JsonFileLogger.JsonFileLogger.TYPE_GPSDATA,
+        #     params = gpsData,
+        # )
+        
         # reset system time
         now = time.time()
-        if now - self.tsLastSysTimeSync > self.SYSTIMESYNCPERIOD:
-            self._syncSysTime(gpsData['datestamp'], gpsData['timestamp'])
+        if now-self.tsLastSysTimeSync>self.SYSTIMESYNCPERIOD:
+            self._syncSysTime(gpsData['datestamp'],gpsData['timestamp'])
             self.tsLastSysTimeSync = now
-    
+
     def format_unix_date(self, datestamp, timestamp):
         """
         datestamp: '270616' (string)
@@ -191,9 +170,9 @@ class GpsThread(threading.Thread):
         day = datestamp[0:2]
         month = datestamp[2:4]
         year = datestamp[4:6]
-        if year != 06:
-            with self.dataLock:
-                self.f_gps_time = True
+        # if year == 17:
+        #     with self.dataLock:
+        #         self.f_gps_time = True
 
         timestamp = timestamp.split('.')[0]
         hour = timestamp[0:2]
@@ -208,21 +187,18 @@ class GpsThread(threading.Thread):
             MINUTE=minute,
             SECOND=second,
         )
-
-    # === parsing
+    
+    # == parsing
     
     def _syncSysTime(self, datestamp,timestamp):
         unixData = self.format_unix_date(datestamp, timestamp)
         os.system('date --s "{0}"'.format(unixData))
         print 'System time set to {0}'.format(unixData)
 
-# ============================ main ===========================================
+# =========================== main ============================================
 
 def main():
     gpsThread = GpsThread()
-    while True:
-        print 'gps Locked? {0}'.format(gpsThread.isGpsLocked())
-        time.sleep(1)
 
 if __name__=="__main__":
     main()

@@ -115,7 +115,7 @@ class ExperimentTx(threading.Thread):
         self.LoggerTx               = LoggerTx(self.queue_tx, self.settings)
 
         # start the gps thread
-        # self.gps                    = gps.GpsThread()
+        self.gps                    = gps.GpsThread()
 
         # configure the logging module
         logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
@@ -248,8 +248,8 @@ class ExperimentTx(threading.Thread):
 
         self.radio_setup()
         logging.warning('WAITING FOR THE START BUTTON TO BE PRESSED')
-        self.start_experiment.wait()
-        self.start_experiment.clear()
+        # self.start_experiment.wait()
+        # self.start_experiment.clear()
         self.started_time = time.time()
         self.hours, self.minutes = self.following_time_to_run()
         self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
