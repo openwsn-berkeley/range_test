@@ -153,16 +153,13 @@ class ExperimentRx(threading.Thread):
         self.start_experiment.clear()
         self.end_of_series.clear()
         self.f_schedule.clear()
+        self.gps                = None
+        self.LoggerRx           = None
 
         threading.Thread.__init__(self)
         self.name = 'ExperimentRx'
         self.daemon = True
         self.start()
-
-        # start the gps thread
-        self.gps = gps.GpsThread()
-
-        self.LoggerRx = None
 
     def radio_setup(self):
         """
@@ -170,19 +167,25 @@ class ExperimentRx(threading.Thread):
         :return:
         """
         # initialize the radio driver
-        self.radio_driver = radio.At86rf215(self._cb_rx_frame, self.start_experiment, self.end_of_series)
+        self.radio_driver   = radio.At86rf215(self._cb_rx_frame, self.start_experiment, self.end_of_series)
         self.radio_driver.radio_init(11, 13)
-        # initializes the LoggerRx class, in charge of the logging part
-        self.LoggerRx = LoggerRx(self.queue_rx, self.settings)
+
+        # initializes the LoggerRx thread
+        self.LoggerRx       = LoggerRx(self.queue_rx, self.settings)
+
+        # start the gps thread
+        self.gps            = gps.GpsThread()
+
+        # init LED's pins
         self.radio_driver.init_binary_pins(self.led_array_pins)
         self.radio_driver.init_binary_pins(self.frame_received_pin)
         self.radio_driver.radio_reset()
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
-        # logging.warning('waiting for the current time')
-        # logging.warning('self.gps.isGpsTime_valid(): {0}'.format(self.gps.isGpsTime_valid()))
-        # while self.gps.isGpsTime_valid() is False:
-        #     time.sleep(2)
-        #     logging.warning('still waiting')
+
+        # waiting until the GPS time is valid
+        while self.gps.is_gps_time_valid() is False:
+            time.sleep(1)
+            logging.warning('still waiting')
 
     def following_time_to_run(self):
         """
@@ -277,9 +280,7 @@ class ExperimentRx(threading.Thread):
 
         # get the scheduled events
         events = self.scheduler.queue
-        # logging.warning('events in list: {0}'.format(self.scheduler.queue))
         for ev in events:
-            # logging.warning('event cancelled: {0}'.format(ev))
             self.scheduler.cancel(ev)
         logging.warning('events in queue: {0}'.format(self.scheduler.queue))
 
@@ -287,8 +288,8 @@ class ExperimentRx(threading.Thread):
 
         self.radio_setup()
         logging.warning('WAITING FOR THE START BUTTON TO BE PRESSED')
-        # self.start_experiment.wait()
-        # self.start_experiment.clear()
+        self.start_experiment.wait()
+        self.start_experiment.clear()
         self.started_time = time.time()
         self.hours, self.minutes = self.following_time_to_run()
         self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))

@@ -24,6 +24,7 @@ class GpsThread(threading.Thread):
         self.tsLastSysTimeSync    = 0
         self.serial               = None
         self.update_counter       = 0
+        self.f_gps_valid          = False
 
         # start myself
         self.start()
@@ -117,6 +118,7 @@ class GpsThread(threading.Thread):
                         gpsData[n] = message.data[i]
                     
                     self._handleGpsData(gpsData)
+                    self.f_gps_valid = True
                     gpsData = {}
     
     # ======================= private =========================================
@@ -147,13 +149,7 @@ class GpsThread(threading.Thread):
             'mag_variation': '',
         }
         """
-        
-        # log
-        # self.logger.writeLine(
-        #     type   = JsonFileLogger.JsonFileLogger.TYPE_GPSDATA,
-        #     params = gpsData,
-        # )
-        
+
         # reset system time
         now = time.time()
         if now-self.tsLastSysTimeSync>self.SYSTIMESYNCPERIOD:
@@ -170,10 +166,6 @@ class GpsThread(threading.Thread):
         day = datestamp[0:2]
         month = datestamp[2:4]
         year = datestamp[4:6]
-        # if year == 17:
-        #     with self.dataLock:
-        #         self.f_gps_time = True
-
         timestamp = timestamp.split('.')[0]
         hour = timestamp[0:2]
         minute = timestamp[2:4]
@@ -194,6 +186,11 @@ class GpsThread(threading.Thread):
         unixData = self.format_unix_date(datestamp, timestamp)
         os.system('date --s "{0}"'.format(unixData))
         print 'System time set to {0}'.format(unixData)
+
+# ========================== public ===========================================
+
+    def is_gps_time_valid(self):
+        return self.f_gps_valid
 
 # =========================== main ============================================
 

@@ -112,10 +112,10 @@ class ExperimentTx(threading.Thread):
         self.start()
 
         # self.LoggerTx = LoggerTx(self.queue_tx, self.end_of_series, self.settings)
-        self.LoggerTx               = LoggerTx(self.queue_tx, self.settings)
+        self.LoggerTx               = None
 
         # start the gps thread
-        self.gps                    = gps.GpsThread()
+        self.gps                    = None
 
         # configure the logging module
         logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
@@ -125,15 +125,21 @@ class ExperimentTx(threading.Thread):
         # initialize the radio driver
         self.radio_driver = radio.At86rf215(self._cb_rx_frame, self.start_experiment, self.end_of_series)
         self.radio_driver.radio_init(11, 13)
+
+        # start the LoggerTx thread
         self.LoggerTx = LoggerTx(self.queue_tx, self.settings)
+
+        # start the gps thread
+        self.gps = gps.GpsThread()
+
         self.radio_driver.init_binary_pins(self.led_array_pins)
         self.radio_driver.radio_reset()
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
-        # logging.warning('waiting for the current time')
-        #
-        # while self.gps.isGpsLocked_GPGGA() is False:
-        #     time.sleep(2)
-        #     logging.warning('still waiting')
+
+        # waiting until the GPS time is valid
+        while self.gps.is_gps_time_valid() is False:
+            time.sleep(1)
+            logging.warning('still waiting')
 
     def following_time_to_run(self):
         """
@@ -238,9 +244,8 @@ class ExperimentTx(threading.Thread):
 
     def remove_scheduled_experiment(self):
         events = self.scheduler.queue
-        # logging.warning('events in list: {0}'.format(self.scheduler.queue))
+
         for ev in events:
-            # logging.warning('event cancelled: {0}'.format(ev))
             self.scheduler.cancel(ev)
         logging.warning('events in queue: {0}'.format(self.scheduler.queue))
     
@@ -248,8 +253,8 @@ class ExperimentTx(threading.Thread):
 
         self.radio_setup()
         logging.warning('WAITING FOR THE START BUTTON TO BE PRESSED')
-        # self.start_experiment.wait()
-        # self.start_experiment.clear()
+        self.start_experiment.wait()
+        self.start_experiment.clear()
         self.started_time = time.time()
         self.hours, self.minutes = self.following_time_to_run()
         self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
