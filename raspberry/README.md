@@ -39,7 +39,10 @@ Button connected to pin 13.
 
 ## meaning
 
-* start LED: on between moment button is pressed and moment experiment starts
+* start LED:
+    * off by default
+    * on steady between moment button is pressed and moment experiment starts
+    * toggles at each new frame transmission/reception
 * 5 additional LEDs: binary counter of the active radio setting
 
 ## pinout
