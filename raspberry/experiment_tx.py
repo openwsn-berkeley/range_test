@@ -13,6 +13,7 @@ import Queue
 import json
 from datetime import datetime as dt
 import datetime
+import socket
 
 import at86rf215_defs as defs
 import at86rf215_driver as radio
@@ -36,7 +37,7 @@ class LoggerTx(threading.Thread):
         self.results = {'type': 'end_of_cycle_tx', 'start_time_str': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
                         'start_time_epoch': time.time(), 'radio_settings': None, 'GPSinfo_at_start': None,
                         'version': self.settings['version'], 'channel': None, 'frequency_0': None,
-                        'burst_size': self.settings['numframes']}
+                        'burst_size': self.settings['numframes'], 'id': socket.gethostname()}
 
         # start the thread
         threading.Thread.__init__(self)

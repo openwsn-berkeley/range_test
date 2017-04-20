@@ -13,6 +13,7 @@ import Queue
 import json
 from datetime import datetime as dt
 import datetime
+import socket
 
 import at86rf215_defs as defs
 import at86rf215_driver as radio
@@ -43,7 +44,7 @@ class LoggerRx(threading.Thread):
                         'start_time_epoch': time.time(), 'version': self.settings['version'],
                         'position_description': None, 'radio_settings': None, 'Rx_frames': 0, 'RSSI_by_length': None,
                         'RX_string': None, 'GPSinfo_at_start': None, 'channel': None, 'frequency_0': None,
-                        'burst_size': self.settings['numframes']}
+                        'burst_size': self.settings['numframes'], 'id': socket.gethostname()}
 
         # start the thread
         threading.Thread.__init__(self)
