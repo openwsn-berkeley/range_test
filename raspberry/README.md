@@ -1,23 +1,52 @@
-# range_test
-This project has been created to be launched at boot time under the Supervisor client/server system.
+# starting
 
-You could also run the experiment for either the Tx or Rx part from your console. To do so, go to the location where the repository has been downloaded (e.g. /home/pi/range_test/raspberry) and run the following command:
-'''
+Tx side:
+
+```
 sudo python raspberryPi_tx.py
-'''
-for the Tx part of the experiment and 
-'''
+```
+
+Rx side:
+
+```
 sudo python raspberryPi_rx.py
-'''
-for the Rx part. 
+```
 
-Once the scripts have been run, the Rpi's will be waiting for the user to press the start button.
+Once the scripts are running, the rPi waits for the user to press the start button.
 
-There are 6 LEDs. One of them is the start LED, which will be on to indicate that the experiment is starting the next minute.
+Note: on the rPi, `supervisor` starts the scripts automatically.
 
-When the start button is pressed before the 50th second of the current minute, the experiment will be start the following minute. If not, the experiment will start at the current minute + 2. 
+# LEDs
 
-For example:
-If the start button is pressed at 15:44:55, the experiment is scheduled to 15:46:00. So the start LED will be lighted just from 15:45:00. If the start button is pressed at 15:44:30, the experiment will start at 15:45:00 and the start LED will be on from that moment until the start of the experiment.  
+## meaning
 
-The code will schedule a new experiment right after having finished the current one. 
+* start LED: on to indicate the experiment is starting at the next minute transition; off when started
+    * When the start button is pressed before the 50th second of the current minute, the experiment starts the following minute
+    * If not, the experiment starts at current minute + 2
+    * example 1: start button pressed at 15:44:30, experiment starts at 15:45:00
+    * example 2: start button pressed at 15:44:55, experiment starts at 15:46:00
+* 5 additional LEDs: binary counter of the active radio setting
+
+## pinout
+
+See https://az835927.vo.msecnd.net/sites/iot/Resources/images/PinMappings/RP2_Pinout.png
+
+| LED name   | rPi pin(s)                           |
+| ---------- | ------------------------------------ |
+| start      | pin 36                               |
+| counter    | pins 29 (lsb), 31, 33, 35, 37 (msb)  |
+
+```
+---------- pin
+         |
+        ###
+        ### 330 Ohm resistor
+        ###
+         |
+        ###
+        ### LED
+        ###
+         |
+---------- GND
+
+```
