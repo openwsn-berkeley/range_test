@@ -34,7 +34,7 @@ class LoggerTx(threading.Thread):
         # local variables
         self.name_file = '/home/pi/range_test_raw_data/experiments.json'
         self.results = {'type': 'end_of_cycle_tx', 'start_time_str': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
-                        'start_time_epoch': time.time(), 'radio_settings': None, 'nmea_at_start': None,
+                        'start_time_epoch': time.time(), 'radio_settings': None, 'GPSinfo_at_start': None,
                         'version': self.settings['version'], 'channel': None, 'frequency_0': None,
                         'burst_size': self.settings['numframes']}
 
@@ -69,7 +69,7 @@ class LoggerTx(threading.Thread):
                     self.results['channel'] = item['channel']
                     self.results['radio_settings'] = item['modulation']
                 else :
-                    self.results['nmea_at_start'] = item
+                    self.results['GPSinfo_at_start'] = item
             elif type(item) is float:
                 logging.warning('Time {0}'.format(item))
             else:

@@ -42,7 +42,7 @@ class LoggerRx(threading.Thread):
                         'start_time_str': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
                         'start_time_epoch': time.time(), 'version': self.settings['version'],
                         'position_description': None, 'radio_settings': None, 'Rx_frames': 0, 'RSSI_by_length': None,
-                        'RX_string': None, 'nmea_at_start': None, 'channel': None, 'frequency_0': None,
+                        'RX_string': None, 'GPSinfo_at_start': None, 'channel': None, 'frequency_0': None,
                         'burst_size': self.settings['numframes']}
 
         # start the thread
@@ -120,7 +120,7 @@ class LoggerRx(threading.Thread):
                         self.results['radio_settings'] = item['modulation']
 
                     else:
-                        self.results['nmea_at_start'] = item
+                        self.results['GPSinfo_at_start'] = item
                 else:
                     logging.warning('UNKNOWN ITEM')
 

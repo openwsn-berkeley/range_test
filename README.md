@@ -17,7 +17,11 @@ The following is an example of what each node will write at the end of each rang
     'numframes'            100,
     'starttime_epoch'      1489196635.438927,
     'starttime_string'     '2017-09-04 10:45:21',
-    'nmea_at_start'        '$GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,47',
+    'GPSinfo_at_start'     {"status": "A", "geo_sep_units": "M", "true_course": "317.77", "datestamp": "200417", "lon_dir": "E", 
+							"timestamp": "141642.000", "altitude": 15.3, "lon": "00223.0842", "gps_qual": 2, 
+							"lat_dir": "N", 	"mag_var_dir": "", "lat": "4850.5432", "age_gps_data": "0000", 
+							"num_sats": "09", "ref_station_id": "0000", "geo_sep": "47.3", "horizontal_dil": "0.93", 
+							"spd_over_grnd": "0.02", "altitude_units": "M", "mag_variation": ""}
     'position_description' None,
     'frequency'            863.625 MHz
     'channel'              0
@@ -46,7 +50,11 @@ The following is an example of what each node will write at the end of each rang
     'radiosettings'        'ofdm_1_mcs0',
     'starttime_epoch'      1489196636.938927,
     'starttime_string'     '2017-09-04 10:45:22',
-    'nmea_at_start'        '$GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,47',
+    'nmea_at_start'        {"status": "A", "geo_sep_units": "M", "true_course": "317.77", "datestamp": "200417", "lon_dir": "E", 
+							"timestamp": "141642.000", "altitude": 15.3, "lon": "00223.0842", "gps_qual": 2, 
+							"lat_dir": "N", 	"mag_var_dir": "", "lat": "4850.5432", "age_gps_data": "0000", 
+							"num_sats": "09", "ref_station_id": "0000", "geo_sep": "47.3", "horizontal_dil": "0.93", 
+							"spd_over_grnd": "0.02", "altitude_units": "M", "mag_variation": ""}
     'position_description' None,
     'frequency'            863.625 MHz
     'channel'              0
