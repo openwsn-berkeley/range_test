@@ -121,8 +121,6 @@ class LoggerRx(threading.Thread):
                 else:
                     logging.warning('UNKNOWN ITEM')
 
-        # logging.warning('THREAD INFORMATIVE RX 2')
-
 
 class ExperimentRx(threading.Thread):
 
@@ -140,11 +138,13 @@ class ExperimentRx(threading.Thread):
         self.index_modulation   = 0
         self.led_array_pins     = [29, 31, 33, 35, 37]
         self.frame_received_pin = [36]
+        self.start_led_pin      = [32]
         self.scheduler          = sched.scheduler(time.time, time.sleep)
         self.list_events_sched  = [None for i in range(len(self.settings["test_settings"]))]
         self.scheduler_aux      = None
         self.schedule_time      = [None for i in range(len(self.settings["test_settings"]))]
         self.time_to_start      = None
+        self.f_start_signal_LED = False
         # start the threads
         self.start_experiment   = threading.Event()
         self.end_of_series      = threading.Event()
@@ -157,7 +157,7 @@ class ExperimentRx(threading.Thread):
         self.LoggerRx           = None
 
         threading.Thread.__init__(self)
-        self.name = 'ExperimentRx'
+        self.name = 'ExperimentRx_'
         self.daemon = True
         self.start()
 
@@ -173,7 +173,7 @@ class ExperimentRx(threading.Thread):
         # initializes the LoggerRx thread
         self.LoggerRx       = LoggerRx(self.queue_rx, self.settings)
 
-        # start the gps thread
+        # # start the gps thread
         self.gps            = gps.GpsThread()
 
         # init LED's pins
@@ -283,6 +283,22 @@ class ExperimentRx(threading.Thread):
         for ev in events:
             self.scheduler.cancel(ev)
         logging.warning('events in queue: {0}'.format(self.scheduler.queue))
+        self.radio_driver.clean_reset_cmd()
+
+    def LED_start_exp(self):
+        """
+        it lights on a LED if the experiment will take place in the next minute
+        it uses the frame receive LED to indicate whether the experiment is going to start the next minute or not.
+        :return:
+        """
+        while not self.f_start_signal_LED:
+            now = time.gmtime()
+            if self.minutes - now[4] == 1 or self.minutes - now[4] == -59:
+                self.radio_driver.LED_ON(self.frame_received_pin)
+                self.f_start_signal_LED = True
+                continue
+            time.sleep(1)
+        self.f_start_signal_LED = False
 
     def run(self):
 
@@ -298,6 +314,7 @@ class ExperimentRx(threading.Thread):
         self.scheduler_aux.name = 'Scheduler Rx'
         logging.warning('waiting the end of the experiment')
         self.f_schedule.set()
+        self.LED_start_exp()
 
         while True:
 
@@ -311,12 +328,12 @@ class ExperimentRx(threading.Thread):
                     self.hours, self.minutes = self.following_time_to_run()
                     self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
                     # self.time_to_start += datetime.timedelta(minutes=1)
-                    self.radio_driver.clean_reset_cmd()
                     self.remove_scheduled_experiment()
                     self.cumulative_time = 0
                     self.first_run = False
                     self.radio_driver.binary_counter(0, self.led_array_pins)
                     self.radio_driver.LED_OFF(self.frame_received_pin)
+                    self.LED_start_exp()
             self.f_schedule.set()
 
         # FIXME: replace by an event from the GPS thread

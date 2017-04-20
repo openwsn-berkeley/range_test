@@ -85,12 +85,14 @@ class ExperimentTx(threading.Thread):
         self.first_run              = False
         self.queue_tx               = Queue.Queue()
         self.started_time           = None
+        self.f_start_signal_LED     = False
         self.cumulative_time        = 0
         self.index_modulation       = 0
         self.scheduler              = sched.scheduler(time.time, time.sleep)
         self.list_events_sched      = [None for i in range(len(self.settings["test_settings"]))]
         self.schedule_time          = ['time' for i in range(len(self.settings["test_settings"]))]
         self.led_array_pins         = [29, 31, 33, 35, 37]
+        self.frame_received_pin     = [32]
         self.scheduler_aux          = None
         self.time_to_start          = None
         self.dataLock               = threading.RLock()
@@ -133,6 +135,7 @@ class ExperimentTx(threading.Thread):
         self.gps = gps.GpsThread()
 
         self.radio_driver.init_binary_pins(self.led_array_pins)
+        self.radio_driver.init_binary_pins(self.frame_received_pin)
         self.radio_driver.radio_reset()
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
 
@@ -217,6 +220,7 @@ class ExperimentTx(threading.Thread):
         for frame_length, ifs in zip(self.settings["frame_lengths"], self.settings["IFS"]):
 
             # check if the reset button has been pressed
+            logging.warning('self.radio_driver.read_reset_cmd(): {0}'.format(self.radio_driver.read_reset_cmd()))
             if self.radio_driver.read_reset_cmd() is True:
                 logging.warning('RESET TRUE STOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOP')
                 break
@@ -248,6 +252,23 @@ class ExperimentTx(threading.Thread):
         for ev in events:
             self.scheduler.cancel(ev)
         logging.warning('events in queue: {0}'.format(self.scheduler.queue))
+        self.radio_driver.clean_reset_cmd()
+
+
+    def LED_start_exp(self):
+        """
+        it lights on a LED if the experiment will take place in the next minute
+        it uses the frame receive LED to indicate whether the experiment is going to start the next minute or not.
+        :return:
+        """
+        while not self.f_start_signal_LED:
+            now = time.gmtime()
+            if self.minutes - now[4] == 1 or self.minutes - now[4] == -59:
+                self.radio_driver.LED_ON(self.frame_received_pin)
+                self.f_start_signal_LED = True
+                continue
+            time.sleep(1)
+        self.f_start_signal_LED = False
     
     def run(self):
 
@@ -263,6 +284,7 @@ class ExperimentTx(threading.Thread):
         self.scheduler_aux.name = 'Scheduler Tx'
         logging.warning('waiting the end of the experiment')
         self.f_schedule.set()
+        self.LED_start_exp()
 
         while True:
 
@@ -274,11 +296,11 @@ class ExperimentTx(threading.Thread):
                     self.started_time = time.time()
                     self.hours, self.minutes = self.following_time_to_run()
                     self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
-                    self.radio_driver.clean_reset_cmd()
                     self.remove_scheduled_experiment()
                     self.cumulative_time = 0
                     self.first_run = False
                     self.radio_driver.binary_counter(0, self.led_array_pins)
+                    self.LED_start_exp()
             self.f_schedule.set()
 
     #  ======================== private =======================================
