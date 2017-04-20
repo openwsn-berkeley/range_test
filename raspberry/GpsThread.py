@@ -3,6 +3,8 @@ import pynmea2
 import serial
 import threading
 import time
+import logging
+import sys
 
 # =========================== classes =========================================
 
@@ -17,14 +19,18 @@ class GpsThread(threading.Thread):
         
         # Initialize the Thread class
         threading.Thread.__init__(self)
-        self.name                 = 'GpsThread'
+        self.name                   = 'GpsThread'
         
         # local variables
-        self.cmd_output           = True
-        self.tsLastSysTimeSync    = 0
-        self.serial               = None
-        self.update_counter       = 0
-        self.f_gps_valid          = False
+        self.cmd_output             = True
+        self.tsLastSysTimeSync      = 0
+        self.serial                 = None
+        self.update_counter         = 0
+        self.f_gps_valid            = False
+        self.dataLock               = threading.RLock()
+        self.gps_info          = None
+
+        logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
 
         # start myself
         self.start()
@@ -118,6 +124,9 @@ class GpsThread(threading.Thread):
                         gpsData[n] = message.data[i]
                     
                     self._handleGpsData(gpsData)
+                    # logging.warning('gpsData: {0}'.format(gpsData))
+                    # logging.warning('gpsData TYPE: {0}'.format(type(gpsData)))
+                    self.gps_info_set(gpsData)
                     self.f_gps_valid = True
                     gpsData = {}
     
@@ -191,6 +200,14 @@ class GpsThread(threading.Thread):
 
     def is_gps_time_valid(self):
         return self.f_gps_valid
+
+    def gps_info_set(self, gpsData):
+        with self.dataLock:
+            self.gps_info = gpsData
+
+    def gps_info_read(self):
+        with self.dataLock:
+            return self.gps_info
 
 # =========================== main ============================================
 

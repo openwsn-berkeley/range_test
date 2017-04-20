@@ -114,10 +114,13 @@ class LoggerRx(threading.Thread):
                     logging.warning('TIME: {0}'.format(item))
 
                 elif type(item) is dict:
-                    self.results['frequency_0'] = item['frequency_0_kHz']
-                    self.results['channel'] = item['channel']
-                    self.results['radio_settings'] = item['modulation']
+                    if item.get('frequency_0_kHz') is not None:
+                        self.results['frequency_0'] = item['frequency_0_kHz']
+                        self.results['channel'] = item['channel']
+                        self.results['radio_settings'] = item['modulation']
 
+                    else:
+                        self.results['nmea_at_start'] = item
                 else:
                     logging.warning('UNKNOWN ITEM')
 
@@ -138,7 +141,6 @@ class ExperimentRx(threading.Thread):
         self.index_modulation   = 0
         self.led_array_pins     = [29, 31, 33, 35, 37]
         self.frame_received_pin = [36]
-        self.start_led_pin      = [32]
         self.scheduler          = sched.scheduler(time.time, time.sleep)
         self.list_events_sched  = [None for i in range(len(self.settings["test_settings"]))]
         self.scheduler_aux      = None
@@ -244,6 +246,9 @@ class ExperimentRx(threading.Thread):
         This is the functions that reconfigures the radio at each test. It gets passed to the scheduler function.
         :return: Nothing
         """
+        # clean the break execute_exp flag
+        self.radio_driver.clean_reset_cmd()
+
         # reset the radio to erase previous configuration
         self.radio_driver.radio_reset()
         self.radio_driver.LED_OFF(self.frame_received_pin)
@@ -261,6 +266,10 @@ class ExperimentRx(threading.Thread):
 
         # show the config
         self.queue_rx.put(item)
+
+        # log GPS info
+        self.queue_rx.put(self.gps.gps_info_read())
+        logging.warning('GPS data: {0}'.format(self.gps.gps_info_read()))
 
         # put the radio into RX mode
         self.radio_driver.radio_trx_enable()
@@ -283,7 +292,7 @@ class ExperimentRx(threading.Thread):
         for ev in events:
             self.scheduler.cancel(ev)
         logging.warning('events in queue: {0}'.format(self.scheduler.queue))
-        self.radio_driver.clean_reset_cmd()
+        # self.radio_driver.clean_reset_cmd()
 
     def LED_start_exp(self):
         """
@@ -304,8 +313,8 @@ class ExperimentRx(threading.Thread):
 
         self.radio_setup()
         logging.warning('WAITING FOR THE START BUTTON TO BE PRESSED')
-        self.start_experiment.wait()
-        self.start_experiment.clear()
+        # self.start_experiment.wait()
+        # self.start_experiment.clear()
         self.started_time = time.time()
         self.hours, self.minutes = self.following_time_to_run()
         self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))

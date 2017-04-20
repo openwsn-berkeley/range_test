@@ -114,6 +114,7 @@ class At86rf215(object):
             self.end_of_series.set()
             with self.dataLock:
                 self.f_reset_cmd        = True
+                logging.warning('self.f_reset_cmd set to true?: {0}'.format(self.f_reset_cmd))
 
     def radio_init(self, channel=11, channel_start_exp=13):
         """

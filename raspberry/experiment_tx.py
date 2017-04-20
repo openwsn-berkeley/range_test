@@ -64,9 +64,12 @@ class LoggerTx(threading.Thread):
                 logging.warning('Time to send the frames {0} - {1} was {2} seconds\n'.format(item[0] - 100, item[0],
                                                                                              item[1]))
             elif type(item) is dict:
-                self.results['frequency_0'] = item['frequency_0_kHz']
-                self.results['channel'] = item['channel']
-                self.results['radio_settings'] = item['modulation']
+                if item.get('frequency_0_kHz') is not None:
+                    self.results['frequency_0'] = item['frequency_0_kHz']
+                    self.results['channel'] = item['channel']
+                    self.results['radio_settings'] = item['modulation']
+                else :
+                    self.results['nmea_at_start'] = item
             elif type(item) is float:
                 logging.warning('Time {0}'.format(item))
             else:
@@ -92,7 +95,7 @@ class ExperimentTx(threading.Thread):
         self.list_events_sched      = [None for i in range(len(self.settings["test_settings"]))]
         self.schedule_time          = ['time' for i in range(len(self.settings["test_settings"]))]
         self.led_array_pins         = [29, 31, 33, 35, 37]
-        self.frame_received_pin     = [32]
+        self.frame_sent_pin         = [36]
         self.scheduler_aux          = None
         self.time_to_start          = None
         self.dataLock               = threading.RLock()
@@ -135,7 +138,7 @@ class ExperimentTx(threading.Thread):
         self.gps = gps.GpsThread()
 
         self.radio_driver.init_binary_pins(self.led_array_pins)
-        self.radio_driver.init_binary_pins(self.frame_received_pin)
+        self.radio_driver.init_binary_pins(self.frame_sent_pin)
         self.radio_driver.radio_reset()
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
 
@@ -187,11 +190,19 @@ class ExperimentTx(threading.Thread):
                 self.schedule_time[self.settings['test_settings'].index(item)] = offset
                 offset += item['durationtx_s'] + SECURITY_TIME
             self.cumulative_time = offset
-            logging.warning(self.schedule_time)
+            logging.warning('time for each set of settings: {0}'.format(self.schedule_time))
             self.scheduler.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
             self.scheduler.run()
 
     def execute_exp(self, item):
+        """"
+        :param item
+
+        """
+        self.radio_driver.LED_OFF(self.frame_sent_pin)
+        # clean the break execute_exp flag
+        self.radio_driver.clean_reset_cmd()
+
         self.queue_tx.put(time.time() - self.started_time)
         # initialize the frame counter
         frame_counter = 0
@@ -216,13 +227,16 @@ class ExperimentTx(threading.Thread):
         # log the config name
         self.queue_tx.put(item)
 
+        # log GPS info
+        self.queue_tx.put(self.gps.gps_info_read())
+        logging.warning('GPS data: {0}'.format(self.gps.gps_info_read()))
+
         # loop through packet lengths
         for frame_length, ifs in zip(self.settings["frame_lengths"], self.settings["IFS"]):
 
             # check if the reset button has been pressed
-            logging.warning('self.radio_driver.read_reset_cmd(): {0}'.format(self.radio_driver.read_reset_cmd()))
+            # logging.warning('self.radio_driver.read_reset_cmd(): {0}'.format(self.radio_driver.read_reset_cmd()))
             if self.radio_driver.read_reset_cmd() is True:
-                logging.warning('RESET TRUE STOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOP')
                 break
 
             self.radio_driver.radio_trx_enable()
@@ -241,9 +255,9 @@ class ExperimentTx(threading.Thread):
 
                 # IFS
                 time.sleep(ifs)
+                self.radio_driver.LED_toggle(self.frame_sent_pin)
                 # logging.warning('self.radio_driver.read_reset_cmd(): {0}'.format(self.radio_driver.read_reset_cmd()))
                 if self.radio_driver.read_reset_cmd() is True:
-                    logging.warning('RESET TRUE STOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOP')
                     break
 
     def remove_scheduled_experiment(self):
@@ -252,8 +266,7 @@ class ExperimentTx(threading.Thread):
         for ev in events:
             self.scheduler.cancel(ev)
         logging.warning('events in queue: {0}'.format(self.scheduler.queue))
-        self.radio_driver.clean_reset_cmd()
-
+        # self.radio_driver.clean_reset_cmd()
 
     def LED_start_exp(self):
         """
@@ -264,7 +277,7 @@ class ExperimentTx(threading.Thread):
         while not self.f_start_signal_LED:
             now = time.gmtime()
             if self.minutes - now[4] == 1 or self.minutes - now[4] == -59:
-                self.radio_driver.LED_ON(self.frame_received_pin)
+                self.radio_driver.LED_ON(self.frame_sent_pin)
                 self.f_start_signal_LED = True
                 continue
             time.sleep(1)
@@ -274,8 +287,8 @@ class ExperimentTx(threading.Thread):
 
         self.radio_setup()
         logging.warning('WAITING FOR THE START BUTTON TO BE PRESSED')
-        self.start_experiment.wait()
-        self.start_experiment.clear()
+        # self.start_experiment.wait()
+        # self.start_experiment.clear()
         self.started_time = time.time()
         self.hours, self.minutes = self.following_time_to_run()
         self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
