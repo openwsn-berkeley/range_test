@@ -339,8 +339,9 @@ def main():
     while True:
         input = raw_input('>')
         if input == 's':
-            print experimentTx.getStats()
+            # print experimentTx.getStats()
             # print 'print stats TX'
+            logging.warning('TO IMPLEMENT')
         if input == 'q':
             sys.exit(0)
 

@@ -350,8 +350,8 @@ class ExperimentRx(threading.Thread):
     #  ======================== public ========================================
 
     def getStats(self):
-        # logging.warning('Results ongoing {0}'.format(self.LoggerRx.results_per_settings))
-        logging.warning('SHOW SOMETHING HERE')
+        # logging.warning('Results ongoing {0}'.format(self.LoggerRx.results))
+        logging.warning('TO IMPLEMENT')
 
     #  ====================== private =========================================
 
