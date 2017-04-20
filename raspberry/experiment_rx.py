@@ -269,7 +269,6 @@ class ExperimentRx(threading.Thread):
 
         # log GPS info
         self.queue_rx.put(self.gps.gps_info_read())
-        logging.warning('GPS data: {0}'.format(self.gps.gps_info_read()))
 
         # put the radio into RX mode
         self.radio_driver.radio_trx_enable()
@@ -313,8 +312,8 @@ class ExperimentRx(threading.Thread):
 
         self.radio_setup()
         logging.warning('WAITING FOR THE START BUTTON TO BE PRESSED')
-        # self.start_experiment.wait()
-        # self.start_experiment.clear()
+        self.start_experiment.wait()
+        self.start_experiment.clear()
         self.started_time = time.time()
         self.hours, self.minutes = self.following_time_to_run()
         self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
