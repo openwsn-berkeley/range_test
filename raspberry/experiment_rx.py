@@ -77,14 +77,14 @@ class LoggerRx(threading.Thread):
     def show_results(self):
         self.rx_frames_psize()
         with open(self.name_file, 'a') as f:
-            f.write(json.dumps([self.results.copy()]))
+            f.write(json.dumps(self.results.copy())+'\n')
 
     def run(self):
 
         while True:
             item = self.queue.get()
             if item == 'Start':
-                if self.results['radio_settings'] is not None:
+                if self.results['radio_settings']:
                     self.show_results()  # print to log file
                     self.rx_frames = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
                     self.rssi_values = [None for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
@@ -104,12 +104,13 @@ class LoggerRx(threading.Thread):
                             self.rssi_values[item[0][0] * 256 + item[0][1]] = float(item[1])
                             self.results['Rx_frames'] += 1
 
-                    except Exception:
+                    except ValueError as err:
                         logging.warning('item: {0}'.format(item))
+                        logging.warning(err)
 
                 elif item == 'Print last':
                     self.show_results()
-                    self.results['radio_settings'] = None
+                    # self.results['radio_settings'] = None
 
                 elif type(item) == float:
                     logging.warning('TIME: {0}'.format(item))
