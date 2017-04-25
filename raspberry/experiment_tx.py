@@ -53,13 +53,13 @@ class LoggerTx(threading.Thread):
             if item == 'Start':
                 self.results['start_time_str'] = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime())
                 self.results['start_time_epoch'] = time.time()
-                if self.results['radio_settings'] is not None:
+                if self.results['radio_settings']:
                     with open(self.name_file, 'a') as f:
-                        f.write(json.dumps(self.results.copy()))
+                        f.write(json.dumps(self.results.copy())+'\n')
 
             elif item == 'Print last':
                 with open(self.name_file, 'a') as f:
-                    f.write(json.dumps(self.results.copy()))
+                    f.write(json.dumps(self.results.copy())+'\n')
 
             elif type(item) is tuple:
                 logging.warning('Time to send the frames {0} - {1} was {2} seconds\n'.format(item[0] - 100, item[0],
@@ -287,8 +287,8 @@ class ExperimentTx(threading.Thread):
 
         self.radio_setup()
         logging.warning('WAITING FOR THE START BUTTON TO BE PRESSED')
-        self.start_experiment.wait()
-        self.start_experiment.clear()
+        # self.start_experiment.wait()
+        # self.start_experiment.clear()
         self.started_time = time.time()
         self.hours, self.minutes = self.following_time_to_run()
         self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
