@@ -127,7 +127,8 @@ class GpsThread(threading.Thread):
                     # logging.warning('gpsData: {0}'.format(gpsData))
                     # logging.warning('gpsData TYPE: {0}'.format(type(gpsData)))
                     self.gps_info_set(gpsData)
-                    self.f_gps_valid = True
+                    with self.dataLock:
+                        self.f_gps_valid = True
                     gpsData = {}
     
     # ======================= private =========================================
@@ -199,7 +200,8 @@ class GpsThread(threading.Thread):
 # ========================== public ===========================================
 
     def is_gps_time_valid(self):
-        return self.f_gps_valid
+        with self.dataLock:
+            return self.f_gps_valid
 
     def gps_info_set(self, gpsData):
         with self.dataLock:
