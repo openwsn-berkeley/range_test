@@ -23,6 +23,7 @@ PACKET_LENGTH = 2047
 CRC_SIZE      = 4
 SECURITY_TIME = 3    # 3 seconds to give more time to TRX to complete the 400 frame bursts.
 START_OFFSET  = 3.5  # 3.5 seconds after the starting time arrives.
+FCS_VALID     = 1
 
 
 class LoggerRx(threading.Thread):
@@ -44,7 +45,7 @@ class LoggerRx(threading.Thread):
                         'start_time_epoch': time.time(), 'version': self.settings['version'],
                         'position_description': None, 'radio_settings': None, 'Rx_frames': 0, 'RSSI_by_length': None,
                         'RX_string': None, 'GPSinfo_at_start': None, 'channel': None, 'frequency_0': None,
-                        'burst_size': self.settings['numframes'], 'id': socket.gethostname()}
+                        'burst_size': self.settings['numframes'], 'id': socket.gethostname(), 'Rx_frames_not_OK': None}
 
         # start the thread
         threading.Thread.__init__(self)
@@ -91,22 +92,26 @@ class LoggerRx(threading.Thread):
                     self.results['Rx_frames'] = 0
                     self.results['start_time_str'] = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime())
                     self.results['start_time_epoch'] = time.time()
+                    self.results['Rx_frames_not_OK'] = 0
                 else:   # I should be here just for the first item in the queue
                     self.results['start_time_str'] = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime())
                     self.results['start_time_epoch'] = time.time()
 
             else:
                 if type(item) is tuple:
-                    try:
-                        if item[0][0] * 256 + item[0][1] < 400:
+                    if item[2] is FCS_VALID:  # check frame correctness.
+                        try:
+                            if item[0][0] * 256 + item[0][1] < 400:
 
-                            self.rx_frames[item[0][0] * 256 + item[0][1]] = '.'
-                            self.rssi_values[item[0][0] * 256 + item[0][1]] = float(item[1])
-                            self.results['Rx_frames'] += 1
+                                self.rx_frames[item[0][0] * 256 + item[0][1]] = '.'
+                                self.rssi_values[item[0][0] * 256 + item[0][1]] = float(item[1])
+                                self.results['Rx_frames'] += 1
 
-                    except ValueError as err:
-                        logging.warning('item: {0}'.format(item))
-                        logging.warning(err)
+                        except ValueError as err:
+                            logging.warning('item: {0}'.format(item))
+                            logging.warning(err)
+                    else:
+                        self.results['Rx_frames_not_OK'] += 1  # Frame received but wrong.
 
                 elif item == 'Print last':
                     self.show_results()

@@ -413,7 +413,7 @@ modulations_settings = {
         (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x64 - 0dBm  mettre 0x7F
         (RG_BBC0_IRQM,          0x12),
         (RG_BBC1_IRQM,          0x00),
-        (RG_BBC0_PC,            0x56),  # FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC0_PC,            0x16),  # FCS FILTER in RX, FCS automatically added in TX
         (RG_BBC0_OFDMC,         0x00),
         (RG_BBC0_OFDMPHRTX,     0x01)],
 
@@ -430,7 +430,7 @@ modulations_settings = {
         (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
         (RG_BBC0_IRQM,          0x12),
         (RG_BBC1_IRQM,          0x00),
-        (RG_BBC0_PC,            0x56),  # FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC0_PC,            0x16),  # FCS FILTER in RX, FCS automatically added in TX
         (RG_BBC0_OFDMC,         0x00),
         (RG_BBC0_OFDMPHRTX,     0x02)],
 
@@ -447,7 +447,7 @@ modulations_settings = {
         (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
         (RG_BBC0_IRQM,          0x12),
         (RG_BBC1_IRQM,          0x00),
-        (RG_BBC0_PC,            0x56),  # FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC0_PC,            0x16),  # FCS FILTER in RX, FCS automatically added in TX
         (RG_BBC0_OFDMC,         0x00),
         (RG_BBC0_OFDMPHRTX,     0x03)],
 
@@ -464,7 +464,7 @@ modulations_settings = {
         (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
         (RG_BBC0_IRQM,          0x12),
         (RG_BBC1_IRQM,          0x00),
-        (RG_BBC0_PC,            0x56),  # FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC0_PC,            0x16),  # FCS FILTER in RX, FCS automatically added in TX
         (RG_BBC0_OFDMC,         0x01),
         (RG_BBC0_OFDMPHRTX,     0x00)],
 
@@ -481,7 +481,7 @@ modulations_settings = {
         (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
         (RG_BBC0_IRQM,          0x12),
         (RG_BBC1_IRQM,          0x00),
-        (RG_BBC0_PC,            0x56),  # FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC0_PC,            0x16),  # FCS FILTER in RX, FCS automatically added in TX
         (RG_BBC0_OFDMC,         0x01),
         (RG_BBC0_OFDMPHRTX,     0x01)],
 
@@ -498,7 +498,7 @@ modulations_settings = {
         (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
         (RG_BBC0_IRQM,          0x12),
         (RG_BBC1_IRQM,          0x00),
-        (RG_BBC0_PC,            0x56),  # FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC0_PC,            0x16),  # FCS FILTER in RX, FCS automatically added in TX
         (RG_BBC0_OFDMC,         0x01),
         (RG_BBC0_OFDMPHRTX,     0x02)],
 
@@ -515,7 +515,7 @@ modulations_settings = {
         (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
         (RG_BBC0_IRQM,          0x12),
         (RG_BBC1_IRQM,          0x00),
-        (RG_BBC0_PC,            0x56),  # FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC0_PC,            0x16),  # FCS FILTER in RX, FCS automatically added in TX
         (RG_BBC0_OFDMC,         0x01),
         (RG_BBC0_OFDMPHRTX,     0x03)],
 
@@ -532,7 +532,7 @@ modulations_settings = {
         (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
         (RG_BBC0_IRQM,          0x12),
         (RG_BBC1_IRQM,          0x00),
-        (RG_BBC0_PC,            0x56),  # FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC0_PC,            0x16),  # FCS FILTER in RX, FCS automatically added in TX
         (RG_BBC0_OFDMC,         0x01),
         (RG_BBC0_OFDMPHRTX,     0x04)],
 
@@ -549,7 +549,7 @@ modulations_settings = {
         (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
         (RG_BBC0_IRQM,          0x12),
         (RG_BBC1_IRQM,          0x00),
-        (RG_BBC0_PC,            0x56),  # FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC0_PC,            0x16),  # FCS FILTER in RX, FCS automatically added in TX
         (RG_BBC0_OFDMC,         0x01),
         (RG_BBC0_OFDMPHRTX,     0x05)],
 
@@ -566,7 +566,7 @@ modulations_settings = {
         (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
         (RG_BBC0_IRQM,          0x12),
         (RG_BBC1_IRQM,          0x00),
-        (RG_BBC0_PC,            0x56),  # FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC0_PC,            0x16),  # FCS FILTER in RX, FCS automatically added in TX
         (RG_BBC0_OFDMC,         0x02),
         (RG_BBC0_OFDMPHRTX,     0x01)],
 
@@ -583,7 +583,7 @@ modulations_settings = {
         (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
         (RG_BBC0_IRQM,          0x12),
         (RG_BBC1_IRQM,          0x00),
-        (RG_BBC0_PC,            0x56),  # FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC0_PC,            0x16),  # FCS FILTER in RX, FCS automatically added in TX
         (RG_BBC0_OFDMC,         0x02),
         (RG_BBC0_OFDMPHRTX,     0x02)],
 
@@ -600,7 +600,7 @@ modulations_settings = {
         (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
         (RG_BBC0_IRQM,          0x12),
         (RG_BBC1_IRQM,          0x00),
-        (RG_BBC0_PC,            0x56),  # FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC0_PC,            0x16),  # FCS FILTER in RX, FCS automatically added in TX
         (RG_BBC0_OFDMC,         0x02),
         (RG_BBC0_OFDMPHRTX,     0x03)],
 
@@ -617,7 +617,7 @@ modulations_settings = {
         (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
         (RG_BBC0_IRQM,          0x12),
         (RG_BBC1_IRQM,          0x00),
-        (RG_BBC0_PC,            0x56),  # FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC0_PC,            0x16),  # FCS FILTER in RX, FCS automatically added in TX
         (RG_BBC0_OFDMC,         0x02),
         (RG_BBC0_OFDMPHRTX,     0x04)],
 
@@ -634,7 +634,7 @@ modulations_settings = {
         (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
         (RG_BBC0_IRQM,          0x12),
         (RG_BBC1_IRQM,          0x00),
-        (RG_BBC0_PC,            0x56),  # FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC0_PC,            0x16),  # FCS FILTER in RX, FCS automatically added in TX
         (RG_BBC0_OFDMC,         0x02),
         (RG_BBC0_OFDMPHRTX,     0x05)],
 
@@ -651,7 +651,7 @@ modulations_settings = {
         (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
         (RG_BBC0_IRQM,          0x12),
         (RG_BBC1_IRQM,          0x00),
-        (RG_BBC0_PC,            0x56),  # FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC0_PC,            0x16),  # FCS FILTER in RX, FCS automatically added in TX
         (RG_BBC0_OFDMC,         0x02),
         (RG_BBC0_OFDMPHRTX,     0x06)],
 
@@ -668,7 +668,7 @@ modulations_settings = {
         (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
         (RG_BBC0_IRQM,          0x12),
         (RG_BBC1_IRQM,          0x00),
-        (RG_BBC0_PC,            0x56),  # FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC0_PC,            0x16),  # FCS FILTER in RX, FCS automatically added in TX
         (RG_BBC0_OFDMC,         0x03),
         (RG_BBC0_OFDMPHRTX,     0x02)],
 
@@ -685,7 +685,7 @@ modulations_settings = {
         (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
         (RG_BBC0_IRQM,          0x12),
         (RG_BBC1_IRQM,          0x00),
-        (RG_BBC0_PC,            0x56),  # FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC0_PC,            0x16),  # FCS FILTER in RX, FCS automatically added in TX
         (RG_BBC0_OFDMC,         0x03),
         (RG_BBC0_OFDMPHRTX,     0x03)],
 
@@ -702,7 +702,7 @@ modulations_settings = {
         (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
         (RG_BBC0_IRQM,          0x12),
         (RG_BBC1_IRQM,          0x00),
-        (RG_BBC0_PC,            0x56),  # FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC0_PC,            0x16),  # FCS FILTER in RX, FCS automatically added in TX
         (RG_BBC0_OFDMC,         0x03),
         (RG_BBC0_OFDMPHRTX,     0x04)],
 
@@ -719,7 +719,7 @@ modulations_settings = {
         (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
         (RG_BBC0_IRQM,          0x12),
         (RG_BBC1_IRQM,          0x00),
-        (RG_BBC0_PC,            0x56),  # FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC0_PC,            0x16),  # FCS FILTER in RX, FCS automatically added in TX
         (RG_BBC0_OFDMC,         0x03),
         (RG_BBC0_OFDMPHRTX,     0x05)],
 
@@ -736,7 +736,7 @@ modulations_settings = {
         (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
         (RG_BBC0_IRQM,          0x12),
         (RG_BBC1_IRQM,          0x00),
-        (RG_BBC0_PC,            0x56),  # FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC0_PC,            0x16),  # FCS FILTER in RX, FCS automatically added in TX
         (RG_BBC0_OFDMC,         0x03),
         (RG_BBC0_OFDMPHRTX,     0x06)]
 }
