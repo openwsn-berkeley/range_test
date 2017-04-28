@@ -45,7 +45,7 @@ class LoggerRx(threading.Thread):
             'version'], 'position_description': None, 'radio_settings': None, 'Rx_frames': 0, 'RSSI_by_length': None,
                         'RX_string': None, 'GPSinfo_at_start': None, 'channel': None, 'frequency_0': None,
                                    'burst_size': self.settings['numframes'], 'id': socket.gethostname(),
-                                   'Rx_frames_not_OK': 0, 'Rx_frames_wrong_indexes': None}
+                                   'Rx_frames_not_OK': 0, 'Rx_frames_wrong_indexes': []}
 
         # start the thread
         threading.Thread.__init__(self)
