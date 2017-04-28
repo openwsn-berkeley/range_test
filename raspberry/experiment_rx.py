@@ -40,13 +40,12 @@ class LoggerRx(threading.Thread):
         self.rx_frames          = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
         self.rssi_values        = [None for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
         self.name_file          = '/home/pi/range_test_raw_data/experiments.json'
-        self.results            = {'type': 'end_of_cycle_rx',
-                        'start_time_str': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
-                        'start_time_epoch': time.time(), 'version': self.settings['version'],
-                        'position_description': None, 'radio_settings': None, 'Rx_frames': 0, 'RSSI_by_length': None,
+        self.results            = {'type': 'end_of_cycle_rx', 'start_time_str': time.strftime(
+            "%a, %d %b %Y %H:%M:%S UTC", time.gmtime()), 'start_time_epoch': time.time(), 'version': self.settings[
+            'version'], 'position_description': None, 'radio_settings': None, 'Rx_frames': 0, 'RSSI_by_length': None,
                         'RX_string': None, 'GPSinfo_at_start': None, 'channel': None, 'frequency_0': None,
-                        'burst_size': self.settings['numframes'], 'id': socket.gethostname(), 'Rx_frames_not_OK': None,
-                        'Rx_frames_wrong_indexes': None}
+                                   'burst_size': self.settings['numframes'], 'id': socket.gethostname(),
+                                   'Rx_frames_not_OK': 0, 'Rx_frames_wrong_indexes': None}
 
         # start the thread
         threading.Thread.__init__(self)
@@ -76,7 +75,7 @@ class LoggerRx(threading.Thread):
                 '2047': ''.join(self.rx_frames[3*self.settings['numframes']:4*self.settings['numframes']])
         }
 
-    def show_results(self):
+    def print_results(self):
         self.rx_frames_psize()
         with open(self.name_file, 'a') as f:
             f.write(json.dumps(self.results.copy())+'\n')
@@ -87,7 +86,7 @@ class LoggerRx(threading.Thread):
             item = self.queue.get()
             if item == 'Start':
                 if self.results['radio_settings']:  # to know if this is the first time I pass in the logger
-                    self.show_results()  # print to log file
+                    self.print_results()  # print to log file
                     self.rx_frames = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
                     self.rssi_values = [None for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
                     self.results['Rx_frames'] = 0
@@ -118,7 +117,7 @@ class LoggerRx(threading.Thread):
                         logging.warning('CRC validity: {0}'.format(item[2]))
 
                 elif item == 'Print last':
-                    self.show_results()
+                    self.print_results()
                     # self.results['radio_settings'] = None
 
                 elif type(item) == float:
