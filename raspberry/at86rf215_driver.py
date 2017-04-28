@@ -6,7 +6,7 @@ Connections
 | rPi pin | ATREB215-XPRO Extension Board pin |
 |---------|-----------------------------------|
 | 01- +3V |  20 - VCC                         |
-| 03-     |  09 - IRQ                         |
+| 11-     |  09 - IRQ                         |
 | 09- GND |  19 - GND                         |
 | 19-     |  16 - SPI_MOSI                    |
 | 21-     |  17 - SPI_MISO                    |
