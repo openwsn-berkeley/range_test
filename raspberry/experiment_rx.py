@@ -44,7 +44,7 @@ class LoggerRx(threading.Thread):
             'version'], 'position_description': None, 'radio_settings': None, 'Rx_frames': 0, 'RSSI_by_length': None,
                         'RX_string': None, 'GPSinfo_at_start': None, 'channel': None, 'frequency_0': None,
                                    'burst_size': self.settings['numframes'], 'id': socket.gethostname(),
-                                   'Rx_frames_not_OK': 0, 'Rx_frames_wrong_indexes': []}
+                                   'Rx_frames_not_OK': 0, 'Rx_frames_not_OK_SN': []}
 
         # start the thread
         threading.Thread.__init__(self)
@@ -92,7 +92,7 @@ class LoggerRx(threading.Thread):
                     self.results['start_time_str'] = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime())
                     self.results['start_time_epoch'] = time.time()
                     self.results['Rx_frames_not_OK'] = 0
-                    self.results['Rx_frames_wrong_indexes'] = []
+                    self.results['Rx_frames_not_OK_SN'] = []
                 else:   # I should be here just for the first item in the queue
                     self.results['start_time_str'] = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime())
                     self.results['start_time_epoch'] = time.time()
@@ -112,7 +112,7 @@ class LoggerRx(threading.Thread):
                             logging.warning(err)
                     else:
                         self.results['Rx_frames_not_OK'] += 1  # Frame received but wrong.
-                        self.results['Rx_frames_wrong_indexes'].append(item[0][0] * 256 + item[0][1])
+                        self.results['Rx_frames_not_OK_SN'].append(item[0][0] * 256 + item[0][1])
                         logging.warning('CRC validity: {0}'.format(item[2]))
 
                 elif item == 'Print last':
