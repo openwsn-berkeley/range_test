@@ -91,7 +91,6 @@ class ExperimentTx(threading.Thread):
         self.started_time           = None
         self.f_start_signal_LED     = False
         self.cumulative_time        = 0
-        self.index_modulation       = 0
         self.scheduler              = sched.scheduler(time.time, time.sleep)
         self.list_events_sched      = [None for i in range(len(self.settings["test_settings"]))]
         self.schedule_time          = ['time' for i in range(len(self.settings["test_settings"]))]
@@ -148,7 +147,7 @@ class ExperimentTx(threading.Thread):
             time.sleep(1)
             logging.warning('still waiting')
 
-    def following_time_to_run(self):
+    def time_experiment(self):
         """
         it sets the next runtime for the whole experiment sequence in hours, minutes
         current_time[3] = hours, current_time[4] = minutes, current_time[5] = seconds
@@ -290,7 +289,7 @@ class ExperimentTx(threading.Thread):
         self.start_experiment.wait()
         self.start_experiment.clear()
         self.started_time = time.time()
-        self.hours, self.minutes = self.following_time_to_run()
+        self.hours, self.minutes = self.time_experiment()
         self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
         self.scheduler_aux = threading.Thread(target=self.experiment_scheduling)
         self.scheduler_aux.start()
@@ -307,7 +306,7 @@ class ExperimentTx(threading.Thread):
                 if self.radio_driver.read_reset_cmd():
                     logging.warning('button pressed')
                     self.started_time = time.time()
-                    self.hours, self.minutes = self.following_time_to_run()
+                    self.hours, self.minutes = self.time_experiment()
                     self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
                     self.remove_scheduled_experiment()
                     self.cumulative_time = 0

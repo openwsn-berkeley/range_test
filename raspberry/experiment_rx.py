@@ -35,8 +35,7 @@ class LoggerRx(threading.Thread):
         # self.radio_driver       = radio_driver
 
         # local variables
-        self.dataLock           = threading.RLock()
-        self.count_rx           = 0
+        # self.dataLock           = threading.RLock()
         self.rx_frames          = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
         self.rssi_values        = [None for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
         self.name_file          = '/home/pi/range_test_raw_data/experiments.json'
@@ -145,10 +144,9 @@ class ExperimentRx(threading.Thread):
         self.minutes            = 0
         self.first_run          = False
         self.queue_rx           = Queue.Queue()
-        self.count_frames_rx    = 0
+        # self.count_frames_rx    = 0
         self.started_time       = None
         self.cumulative_time    = 0
-        self.index_modulation   = 0
         self.led_array_pins     = [29, 31, 33, 35, 37]
         self.frame_received_pin = [36]
         self.scheduler          = sched.scheduler(time.time, time.sleep)
@@ -157,6 +155,7 @@ class ExperimentRx(threading.Thread):
         self.schedule_time      = [None for i in range(len(self.settings["test_settings"]))]
         self.time_to_start      = None
         self.f_start_signal_LED = False
+        
         # start the threads
         self.start_experiment   = threading.Event()
         self.end_of_series      = threading.Event()
@@ -199,7 +198,7 @@ class ExperimentRx(threading.Thread):
             time.sleep(1)
             logging.warning('still waiting')
 
-    def following_time_to_run(self):
+    def time_experiment(self):
         """
         it sets the next runtime for the whole experiment sequence in hours, minutes
         current_time[3] = hours, current_time[4] = minutes, current_time[5] = seconds
@@ -271,7 +270,7 @@ class ExperimentRx(threading.Thread):
         self.radio_driver.binary_counter(item['index'], self.led_array_pins)
         logging.warning('modulation: {0}'.format(item["modulation"]))
         # RX counter to zero
-        self.count_frames_rx = 0
+        # self.count_frames_rx = 0
         self.queue_rx.put('Start')
 
         # show the config
@@ -325,7 +324,7 @@ class ExperimentRx(threading.Thread):
         self.start_experiment.wait()
         self.start_experiment.clear()
         self.started_time = time.time()
-        self.hours, self.minutes = self.following_time_to_run()
+        self.hours, self.minutes = self.time_experiment()
         self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
         self.scheduler_aux = threading.Thread(target=self.experiment_scheduling)
         self.scheduler_aux.start()
@@ -343,7 +342,7 @@ class ExperimentRx(threading.Thread):
                     logging.warning('RESETTING SCHEDULE')
                     self.radio_driver.radio_off()
                     self.started_time = time.time()
-                    self.hours, self.minutes = self.following_time_to_run()
+                    self.hours, self.minutes = self.time_experiment()
                     self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
                     # self.time_to_start += datetime.timedelta(minutes=1)
                     self.remove_scheduled_experiment()
@@ -366,7 +365,7 @@ class ExperimentRx(threading.Thread):
 
     def _cb_rx_frame(self, frame_rcv, rssi, crc, mcs):
         self.radio_driver.LED_toggle(self.frame_received_pin)
-        self.count_frames_rx += 1
+        # self.count_frames_rx += 1
         self.queue_rx.put((frame_rcv, rssi, crc, mcs))
 
         # re-arm the radio in RX mode
