@@ -36,15 +36,15 @@ class LoggerRx(threading.Thread):
 
         # local variables
         # self.dataLock           = threading.RLock()
-        self.rx_frames          = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
+        self.rx_string          = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
         self.rssi_values        = [None for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
         self.name_file          = '/home/pi/range_test_raw_data/experiments.json'
         self.results            = {'type': 'end_of_cycle_rx', 'start_time_str': time.strftime(
             "%a, %d %b %Y %H:%M:%S UTC", time.gmtime()), 'start_time_epoch': time.time(), 'version': self.settings[
-            'version'], 'position_description': None, 'radio_settings': None, 'Rx_frames': 0, 'RSSI_by_length': None,
+            'version'], 'position_description': None, 'radio_settings': None, 'rx_frames_count': 0, 'RSSI_by_length': None,
                         'rx_string': None, 'GPSinfo_at_start': None, 'channel': None, 'frequency_0': None,
                                    'burst_size': self.settings['numframes'], 'id': socket.gethostname(),
-                                   'Rx_frames_not_OK': 0, 'Rx_frames_not_OK_SN': []}
+                                   'rx_frames_wrong_fcs_count': 0, 'rx_frames_wrong_fcs_sequence_number': []}
 
         # start the thread
         threading.Thread.__init__(self)
@@ -68,10 +68,10 @@ class LoggerRx(threading.Thread):
                 '2047': self.rssi_values[3*self.settings['numframes']:4*self.settings['numframes']]
             },
         self.results['rx_string'] = {
-                '8':    ''.join(self.rx_frames[0:self.settings['numframes']]),
-                '127':  ''.join(self.rx_frames[self.settings['numframes']:2*self.settings['numframes']]),
-                '1000': ''.join(self.rx_frames[2*self.settings['numframes']:3*self.settings['numframes']]),
-                '2047': ''.join(self.rx_frames[3*self.settings['numframes']:4*self.settings['numframes']])
+                '8':    ''.join(self.rx_string[0:self.settings['numframes']]),
+                '127':  ''.join(self.rx_string[self.settings['numframes']:2*self.settings['numframes']]),
+                '1000': ''.join(self.rx_string[2*self.settings['numframes']:3*self.settings['numframes']]),
+                '2047': ''.join(self.rx_string[3*self.settings['numframes']:4*self.settings['numframes']])
         }
 
     def print_results(self):
@@ -86,13 +86,13 @@ class LoggerRx(threading.Thread):
             if item == 'Start':
                 if self.results['radio_settings']:  # to know if this is the first time I pass in the logger
                     self.print_results()  # print to log file
-                    self.rx_frames = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
+                    self.rx_string = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
                     self.rssi_values = [None for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
-                    self.results['rx_frames'] = 0
+                    self.results['rx_frames_count'] = 0
                     self.results['start_time_str'] = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime())
                     self.results['start_time_epoch'] = time.time()
-                    self.results['rx_frames_wrong_fcs'] = 0
-                    self.results['rx_frames_wrong_fcs_sq'] = []
+                    self.results['rx_frames_wrong_fcs_count'] = 0
+                    self.results['rx_frames_wrong_fcs_sequence_number'] = []
                 else:   # I should be here just for the first item in the queue
                     self.results['start_time_str'] = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime())
                     self.results['start_time_epoch'] = time.time()
@@ -103,16 +103,16 @@ class LoggerRx(threading.Thread):
                         try:
                             if item[0][0] * 256 + item[0][1] < 400:
 
-                                self.rx_frames[item[0][0] * 256 + item[0][1]] = '.'
+                                self.rx_string[item[0][0] * 256 + item[0][1]] = '.'
                                 self.rssi_values[item[0][0] * 256 + item[0][1]] = float(item[1])
-                                self.results['rx_frames'] += 1
+                                self.results['rx_frames_count'] += 1
 
                         except ValueError as err:
                             logging.warning('item: {0}'.format(item))
                             logging.warning(err)
                     else:
                         self.results['rx_frames_wrong_fcs'] += 1  # Frame received but wrong.
-                        self.results['rx_frames_wrong_fcs_sq'].append(item[0][0] * 256 + item[0][1])
+                        self.results['rx_frames_wrong_fcs_sequence_number'].append(item[0][0] * 256 + item[0][1])
                         # logging.warning('CRC validity: {0}'.format(item[2]))
 
                 elif item == 'Print last':
