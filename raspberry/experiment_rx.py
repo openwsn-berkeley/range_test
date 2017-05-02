@@ -42,7 +42,7 @@ class LoggerRx(threading.Thread):
         self.results            = {'type': 'end_of_cycle_rx', 'start_time_str': time.strftime(
             "%a, %d %b %Y %H:%M:%S UTC", time.gmtime()), 'start_time_epoch': time.time(), 'version': self.settings[
             'version'], 'position_description': None, 'radio_settings': None, 'Rx_frames': 0, 'RSSI_by_length': None,
-                        'RX_string': None, 'GPSinfo_at_start': None, 'channel': None, 'frequency_0': None,
+                        'rx_string': None, 'GPSinfo_at_start': None, 'channel': None, 'frequency_0': None,
                                    'burst_size': self.settings['numframes'], 'id': socket.gethostname(),
                                    'Rx_frames_not_OK': 0, 'Rx_frames_not_OK_SN': []}
 
@@ -67,7 +67,7 @@ class LoggerRx(threading.Thread):
                 '1000': self.rssi_values[2*self.settings['numframes']:3*self.settings['numframes']],
                 '2047': self.rssi_values[3*self.settings['numframes']:4*self.settings['numframes']]
             },
-        self.results['RX_string'] = {
+        self.results['rx_string'] = {
                 '8':    ''.join(self.rx_frames[0:self.settings['numframes']]),
                 '127':  ''.join(self.rx_frames[self.settings['numframes']:2*self.settings['numframes']]),
                 '1000': ''.join(self.rx_frames[2*self.settings['numframes']:3*self.settings['numframes']]),
@@ -88,11 +88,11 @@ class LoggerRx(threading.Thread):
                     self.print_results()  # print to log file
                     self.rx_frames = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
                     self.rssi_values = [None for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
-                    self.results['Rx_frames'] = 0
+                    self.results['rx_frames'] = 0
                     self.results['start_time_str'] = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime())
                     self.results['start_time_epoch'] = time.time()
-                    self.results['Rx_frames_not_OK'] = 0
-                    self.results['Rx_frames_not_OK_SN'] = []
+                    self.results['rx_frames_wrong_fcs'] = 0
+                    self.results['rx_frames_wrong_fcs_sq'] = []
                 else:   # I should be here just for the first item in the queue
                     self.results['start_time_str'] = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime())
                     self.results['start_time_epoch'] = time.time()
@@ -105,15 +105,15 @@ class LoggerRx(threading.Thread):
 
                                 self.rx_frames[item[0][0] * 256 + item[0][1]] = '.'
                                 self.rssi_values[item[0][0] * 256 + item[0][1]] = float(item[1])
-                                self.results['Rx_frames'] += 1
+                                self.results['rx_frames'] += 1
 
                         except ValueError as err:
                             logging.warning('item: {0}'.format(item))
                             logging.warning(err)
                     else:
-                        self.results['Rx_frames_not_OK'] += 1  # Frame received but wrong.
-                        self.results['Rx_frames_not_OK_SN'].append(item[0][0] * 256 + item[0][1])
-                        logging.warning('CRC validity: {0}'.format(item[2]))
+                        self.results['rx_frames_wrong_fcs'] += 1  # Frame received but wrong.
+                        self.results['rx_frames_wrong_fcs_sq'].append(item[0][0] * 256 + item[0][1])
+                        # logging.warning('CRC validity: {0}'.format(item[2]))
 
                 elif item == 'Print last':
                     self.print_results()
@@ -144,7 +144,6 @@ class ExperimentRx(threading.Thread):
         self.minutes            = 0
         self.first_run          = False
         self.queue_rx           = Queue.Queue()
-        # self.count_frames_rx    = 0
         self.started_time       = None
         self.cumulative_time    = 0
         self.led_array_pins     = [29, 31, 33, 35, 37]
