@@ -32,10 +32,8 @@ class LoggerRx(threading.Thread):
         # store parameters
         self.queue              = queue
         self.settings           = settings
-        # self.radio_driver       = radio_driver
 
         # local variables
-        # self.dataLock           = threading.RLock()
         self.rx_string          = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
         self.rssi_values        = [None for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
         self.name_file          = '/home/pi/range_test_raw_data/experiments.json'
@@ -111,7 +109,7 @@ class LoggerRx(threading.Thread):
                             logging.warning('item: {0}'.format(item))
                             logging.warning(err)
                     else:
-                        self.results['rx_frames_wrong_fcs'] += 1  # Frame received but wrong.
+                        self.results['rx_frames_wrong_fcs_count'] += 1  # Frame received but wrong.
                         self.results['rx_frames_wrong_fcs_sequence_number'].append(item[0][0] * 256 + item[0][1])
                         # logging.warning('CRC validity: {0}'.format(item[2]))
 
