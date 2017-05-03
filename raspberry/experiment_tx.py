@@ -33,7 +33,7 @@ class LoggerTx(threading.Thread):
         self.queue = queue
         self.settings = settings
         # local variables
-        self.name_file = '/home/pi/range_test_raw_data/experiments.json'
+        self.name_file = '/home/pi/range_test_raw_data/experiments_results_' + socket.gethostname() + '.json'
         self.results = {'type': 'end_of_cycle_tx', 'start_time_str': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
                         'start_time_epoch': time.time(), 'radio_settings': None, 'GPSinfo_at_start': None,
                         'version': self.settings['version'], 'channel': None, 'frequency_0': None,
@@ -286,8 +286,8 @@ class ExperimentTx(threading.Thread):
 
         self.radio_setup()
         logging.warning('WAITING FOR THE START BUTTON TO BE PRESSED')
-        self.start_experiment.wait()
-        self.start_experiment.clear()
+        # self.start_experiment.wait()
+        # self.start_experiment.clear()
         self.started_time = time.time()
         self.hours, self.minutes = self.time_experiment()
         self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))

@@ -36,7 +36,7 @@ class LoggerRx(threading.Thread):
         # local variables
         self.rx_string          = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
         self.rssi_values        = [None for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
-        self.name_file          = '/home/pi/range_test_raw_data/experiments.json'
+        self.name_file          = '/home/pi/range_test_raw_data/experiments_results_' + socket.gethostname() + '.json'
         self.results            = {'type': 'end_of_cycle_rx', 'start_time_str': time.strftime(
             "%a, %d %b %Y %H:%M:%S UTC", time.gmtime()), 'start_time_epoch': time.time(), 'version': self.settings[
             'version'], 'position_description': None, 'radio_settings': None, 'rx_frames_count': 0, 'RSSI_by_length': None,
@@ -84,17 +84,29 @@ class LoggerRx(threading.Thread):
             if item == 'Start':
                 if self.results['radio_settings']:  # to know if this is the first time I pass in the logger
                     self.print_results()  # print to log file
-                    self.rx_string = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
-                    self.rssi_values = [None for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
-                    self.results['rx_frames_count'] = 0
-                    self.results['start_time_str'] = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime())
-                    self.results['start_time_epoch'] = time.time()
-                    self.results['rx_frames_wrong_fcs_count'] = 0
-                    self.results['rx_frames_wrong_fcs_sequence_number'] = []
-                else:   # I should be here just for the first item in the queue
-                    self.results['start_time_str'] = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime())
-                    self.results['start_time_epoch'] = time.time()
-
+                #     self.rx_string = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
+                #     self.rssi_values = [None for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
+                #     self.results['rx_frames_count'] = 0
+                #     self.results['start_time_str'] = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime())
+                #     self.results['start_time_epoch'] = time.time()
+                #     self.results['rx_frames_wrong_fcs_count'] = 0
+                #     self.results['rx_frames_wrong_fcs_sequence_number'] = []
+                # else:   # I should be here just for the first item in the queue
+                #     self.rx_string = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
+                #     self.rssi_values = [None for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
+                #     self.results['rx_frames_count'] = 0
+                #     self.results['start_time_str'] = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime())
+                #     self.results['start_time_epoch'] = time.time()
+                #     self.results['rx_frames_wrong_fcs_count'] = 0
+                #     self.results['rx_frames_wrong_fcs_sequence_number'] = []
+                self.rx_string = ['!' for i in range(len(self.settings['frame_lengths']) * self.settings['numframes'])]
+                self.rssi_values = [None for i in
+                                    range(len(self.settings['frame_lengths']) * self.settings['numframes'])]
+                self.results['rx_frames_count'] = 0
+                self.results['start_time_str'] = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime())
+                self.results['start_time_epoch'] = time.time()
+                self.results['rx_frames_wrong_fcs_count'] = 0
+                self.results['rx_frames_wrong_fcs_sequence_number'] = []
             else:
                 if type(item) is tuple:
                     if item[2] is FCS_VALID:  # check frame correctness.
@@ -109,13 +121,17 @@ class LoggerRx(threading.Thread):
                             logging.warning('item: {0}'.format(item))
                             logging.warning(err)
                     else:
-                        self.results['rx_frames_wrong_fcs_count'] += 1  # Frame received but wrong.
-                        self.results['rx_frames_wrong_fcs_sequence_number'].append(item[0][0] * 256 + item[0][1])
-                        # logging.warning('CRC validity: {0}'.format(item[2]))
+                        try:
+                            self.results['rx_frames_wrong_fcs_count'] += 1  # Frame received but wrong.
+                            self.results['rx_frames_wrong_fcs_sequence_number'].append(item[0][0] * 256 + item[0][1])
+
+                        except ValueError as err:
+                            logging.warning('item: {0}'.format(item))
+                            logging.warning(err)
 
                 elif item == 'Print last':
                     self.print_results()
-                    # self.results['radio_settings'] = None
+                    self.results['radio_settings'] = None # by doing this I won't print twice the last set of settings.
 
                 elif type(item) == float:
                     logging.warning('TIME: {0}'.format(item))
@@ -318,8 +334,8 @@ class ExperimentRx(threading.Thread):
 
         self.radio_setup()
         logging.warning('WAITING FOR THE START BUTTON TO BE PRESSED')
-        self.start_experiment.wait()
-        self.start_experiment.clear()
+        # self.start_experiment.wait()
+        # self.start_experiment.clear()
         self.started_time = time.time()
         self.hours, self.minutes = self.time_experiment()
         self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
