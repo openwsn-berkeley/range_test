@@ -290,7 +290,7 @@ class ExperimentRx(threading.Thread):
         self.queue_rx.put(item)
 
         # log GPS info
-        self.queue_rx.put(self.gps.gps_info_read())
+        # self.queue_rx.put(self.gps.gps_info_read())
 
         # put the radio into RX mode
         self.radio_driver.radio_trx_enable()
