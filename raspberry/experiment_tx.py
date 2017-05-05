@@ -286,8 +286,8 @@ class ExperimentTx(threading.Thread):
 
         self.radio_setup()
         logging.warning('WAITING FOR THE START BUTTON TO BE PRESSED')
-        # self.start_experiment.wait()
-        # self.start_experiment.clear()
+        self.start_experiment.wait()
+        self.start_experiment.clear()
         self.started_time = time.time()
         self.hours, self.minutes = self.time_experiment()
         self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
