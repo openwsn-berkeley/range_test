@@ -120,7 +120,7 @@ class ExperimentTx(threading.Thread):
         self.LoggerTx               = None
 
         # start the gps thread
-        # self.gps                    = None
+        self.gps                    = None
 
         # configure the logging module
         logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
@@ -135,7 +135,7 @@ class ExperimentTx(threading.Thread):
         self.LoggerTx = LoggerTx(self.queue_tx, self.settings)
 
         # start the gps thread
-        # self.gps = gps.GpsThread()
+        self.gps = gps.GpsThread()
 
         self.radio_driver.init_binary_pins(self.led_array_pins)
         self.radio_driver.init_binary_pins(self.frame_sent_pin)
@@ -143,9 +143,9 @@ class ExperimentTx(threading.Thread):
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
 
         # waiting until the GPS time is valid
-        # while self.gps.is_gps_time_valid() is False:
-        #     time.sleep(1)
-        #     logging.warning('still waiting')
+        while self.gps.is_gps_time_valid() is False:
+            time.sleep(1)
+            logging.warning('still waiting')
 
     def time_experiment(self):
         """
@@ -228,7 +228,7 @@ class ExperimentTx(threading.Thread):
         self.queue_tx.put(item)
 
         # log GPS info
-        # self.queue_tx.put(self.gps.gps_info_read())
+        self.queue_tx.put(self.gps.gps_info_read())
 
         # loop through packet lengths
         for frame_length, ifs in zip(self.settings["frame_lengths"], self.settings["IFS"]):

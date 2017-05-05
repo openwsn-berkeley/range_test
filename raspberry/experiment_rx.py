@@ -170,7 +170,7 @@ class ExperimentRx(threading.Thread):
         self.start_experiment.clear()
         self.end_of_series.clear()
         self.f_schedule.clear()
-        # self.gps                = None
+        self.gps                = None
         self.LoggerRx           = None
 
         threading.Thread.__init__(self)
@@ -191,7 +191,7 @@ class ExperimentRx(threading.Thread):
         self.LoggerRx       = LoggerRx(self.queue_rx, self.settings)
 
         # # start the gps thread
-        # self.gps            = gps.GpsThread()
+        self.gps            = gps.GpsThread()
 
         # init LED's pins
         self.radio_driver.init_binary_pins(self.led_array_pins)
@@ -200,9 +200,9 @@ class ExperimentRx(threading.Thread):
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
 
         # waiting until the GPS time is valid
-        # while self.gps.is_gps_time_valid() is False:
-        #     time.sleep(1)
-        #     logging.warning('still waiting')
+        while self.gps.is_gps_time_valid() is False:
+            time.sleep(1)
+            logging.warning('still waiting')
 
     def time_experiment(self):
         """
@@ -283,7 +283,7 @@ class ExperimentRx(threading.Thread):
         self.queue_rx.put(item)
 
         # log GPS info
-        # self.queue_rx.put(self.gps.gps_info_read())
+        self.queue_rx.put(self.gps.gps_info_read())
 
         # put the radio into RX mode
         self.radio_driver.radio_trx_enable()
