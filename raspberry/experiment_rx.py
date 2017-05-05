@@ -24,7 +24,7 @@ CRC_SIZE            = 4
 SECURITY_TIME       = 3    # 3 seconds to give more time to TRX to complete the 400 frame bursts.
 START_OFFSET        = 3.5  # 3.5 seconds after the starting time arrives.
 FCS_VALID           = 1
-FRAME_MINIMUM_SIZE  = 4
+FRAME_MINIMUM_SIZE  = 8
 
 
 class LoggerRx(threading.Thread):
@@ -100,7 +100,7 @@ class LoggerRx(threading.Thread):
                     if item[2] is FCS_VALID:  # check frame correctness.
                         if len(item[0]) > FRAME_MINIMUM_SIZE:
                             try:
-                                if item[0][0] * 256 + item[0][1] < 400 and (item[0][1], item[0][1]) == (0x02, 0x03):
+                                if item[0][0] * 256 + item[0][1] < 400 and (item[0][1], item[0][1]) == (0x00, 0x01):
                                     self.rx_string[item[0][0] * 256 + item[0][1]] = '.'
                                     self.rssi_values[item[0][0] * 256 + item[0][1]] = float(item[1])
                                     self.results['rx_frames_count'] += 1
