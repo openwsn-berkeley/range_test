@@ -100,7 +100,7 @@ class LoggerRx(threading.Thread):
                     if item[2] is FCS_VALID:  # check frame correctness.
                         if len(item[0]) > FRAME_MINIMUM_SIZE:
                             try:
-                                if item[0][0] * 256 + item[0][1] < 400 and (item[0][1], item[0][1]) == (0x00, 0x01):
+                                if item[0][0] * 256 + item[0][1] < 400 and (item[0][2], item[0][3]) == (0x00, 0x01):
                                     self.rx_string[item[0][0] * 256 + item[0][1]] = '.'
                                     self.rssi_values[item[0][0] * 256 + item[0][1]] = float(item[1])
                                     self.results['rx_frames_count'] += 1
