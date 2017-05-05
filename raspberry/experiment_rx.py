@@ -19,11 +19,12 @@ import at86rf215_defs as defs
 import at86rf215_driver as radio
 import GpsThread as gps
 
-PACKET_LENGTH = 2047
-CRC_SIZE      = 4
-SECURITY_TIME = 3    # 3 seconds to give more time to TRX to complete the 400 frame bursts.
-START_OFFSET  = 3.5  # 3.5 seconds after the starting time arrives.
-FCS_VALID     = 1
+PACKET_LENGTH       = 2047
+CRC_SIZE            = 4
+SECURITY_TIME       = 3    # 3 seconds to give more time to TRX to complete the 400 frame bursts.
+START_OFFSET        = 3.5  # 3.5 seconds after the starting time arrives.
+FCS_VALID           = 1
+FRAME_MINIMUM_SIZE  = 4
 
 
 class LoggerRx(threading.Thread):
@@ -84,21 +85,6 @@ class LoggerRx(threading.Thread):
             if item == 'Start':
                 if self.results['radio_settings']:  # to know if this is the first time I pass in the logger
                     self.print_results()  # print to log file
-                #     self.rx_string = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
-                #     self.rssi_values = [None for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
-                #     self.results['rx_frames_count'] = 0
-                #     self.results['start_time_str'] = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime())
-                #     self.results['start_time_epoch'] = time.time()
-                #     self.results['rx_frames_wrong_fcs_count'] = 0
-                #     self.results['rx_frames_wrong_fcs_sequence_number'] = []
-                # else:   # I should be here just for the first item in the queue
-                #     self.rx_string = ['!' for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
-                #     self.rssi_values = [None for i in range(len(self.settings['frame_lengths'])*self.settings['numframes'])]
-                #     self.results['rx_frames_count'] = 0
-                #     self.results['start_time_str'] = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime())
-                #     self.results['start_time_epoch'] = time.time()
-                #     self.results['rx_frames_wrong_fcs_count'] = 0
-                #     self.results['rx_frames_wrong_fcs_sequence_number'] = []
                 self.rx_string = ['!' for i in range(len(self.settings['frame_lengths']) * self.settings['numframes'])]
                 self.rssi_values = [None for i in
                                     range(len(self.settings['frame_lengths']) * self.settings['numframes'])]
@@ -107,45 +93,52 @@ class LoggerRx(threading.Thread):
                 self.results['start_time_epoch'] = time.time()
                 self.results['rx_frames_wrong_fcs_count'] = 0
                 self.results['rx_frames_wrong_fcs_sequence_number'] = []
-            else:
-                if type(item) is tuple:
+
+            elif type(item) is tuple:
+                # verify size of the tuple
+                if len(item) == 4:
                     if item[2] is FCS_VALID:  # check frame correctness.
-                        try:
-                            if item[0][0] * 256 + item[0][1] < 400:
+                        if len(item[0]) > FRAME_MINIMUM_SIZE:
+                            try:
+                                if item[0][0] * 256 + item[0][1] < 400 and (item[0][1], item[0][1]) == (0x02, 0x03):
+                                    self.rx_string[item[0][0] * 256 + item[0][1]] = '.'
+                                    self.rssi_values[item[0][0] * 256 + item[0][1]] = float(item[1])
+                                    self.results['rx_frames_count'] += 1
+                                else:
+                                    logging.warning('UNKNOWN ITEM (frame_rcv, rssi, crc, mcs): {0}'.format(item))
 
-                                self.rx_string[item[0][0] * 256 + item[0][1]] = '.'
-                                self.rssi_values[item[0][0] * 256 + item[0][1]] = float(item[1])
-                                self.results['rx_frames_count'] += 1
-
-                        except ValueError as err:
-                            logging.warning('item: {0}'.format(item))
-                            logging.warning(err)
+                            except IndexError as err:
+                                logging.warning('item: {0}'.format(item))
+                                logging.warning(err)
                     else:
                         try:
-                            self.results['rx_frames_wrong_fcs_count'] += 1  # Frame received but wrong.
                             self.results['rx_frames_wrong_fcs_sequence_number'].append(item[0][0] * 256 + item[0][1])
 
-                        except ValueError as err:
-                            logging.warning('item: {0}'.format(item))
+                        except IndexError as err:
+                            logging.warning('UNKNOWN: {0}'.format(item))
                             logging.warning(err)
+                        self.results['rx_frames_wrong_fcs_count'] += 1  # Frame received but wrong.
 
-                elif item == 'Print last':
-                    self.print_results()
-                    self.results['radio_settings'] = None # by doing this I won't print twice the last set of settings.
-
-                elif type(item) == float:
-                    logging.warning('TIME: {0}'.format(item))
-
-                elif type(item) is dict:
-                    if item.get('frequency_0_kHz') is not None:
-                        self.results['frequency_0'] = item['frequency_0_kHz']
-                        self.results['channel'] = item['channel']
-                        self.results['radio_settings'] = item['modulation']
-
-                    else:
-                        self.results['GPSinfo_at_start'] = item
                 else:
-                    logging.warning('UNKNOWN ITEM')
+                    logging.warning('UNKNOWN OBJECT IN THE QUEUE: {0}'.format(item))
+
+            elif item == 'Print last':
+                self.print_results()
+                self.results['radio_settings'] = None  # by doing this I won't print twice the last set of settings.
+
+            elif type(item) == float:
+                logging.warning('TIME: {0}'.format(item))
+
+            elif type(item) is dict:
+                if item.get('frequency_0_kHz') is not None:
+                    self.results['frequency_0'] = item['frequency_0_kHz']
+                    self.results['channel'] = item['channel']
+                    self.results['radio_settings'] = item['modulation']
+
+                else:
+                    self.results['GPSinfo_at_start'] = item
+            else:
+                logging.warning('UNKNOWN ITEM {0}'.format(item))
 
 
 class ExperimentRx(threading.Thread):
@@ -177,7 +170,7 @@ class ExperimentRx(threading.Thread):
         self.start_experiment.clear()
         self.end_of_series.clear()
         self.f_schedule.clear()
-        # self.gps                = None
+        self.gps                = None
         self.LoggerRx           = None
 
         threading.Thread.__init__(self)
@@ -198,7 +191,7 @@ class ExperimentRx(threading.Thread):
         self.LoggerRx       = LoggerRx(self.queue_rx, self.settings)
 
         # # start the gps thread
-        # self.gps            = gps.GpsThread()
+        self.gps            = gps.GpsThread()
 
         # init LED's pins
         self.radio_driver.init_binary_pins(self.led_array_pins)
@@ -207,9 +200,9 @@ class ExperimentRx(threading.Thread):
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
 
         # waiting until the GPS time is valid
-        # while self.gps.is_gps_time_valid() is False:
-        #     time.sleep(1)
-        #     logging.warning('still waiting')
+        while self.gps.is_gps_time_valid() is False:
+            time.sleep(1)
+            logging.warning('still waiting')
 
     def time_experiment(self):
         """
@@ -290,7 +283,7 @@ class ExperimentRx(threading.Thread):
         self.queue_rx.put(item)
 
         # log GPS info
-        # self.queue_rx.put(self.gps.gps_info_read())
+        self.queue_rx.put(self.gps.gps_info_read())
 
         # put the radio into RX mode
         self.radio_driver.radio_trx_enable()
