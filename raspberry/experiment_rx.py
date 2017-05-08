@@ -109,6 +109,7 @@ class LoggerRx(threading.Thread):
 
                             except IndexError as err:
                                 logging.warning('item: {0}'.format(item))
+                                logging.warning('frame not sent within the experiment, unknown sender')
                                 logging.warning(err)
                     else:
                         try:
@@ -120,14 +121,14 @@ class LoggerRx(threading.Thread):
                         self.results['rx_frames_wrong_fcs_count'] += 1  # Frame received but wrong.
 
                 else:
-                    logging.warning('UNKNOWN OBJECT IN THE QUEUE: {0}'.format(item))
+                    logging.error('UNKNOWN OBJECT IN THE QUEUE: {0}'.format(item))
 
             elif item == 'Print last':
                 self.print_results()
                 self.results['radio_settings'] = None  # by doing this I won't print twice the last set of settings.
 
             elif type(item) == float:
-                logging.warning('TIME: {0}'.format(item))
+                logging.info('TIME: {0}'.format(item))
 
             elif type(item) is dict:
                 if item.get('frequency_0_kHz') is not None:
@@ -138,7 +139,7 @@ class LoggerRx(threading.Thread):
                 else:
                     self.results['GPSinfo_at_start'] = item
             else:
-                logging.warning('UNKNOWN ITEM {0}'.format(item))
+                logging.error('UNKNOWN ITEM IN THE QUEUE: {0}'.format(item))
 
 
 class ExperimentRx(threading.Thread):
@@ -200,9 +201,11 @@ class ExperimentRx(threading.Thread):
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
 
         # waiting until the GPS time is valid
+        logging.info('waiting for valid GPS time...')
         while self.gps.is_gps_time_valid() is False:
             time.sleep(1)
-            logging.warning('still waiting')
+            # logging.warning('still waiting')
+        logging.info('... time valid')
 
     def time_experiment(self):
         """
@@ -237,14 +240,14 @@ class ExperimentRx(threading.Thread):
         :return: Nothing
         """
 
-        logging.warning('entering the experiment_scheduling')
+        logging.info('entering the experiment_scheduling')
         while True:
             self.f_schedule.wait()
             self.f_schedule.clear()
             if self.first_run is False:
                 offset = START_OFFSET
                 self.first_run = True
-                logging.warning('TIME time_to_start: {0}'.format(self.time_to_start))
+                logging.info('TIME time_to_start: {0}'.format(self.time_to_start))
             else:
                 offset = self.cumulative_time + 2
             for item in self.settings['test_settings']:
@@ -252,7 +255,7 @@ class ExperimentRx(threading.Thread):
                 self.schedule_time[self.settings['test_settings'].index(item)] = offset
                 offset += item['durationtx_s'] + SECURITY_TIME
             self.cumulative_time = offset
-            logging.warning('time for each set of settings: {0}'.format(self.schedule_time))
+            logging.info('time for each set of settings: {0}'.format(self.schedule_time))
             self.scheduler.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
             self.scheduler.run()
 
@@ -274,7 +277,7 @@ class ExperimentRx(threading.Thread):
                                                item['channel']))
 
         self.radio_driver.binary_counter(item['index'], self.led_array_pins)
-        logging.warning('modulation: {0}'.format(item["modulation"]))
+        logging.info('modulation: {0}'.format(item["modulation"]))
         # RX counter to zero
         # self.count_frames_rx = 0
         self.queue_rx.put('Start')
@@ -305,7 +308,7 @@ class ExperimentRx(threading.Thread):
         events = self.scheduler.queue
         for ev in events:
             self.scheduler.cancel(ev)
-        logging.warning('events in queue: {0}'.format(self.scheduler.queue))
+        logging.info('events in queue: {0}'.format(self.scheduler.queue))
         # self.radio_driver.clean_reset_cmd()
 
     def LED_start_exp(self):
@@ -326,7 +329,7 @@ class ExperimentRx(threading.Thread):
     def run(self):
 
         self.radio_setup()
-        logging.warning('WAITING FOR THE START BUTTON TO BE PRESSED')
+        logging.info('WAITING FOR THE START BUTTON TO BE PRESSED')
         self.start_experiment.wait()
         self.start_experiment.clear()
         self.started_time = time.time()
@@ -335,7 +338,7 @@ class ExperimentRx(threading.Thread):
         self.scheduler_aux = threading.Thread(target=self.experiment_scheduling)
         self.scheduler_aux.start()
         self.scheduler_aux.name = 'Scheduler Rx'
-        logging.warning('waiting the end of the experiment')
+        logging.info('waiting the end of the experiment')
         self.f_schedule.set()
         self.LED_start_exp()
 
@@ -345,7 +348,7 @@ class ExperimentRx(threading.Thread):
             self.end_of_series.clear()
             with self.dataLock:
                 if self.radio_driver.read_reset_cmd():
-                    logging.warning('RESETTING SCHEDULE')
+                    logging.info('RESETTING SCHEDULE')
                     self.radio_driver.radio_off()
                     self.started_time = time.time()
                     self.hours, self.minutes = self.time_experiment()
@@ -389,7 +392,7 @@ def load_experiment_details():
 
 def main():
 
-    logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
+    logging.basicConfig(stream=sys.__stdout__, level=logging.DEBUG)
     experimentRx = ExperimentRx(load_experiment_details())
 
     while True:

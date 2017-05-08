@@ -45,7 +45,7 @@ class LoggerTx(threading.Thread):
         self.daemon = True
         self.start()
 
-        logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
+        logging.basicConfig(stream=sys.__stdout__, level=logging.DEBUG)
 
     def run(self):
         while True:
@@ -62,7 +62,7 @@ class LoggerTx(threading.Thread):
                     f.write(json.dumps(self.results.copy())+'\n')
 
             elif type(item) is tuple:
-                logging.warning('Time to send the frames {0} - {1} was {2} seconds\n'.format(item[0] - 100, item[0],
+                logging.info('Time to send the frames {0} - {1} was {2} seconds\n'.format(item[0] - 100, item[0],
                                                                                              item[1]))
             elif type(item) is dict:
                 if item.get('frequency_0_kHz') is not None:
@@ -72,9 +72,9 @@ class LoggerTx(threading.Thread):
                 else :
                     self.results['GPSinfo_at_start'] = item
             elif type(item) is float:
-                logging.warning('Time {0}'.format(item))
+                logging.info('Time {0}'.format(item))
             else:
-                logging.warning('UNKNOWN ITEM')
+                logging.error('UNKNOWN ITEM IN THE QUEUE: {0}.'.format(item))
 
 
 class ExperimentTx(threading.Thread):
@@ -143,9 +143,11 @@ class ExperimentTx(threading.Thread):
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
 
         # waiting until the GPS time is valid
+        logging.info('waiting for valid GPS time...')
         while self.gps.is_gps_time_valid() is False:
             time.sleep(1)
-            logging.warning('still waiting')
+            # logging.warning('still waiting')
+        logging.info('... time valid')
 
     def time_experiment(self):
         """
@@ -182,7 +184,7 @@ class ExperimentTx(threading.Thread):
             if self.first_run is False:
                 offset = START_OFFSET
                 self.first_run = True
-                logging.warning('TIME: {0}'.format(self.time_to_start))
+                logging.info('TIME: {0}'.format(self.time_to_start))
             else:
                 offset = self.cumulative_time + 2
             for item in self.settings['test_settings']:
@@ -190,7 +192,7 @@ class ExperimentTx(threading.Thread):
                 self.schedule_time[self.settings['test_settings'].index(item)] = offset
                 offset += item['durationtx_s'] + SECURITY_TIME
             self.cumulative_time = offset
-            logging.warning('time for each set of settings: {0}'.format(self.schedule_time))
+            logging.info('time for each set of settings: {0}'.format(self.schedule_time))
             self.scheduler.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
             self.scheduler.run()
 
@@ -220,7 +222,7 @@ class ExperimentTx(threading.Thread):
                                                item['channel']))
 
         self.radio_driver.binary_counter(item['index'], self.led_array_pins)
-        logging.warning('modulation: {0}'.format(item["modulation"]))
+        logging.info('modulation: {0}'.format(item["modulation"]))
         # let know to the informative class the beginning of a new experiment
         self.queue_tx.put('Start')
 
@@ -264,7 +266,7 @@ class ExperimentTx(threading.Thread):
 
         for ev in events:
             self.scheduler.cancel(ev)
-        logging.warning('events in queue: {0}'.format(self.scheduler.queue))
+        logging.info('events in queue: {0}'.format(self.scheduler.queue))
         # self.radio_driver.clean_reset_cmd()
 
     def LED_start_exp(self):
@@ -285,7 +287,7 @@ class ExperimentTx(threading.Thread):
     def run(self):
 
         self.radio_setup()
-        logging.warning('WAITING FOR THE START BUTTON TO BE PRESSED')
+        logging.info('WAITING FOR THE START BUTTON TO BE PRESSED')
         self.start_experiment.wait()
         self.start_experiment.clear()
         self.started_time = time.time()
@@ -294,7 +296,7 @@ class ExperimentTx(threading.Thread):
         self.scheduler_aux = threading.Thread(target=self.experiment_scheduling)
         self.scheduler_aux.start()
         self.scheduler_aux.name = 'Scheduler Tx'
-        logging.warning('waiting the end of the experiment')
+        logging.info('waiting the end of the experiment')
         self.f_schedule.set()
         self.LED_start_exp()
 
@@ -304,7 +306,7 @@ class ExperimentTx(threading.Thread):
             self.end_of_series.clear()
             with self.dataLock:
                 if self.radio_driver.read_reset_cmd():
-                    logging.warning('button pressed')
+                    logging.info('button pressed')
                     self.started_time = time.time()
                     self.hours, self.minutes = self.time_experiment()
                     self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
@@ -332,7 +334,7 @@ def load_experiment_details():
 
 def main():
 
-    logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
+    logging.basicConfig(stream=sys.__stdout__, level=logging.DEBUG)
     experimentTx = ExperimentTx(load_experiment_details())
 
     while True:
