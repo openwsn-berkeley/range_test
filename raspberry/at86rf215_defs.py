@@ -764,7 +764,7 @@ modulations_settings = {
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0x03),  # recommended value ()
         (RG_RF09_TXDFE,         0x46),
-        (RG_RF09_PAC,           0x64),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
+        (RG_RF09_PAC,           0x64),  # Tx Power 5 bits >> 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
         (RG_BBC0_IRQM,          0x12),
         (RG_BBC1_IRQM,          0x00),
         (RG_BBC0_PC,            0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
