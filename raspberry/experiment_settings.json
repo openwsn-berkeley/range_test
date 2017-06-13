@@ -13,7 +13,7 @@
         {"channel_spacing_kHz": 1200, "frequency_0_kHz": 863625, "channel": 0, "modulation": "ofdm_100kbps_1200kHz_mcs0",   "durationtx_s":  30, "index": 7},
         {"channel_spacing_kHz": 1200, "frequency_0_kHz": 863625, "channel": 0, "modulation": "ofdm_200kbps_1200kHz_mcs1",   "durationtx_s":  17, "index": 8},
         {"channel_spacing_kHz": 1200, "frequency_0_kHz": 863625, "channel": 0, "modulation": "ofdm_400kbps_1200kHz_mcs2",   "durationtx_s":  11, "index": 9},
-        {"channel_spacing_kHz": 1200, "frequency_0_kHz": 863625, "channel": 0, "modulation": "ofdm_800kbps_1200kHz_ms3",    "durationtx_s":   8, "index": 10},
+        {"channel_spacing_kHz": 1200, "frequency_0_kHz": 863625, "channel": 0, "modulation": "ofdm_800kbps_1200kHz_mcs3",   "durationtx_s":   8, "index": 10},
         {"channel_spacing_kHz":  800, "frequency_0_kHz": 863425, "channel": 0, "modulation": "ofdm_50kbps_800kHz_mcs0",     "durationtx_s":  56, "index": 11},
         {"channel_spacing_kHz":  800, "frequency_0_kHz": 863425, "channel": 0, "modulation": "ofdm_100kbps_800kHz_mcs1",    "durationtx_s":  30, "index": 12},
         {"channel_spacing_kHz":  800, "frequency_0_kHz": 863425, "channel": 0, "modulation": "ofdm_200kbps_800kHz_mcs2",    "durationtx_s":  18, "index": 13},
