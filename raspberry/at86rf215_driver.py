@@ -36,12 +36,10 @@ RADIOSTATE_TXRX_DONE = 0x05  # ///< Packet is fully loaded in the radio's TX buf
 
 class At86rf215(object):
 
-    def __init__(self, cb, start_experiment, end_of_series):
+    def __init__(self, cb):
 
         # store params
         self.cb                 = cb
-        self.start_experiment   = start_experiment
-        self.end_of_series      = end_of_series
 
         # local variables
         self.at86_state         = RADIOSTATE_RFOFF
@@ -55,7 +53,7 @@ class At86rf215(object):
         self.counter            = 0
         self.toggle_LED         = False
         self.f_reset_button     = False
-        self.f_reset_cmd        = False
+        self.f_reset_pin        = False
 
         self.state              = {'state_TRXprep': self.state_trx_prep, 'state_TXnow': self.state_tx_now,
                                    'state_RF_reset': self.state_reset}
@@ -63,8 +61,6 @@ class At86rf215(object):
         self.state['state_TRXprep'].clear()
         self.state['state_TXnow'].clear()
         self.state['state_RF_reset'].clear()
-
-
 
     # ======================== public ==========================================
 
@@ -104,38 +100,31 @@ class At86rf215(object):
             (pkt_rcv, rssi, crc, mcs) = self.radio_get_received_frame()
             self.cb(pkt_rcv, rssi, crc, mcs)
 
-    def cb_gpio_isr(self, channel = 11):
+    def cb_radio_isr(self, channel = 11):
         self.read_isr_source()
 
-    def cb_gpio_startExp(self, channel = 13):
-        if not self.f_reset_button:
-            with self.dataLock:
-                self.start_experiment.set()
-            self.f_reset_button         = True
+        # FIXME MOVE THIS TO THE EXPERIMENT RX
 
-        else:
-            logging.warning('RESET BUTTON PRESSED')
-            with self.dataLock:
-                self.end_of_series.set()
-                self.f_reset_cmd        = True
-                logging.warning('self.f_reset_cmd set to true?: {0}'.format(self.f_reset_cmd))
+    # def cb_gpio_startExp(self, channel = 13):
+    #     if not self.f_reset_button:
+    #         with self.dataLock:
+    #             self.start_experiment.set()
+    #         self.f_reset_button         = True
+    #
+    #     else:
+    #         logging.warning('RESET BUTTON PRESSED')
+    #         with self.dataLock:
+    #             self.end_of_series.set()
+    #             self.f_reset_pin        = True
+    #             logging.warning('self.f_reset_pin set to true?: {0}'.format(self.f_reset_pin))
 
-    def radio_init(self, channel=11, channel_start_exp=13):
+    def spi_init(self):
         """
-        Initialize the GPIO and SPI modules.
-        :param channel: the number of the GPIO-pin which receives the IRQ pin from the radio.
-        :param channel_start_exp: GPIO connected to press button. It lets the experiment start.
+        Initialize the SPI modules.
         :return: nothing
         """
         self.spi.open(0, 0)
-
-        # spi speed TEST
         self.spi.max_speed_hz = 7800000
-        GPIO.setmode(GPIO.BOARD)
-        GPIO.setup(channel, GPIO.IN)
-        GPIO.setup(channel_start_exp, GPIO.IN)
-        GPIO.add_event_detect(channel, GPIO.RISING, callback=self.cb_gpio_isr)
-        GPIO.add_event_detect(channel_start_exp, GPIO.RISING, callback=self.cb_gpio_startExp, bouncetime=150)
 
     def radio_reset(self):
         """
@@ -279,53 +268,53 @@ class At86rf215(object):
         add = defs.RG_RF09_STATE[:] + [0x00]
         return self.spi.xfer2(add)[2]
 
-    def init_binary_pins(self, array):
-        """
-        It initialises the set of pins for the binary counter
-        :param array: set of pins where a LED + resistor are connected.
-        :return: nothing
-        """
-        for pin in array:
-            GPIO.setup(pin, GPIO.OUT)
-            self.LED_OFF(pin)
-
-    def binary_counter(self, number, array):
-        """
-        it switches on the LEDs according to the number, binary system.
-        :param number: The number to be shown in binary
-        :param array: amount of LEDs available
-        :return: light :)
-        """
-        for index in range(0, len(array)):
-            GPIO.output(array[index], GPIO.LOW)
-
-        # LED_val = [0 for i in range(0, len(array))]
-        for index in range(0, len(array)):
-            LED = number >> index
-            if LED & 1:
-                GPIO.output(array[index], GPIO.HIGH)
-
-    def LED_ON(self, pin):
-        GPIO.output(pin, GPIO.HIGH)
-
-    def LED_OFF(self, pin):
-        GPIO.output(pin, GPIO.LOW)
-
-    def LED_toggle(self, pin):
-        if self.toggle_LED is False:
-            self.toggle_LED = True
-            GPIO.output(pin, GPIO.HIGH)
-        else:
-            self.toggle_LED = False
-            GPIO.output(pin, GPIO.LOW)
-
-    def read_reset_cmd(self):
-        with self.dataLock:
-            return self.f_reset_cmd
-
-    def clean_reset_cmd(self):
-        with self.dataLock:
-            self.f_reset_cmd = False
+    # def init_binary_pins(self, array):
+    #     """
+    #     It initialises the set of pins for the binary counter
+    #     :param array: set of pins where a LED + resistor are connected.
+    #     :return: nothing
+    #     """
+    #     for pin in array:
+    #         GPIO.setup(pin, GPIO.OUT)
+    #         self.LED_OFF(pin)
+    #
+    # def binary_counter(self, number, array):
+    #     """
+    #     it switches on the LEDs according to the number, binary system.
+    #     :param number: The number to be shown in binary
+    #     :param array: amount of LEDs available
+    #     :return: light :)
+    #     """
+    #     for index in range(0, len(array)):
+    #         GPIO.output(array[index], GPIO.LOW)
+    #
+    #     # LED_val = [0 for i in range(0, len(array))]
+    #     for index in range(0, len(array)):
+    #         LED = number >> index
+    #         if LED & 1:
+    #             GPIO.output(array[index], GPIO.HIGH)
+    #
+    # def LED_ON(self, pin):
+    #     GPIO.output(pin, GPIO.HIGH)
+    #
+    # def LED_OFF(self, pin):
+    #     GPIO.output(pin, GPIO.LOW)
+    #
+    # def LED_toggle(self, pin):
+    #     if self.toggle_LED is False:
+    #         self.toggle_LED = True
+    #         GPIO.output(pin, GPIO.HIGH)
+    #     else:
+    #         self.toggle_LED = False
+    #         GPIO.output(pin, GPIO.LOW)
+    #
+    # def read_reset_pin(self):
+    #     with self.dataLock:
+    #         return self.f_reset_pin
+    #
+    # def clean_reset_pin(self):
+    #     with self.dataLock:
+    #         self.f_reset_pin = False
 
 
 

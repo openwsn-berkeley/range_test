@@ -102,10 +102,10 @@ class ExperimentTx(threading.Thread):
         self.dataLock               = threading.RLock()
 
         # start the threads
-        self.end_of_series          = threading.Event()
+        self.end_experiment          = threading.Event()
         self.start_experiment       = threading.Event()
         self.f_schedule             = threading.Event()
-        self.end_of_series.clear()
+        self.end_experiment.clear()
         self.start_experiment.clear()
         self.f_schedule.clear()
 
@@ -115,7 +115,7 @@ class ExperimentTx(threading.Thread):
         self.daemon = True
         self.start()
 
-        # self.LoggerTx = LoggerTx(self.queue_tx, self.end_of_series, self.settings)
+        # self.LoggerTx = LoggerTx(self.queue_tx, self.end_experiment, self.settings)
         self.LoggerTx               = None
 
         # start the gps thread
@@ -127,7 +127,7 @@ class ExperimentTx(threading.Thread):
     def radio_setup(self):
 
         # initialize the radio driver
-        self.radio_driver = radio.At86rf215(self._cb_rx_frame, self.start_experiment, self.end_of_series)
+        self.radio_driver = radio.At86rf215()
         self.radio_driver.radio_init(11, 13)
 
         # start the LoggerTx thread
@@ -174,7 +174,7 @@ class ExperimentTx(threading.Thread):
         """
         self.queue_tx.put('Print last')
         with self.dataLock:
-            self.end_of_series.set()
+            self.end_experiment.set()
 
     def experiment_scheduling(self):
 
@@ -319,10 +319,10 @@ class ExperimentTx(threading.Thread):
 
         while True:
 
-            # it waits for the self.end_of_series signal that can be triggered at the end of the 31st experiment
+            # it waits for the self.end_experiment signal that can be triggered at the end of the 31st experiment
             # or when the push button is pressed
-            self.end_of_series.wait()
-            self.end_of_series.clear()
+            self.end_experiment.wait()
+            self.end_experiment.clear()
 
             # if push button, removes all the experiments scheduled
             if self.radio_driver.read_reset_cmd():
@@ -351,8 +351,18 @@ class ExperimentTx(threading.Thread):
 
     #  ======================== private =======================================
     
-    def _cb_rx_frame(self, frame_rcv, rssi, crc, mcs):
-        raise SystemError("frame received on transmitting mote")
+    def cb_push_button(self, channel = 13):
+        if not self.f_reset_button:
+            with self.dataLock:
+                self.start_experiment.set()
+            self.f_reset_button         = True
+
+        else:
+            logging.warning('RESET BUTTON PRESSED')
+            with self.dataLock:
+                self.end_experiment.set()
+                self.f_reset_cmd        = True
+                logging.warning('self.f_reset_cmd set to true?: {0}'.format(self.f_reset_cmd))
 
 #  ============================ main ==========================================
 
