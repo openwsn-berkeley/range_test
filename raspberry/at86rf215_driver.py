@@ -84,15 +84,18 @@ class At86rf215(object):
         isr = self.radio_read_spi(defs.RG_RF09_IRQS, 4)
         if isr[0] & defs.IRQS_WAKEUP:
             self.at86_state = RADIOSTATE_RFOFF
-            self.state['state_RF_reset'].set()
+            with self.dataLock:
+                self.state['state_RF_reset'].set()
 
         if isr[0] & defs.IRQS_TRXRDY_MASK:
             self.at86_state = RADIOSTATE_TRX_ENABLED
-            self.state['state_TRXprep'].set()
+            with self.dataLock:
+                self.state['state_TRXprep'].set()
 
         if isr[2] & defs.IRQS_TXFE_MASK:
             self.at86_state = RADIOSTATE_TXRX_DONE
-            self.state['state_TXnow'].set()
+            with self.dataLock:
+                self.state['state_TXnow'].set()
             self.count += 1
 
         if isr[2] & defs.IRQS_RXFE_MASK:
@@ -106,13 +109,14 @@ class At86rf215(object):
 
     def cb_gpio_startExp(self, channel = 13):
         if not self.f_reset_button:
-            self.start_experiment.set()
+            with self.dataLock:
+                self.start_experiment.set()
             self.f_reset_button         = True
 
         else:
             logging.warning('RESET BUTTON PRESSED')
-            self.end_of_series.set()
             with self.dataLock:
+                self.end_of_series.set()
                 self.f_reset_cmd        = True
                 logging.warning('self.f_reset_cmd set to true?: {0}'.format(self.f_reset_cmd))
 
@@ -131,7 +135,7 @@ class At86rf215(object):
         GPIO.setup(channel, GPIO.IN)
         GPIO.setup(channel_start_exp, GPIO.IN)
         GPIO.add_event_detect(channel, GPIO.RISING, callback=self.cb_gpio_isr)
-        GPIO.add_event_detect(channel_start_exp, GPIO.RISING, callback=self.cb_gpio_startExp, bouncetime=350)
+        GPIO.add_event_detect(channel_start_exp, GPIO.RISING, callback=self.cb_gpio_startExp, bouncetime=150)
 
     def radio_reset(self):
         """

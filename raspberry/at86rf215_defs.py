@@ -448,7 +448,7 @@ modulations_settings = {
         (RG_BBC0_OFDMPHRTX,     0x02)],
 
     # ofdm_1_mcs3
-    'ofdm_800kbps_1200kHz_ms3': [
+    'ofdm_800kbps_1200kHz_mcs3': [
         (RG_RF09_CMD,           0x02),
         (RG_RF09_IRQM,          0x1F),
         (RG_RF24_IRQM,          0x00),
