@@ -440,27 +440,21 @@ class ExperimentRx(object):
     #  ====================== private =========================================
 
     def cb_push_button(self, channel = 13):
-        if self.state == IDLE_STATE:
-            self.started_time = time.time()
-            self.hours, self.minutes = self.start_time_experiment()
-            self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
-            if self.experiment_scheduled:
-                self.experiment_scheduled.cancel()
-            self.experiment_scheduled = Timer(
-                time.mktime(self.time_to_start.timetuple()) + START_OFFSET  - time.time(),
-                self._experiment_scheduling, ())
-            self.experiment_scheduled.start()
-            logging.info('time for the experiment to start: {0}'.format(time.mktime(self.time_to_start.timetuple())
-                                                                        + START_OFFSET  - time.time()))
-            logging.info('self.state = RX_STATE')
 
-        else:
-            logging.warning('RESET BUTTON PRESSED')
+        self.started_time = time.time()
+        self.hours, self.minutes = self.start_time_experiment()
+        self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
+        if self.experiment_scheduled:
+            self.experiment_scheduled.cancel()
+            self.experiment_counter = 0
+        self.experiment_scheduled = Timer(
+            time.mktime(self.time_to_start.timetuple()) + START_OFFSET  - time.time(),
+            self._experiment_scheduling, ())
+        self.experiment_scheduled.start()
+        logging.info('time for the experiment to start: {0}'.format(time.mktime(self.time_to_start.timetuple())
+                                                                    + START_OFFSET  - time.time()))
+        logging.info('self.state = RX_STATE')
 
-            self.end_experiment.set()
-            self.f_reset_pin        = True
-            logging.warning('self.f_reset_pin set to true?: {0}'.format(self.f_reset_pin))
-            self.state          = IDLE_STATE
 
     def _cb_rx_frame(self, frame_rcv, rssi, crc, mcs):
         self.gpio_handler.led_toggle(self.frame_received_pin)
