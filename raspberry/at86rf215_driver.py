@@ -103,21 +103,6 @@ class At86rf215(object):
     def cb_radio_isr(self, channel = 11):
         self.read_isr_source()
 
-        # FIXME MOVE THIS TO THE EXPERIMENT RX
-
-    # def cb_gpio_startExp(self, channel = 13):
-    #     if not self.f_reset_button:
-    #         with self.dataLock:
-    #             self.start_experiment.set()
-    #         self.f_reset_button         = True
-    #
-    #     else:
-    #         logging.warning('RESET BUTTON PRESSED')
-    #         with self.dataLock:
-    #             self.end_of_series.set()
-    #             self.f_reset_pin        = True
-    #             logging.warning('self.f_reset_pin set to true?: {0}'.format(self.f_reset_pin))
-
     def spi_init(self):
         """
         Initialize the SPI modules.
