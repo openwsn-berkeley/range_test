@@ -17,7 +17,6 @@ import socket
 from threading import Timer
 
 import at86rf215_defs as defs
-# import RPi.GPIO as GPIO
 import at86rf215_driver as radio
 import GpsThread as gps
 import gpio_handler as gpio
@@ -293,12 +292,8 @@ class ExperimentTx(threading.Thread):
 
     def remove_scheduled_experiment(self):
         events = self.scheduler.queue
-
-        logging.info('events: {0}'.format(events))
         for ev in events:
             self.scheduler.cancel(ev)
-        logging.info('events in queue: {0}'.format(self.scheduler.queue))
-        # self.radio_driver.clean_reset_cmd()
 
     def LED_start_exp(self):
         """

@@ -250,7 +250,7 @@ class ExperimentRx(object):
         """
         self.queue_rx.put('Print last')
 
-    def LED_start_experiment(self):
+    def led_start_experiment_signal(self):
         """
         it lights on a LED if the experiment will take place in the next minute
         it uses the frame receive LED to indicate whether the experiment is going to start the next minute or not.
@@ -264,6 +264,12 @@ class ExperimentRx(object):
                 continue
             time.sleep(1)
         self.f_start_signal_LED = False
+
+    def led_end_experiment_signal(self):
+        while True:
+            for led in self.led_array_pins:
+                self.gpio_handler.led_toggle(led)
+            time.sleep(1)
 
     def execute_experiment_rx(self):
         self.radio_driver.radio_reset()
@@ -306,6 +312,7 @@ class ExperimentRx(object):
         self.hours, self.minutes = self.start_time_experiment()
         self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
         if self.experiment_scheduled:
+            self.gpio_handler.binary_counter(0, self.led_array_pins)
             self.experiment_scheduled.cancel()
             self.experiment_counter = 0
         self.experiment_scheduled = Timer(
@@ -315,7 +322,7 @@ class ExperimentRx(object):
         logging.info('time left for the experiment to start: {0}'.format(time.mktime(self.time_to_start.timetuple())
                                                                     + START_OFFSET  - time.time()))
         logging.info('time to start experiment: {0}'.format(self.time_to_start.timetuple()))
-        self.LED_start_experiment()
+        self.led_start_experiment_signal()
 
 
     def _cb_rx_frame(self, frame_rcv, rssi, crc, mcs):
@@ -339,6 +346,8 @@ class ExperimentRx(object):
         else:
             self.stop_exp()
             self.radio_driver.radio_off()
+            self.led_end_experiment_signal()
+
 
 # ========================== main ============================================
 
