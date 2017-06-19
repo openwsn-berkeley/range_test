@@ -1,5 +1,6 @@
 import threading
 import RPi.GPIO as GPIO
+import time
 
 
 class GPIO_handler(object):
@@ -66,3 +67,10 @@ class GPIO_handler(object):
     def clean_reset_pin(self):
         with self.dataLock:
             self.f_reset_pin = False
+
+    def led_end_experiment_signal(self, led_array_pins):
+        for i in range(60):
+            for led in led_array_pins:
+                self.led_toggle(led)
+            time.sleep(2)
+            i += 1
