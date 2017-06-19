@@ -8,7 +8,6 @@ import time
 import sys
 import logging
 import threading
-import sched
 import Queue
 import json
 from datetime import datetime as dt
@@ -53,37 +52,6 @@ class LoggerRx(threading.Thread):
         self.daemon             = True
         self.start()
 
-    def rx_frames_psize(self):
-        """
-        It assigns the values to the result dictionary by separating the burst of 400 frames into 4 groups of 100 frames
-        each, knowing the first 100 correspond to 8 bytes long, 100-199 frames number correspond to 127 bytes long,
-        200-299 to 1000 bytes long and 300-399 to 2047 bytes long. Also assigns the RSSI average value during the
-        experiment and the modulation used.
-        :returns: Nothing
-        """
-
-        self.results['RSSI_by_length'] = {
-                '8':    self.rssi_values[0:self.settings['numframes']],
-                '127':  self.rssi_values[self.settings['numframes']:2*self.settings['numframes']],
-                '1000': self.rssi_values[2*self.settings['numframes']:3*self.settings['numframes']],
-                '2047': self.rssi_values[3*self.settings['numframes']:4*self.settings['numframes']]
-            },
-        self.results['rx_string'] = {
-                '8':    ''.join(self.rx_string[0:self.settings['numframes']]),
-                '127':  ''.join(self.rx_string[self.settings['numframes']:2*self.settings['numframes']]),
-                '1000': ''.join(self.rx_string[2*self.settings['numframes']:3*self.settings['numframes']]),
-                '2047': ''.join(self.rx_string[3*self.settings['numframes']:4*self.settings['numframes']])
-        }
-
-    def print_results(self):
-        """
-        it will print the results of the previous experiment in the output file
-        :return:
-        """
-        self.rx_frames_psize()
-        with open(self.name_file, 'a') as f:
-            f.write(json.dumps(self.results.copy())+'\n')
-
     def run(self):
         """
         analyses the frames received by the radio that are put in the logger queue. It stars filling the results of
@@ -95,7 +63,7 @@ class LoggerRx(threading.Thread):
             item = self.queue.get()
             if item == 'Start':
                 if self.results['radio_settings']:  # to know if this is the first time I pass in the logger
-                    self.print_results()  # print to log file
+                    self._print_results()  # print to log file
                 self.rx_string = ['!' for i in range(len(self.settings['frame_lengths']) * self.settings['numframes'])]
                 self.rssi_values = [None for i in
                                     range(len(self.settings['frame_lengths']) * self.settings['numframes'])]
@@ -135,7 +103,7 @@ class LoggerRx(threading.Thread):
                     logging.error('UNKNOWN OBJECT IN THE QUEUE: {0}'.format(item))
 
             elif item == 'Print last':
-                self.print_results()
+                self._print_results()
                 self.results['radio_settings'] = None  # by doing this I won't print twice the last set of settings.
 
             elif type(item) == float:
@@ -152,6 +120,43 @@ class LoggerRx(threading.Thread):
             else:
                 logging.error('UNKNOWN ITEM IN THE QUEUE: {0}'.format(item))
 
+#  ====================== private =========================================
+
+    def _print_results(self):
+        """
+        it will print the results of the previous experiment in the output file
+        :return:
+        """
+        self._rx_frames_psize()
+        with open(self.name_file, 'a') as f:
+            f.write(json.dumps(self.results.copy())+'\n')
+
+    def _rx_frames_psize(self):
+        """
+        It assigns the values to the result dictionary by separating the burst of 400 frames into 4 groups of 100 frames
+        each, knowing the first 100 correspond to 8 bytes long, 100-199 frames number correspond to 127 bytes long,
+        200-299 to 1000 bytes long and 300-399 to 2047 bytes long. Also assigns the RSSI average value during the
+        experiment and the modulation used.
+        :returns: Nothing
+        """
+
+        self.results['RSSI_by_length'] = {
+                '8':    self.rssi_values[0:self.settings['numframes']],
+                '127':  self.rssi_values[self.settings['numframes']:2*self.settings['numframes']],
+                '1000': self.rssi_values[2*self.settings['numframes']:3*self.settings['numframes']],
+                '2047': self.rssi_values[3*self.settings['numframes']:4*self.settings['numframes']]
+            },
+        self.results['rx_string'] = {
+                '8':    ''.join(self.rx_string[0:self.settings['numframes']]),
+                '127':  ''.join(self.rx_string[self.settings['numframes']:2*self.settings['numframes']]),
+                '1000': ''.join(self.rx_string[2*self.settings['numframes']:3*self.settings['numframes']]),
+                '2047': ''.join(self.rx_string[3*self.settings['numframes']:4*self.settings['numframes']])
+        }
+
+# ============================== public =======================================
+
+
+# =============================================================================
 
 class ExperimentRx(object):
 
@@ -170,10 +175,10 @@ class ExperimentRx(object):
         self.frame_received_pin     = [36]
         self.time_to_start          = None
         self.f_start_signal_LED     = False
-        self.f_reset_button         = False
-        self.f_reset_pin            = False
         self.experiment_counter     = 0
         self.experiment_scheduled   = None
+        self.experiment_rx_thread   = None  
+        # FIXME change this name variable
 
         self.dataLock               = threading.RLock()
 
@@ -183,13 +188,16 @@ class ExperimentRx(object):
         self.gpio_handler           = None
 
         # start all the drivers
-        self.radio_setup()
-        self.logger_init()
-        self.gpio_handler_init()
-        self.gps_init()
-        self.radio_init()
+        self._radio_setup()
+        self._logger_init()
+        self._gpio_handler_init()
+        self._gps_ini()
+        self._radio_init()
+        logging.info('threads alive at the start of the program: {0}'.format(threading.enumerate()))
 
-    def radio_setup(self):
+#  ====================== private =========================================
+
+    def _radio_setup(self):
         """
         it initialises the radio driver, it loads the callback for the RX
         :return:
@@ -198,11 +206,11 @@ class ExperimentRx(object):
         self.radio_driver   = radio.At86rf215(self._cb_rx_frame)
         self.radio_driver.spi_init()
 
-    def radio_init(self):
+    def _radio_init(self):
         self.radio_driver.radio_reset()
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
 
-    def gps_init(self):
+    def _gps_ini(self):
         # start the gps thread
         self.gps            = gps.GpsThread()
 
@@ -213,18 +221,18 @@ class ExperimentRx(object):
         logging.info('... time valid')
         logging.info('out of GPS init')
 
-    def logger_init(self):
+    def _logger_init(self):
         # initializes the LoggerRx thread
         self.LoggerRx       = LoggerRx(self.queue_rx, self.settings)
 
-    def gpio_handler_init(self):
+    def _gpio_handler_init(self):
         self.gpio_handler   = gpio.GPIO_handler(self.radio_isr_pin, self.push_button_pin, self.radio_driver.cb_radio_isr,
                                            self._cb_push_button)
         
         self.gpio_handler.init_binary_pins(self.led_array_pins)
         self.gpio_handler.init_binary_pins(self.frame_received_pin)
 
-    def start_time_experiment(self):
+    def _start_time_experiment(self):
         """
         it sets the next runtime for the whole experiment sequence in hours, minutes
         current_time[3] = hours, current_time[4] = minutes, current_time[5] = seconds
@@ -244,34 +252,32 @@ class ExperimentRx(object):
 
         return new_time
 
-    def stop_exp(self):
+    def _stop_exp(self):
         """
         it makes print the last modulation results
         """
         self.queue_rx.put('Print last')
 
-    def led_start_experiment_signal(self):
+    def _led_start_experiment_signal(self):
         """
         it lights on a LED if the experiment will take place in the next minute
         it uses the frame receive LED to indicate whether the experiment is going to start the next minute or not.
         :return:
         """
+        logging.info('entering led_start_experiment_signal')
         while not self.f_start_signal_LED:
             now = time.gmtime()
             if self.minutes - now[4] == 1 or self.minutes - now[4] == -59:
+                logging.info('SWITCHING LIGHT UP led_start_experiment_signal')
                 self.gpio_handler.led_on(self.frame_received_pin)
                 self.f_start_signal_LED = True
                 continue
             time.sleep(1)
         self.f_start_signal_LED = False
+        logging.info('OUTING led_start_experiment_signal')
 
-    def led_end_experiment_signal(self):
-        while True:
-            for led in self.led_array_pins:
-                self.gpio_handler.led_toggle(led)
-            time.sleep(1)
-
-    def execute_experiment_rx(self):
+    def _execute_experiment_rx(self):
+        logging.info('entering execute_experiment_rx, time: {0}'.format(time.time()))
         self.radio_driver.radio_reset()
         self.gpio_handler.led_off(self.frame_received_pin)
 
@@ -297,22 +303,18 @@ class ExperimentRx(object):
         self.radio_driver.radio_rx_now()
         self.queue_rx.put(time.time() - self.started_time)
 
-
-    #  ======================== public ========================================
-
-    def getStats(self):
-        # logging.warning('Results ongoing {0}'.format(self.LoggerRx.results))
-        logging.warning('TO IMPLEMENT')
-
-    #  ====================== private =========================================
+    # ========================= callbacks =====================================
 
     def _cb_push_button(self, channel = 13):
 
         self.started_time = time.time()
-        self.hours, self.minutes = self.start_time_experiment()
+        self.hours, self.minutes = self._start_time_experiment()
         self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
+        self.radio_driver.radio_off()
+        self.gpio_handler.led_off(self.frame_received_pin)
+        self.gpio_handler.binary_counter(0, self.led_array_pins)
         if self.experiment_scheduled:
-            self.gpio_handler.binary_counter(0, self.led_array_pins)
+            logging.info('cancelling experiment')
             self.experiment_scheduled.cancel()
             self.experiment_counter = 0
         self.experiment_scheduled = Timer(
@@ -322,8 +324,10 @@ class ExperimentRx(object):
         logging.info('time left for the experiment to start: {0}'.format(time.mktime(self.time_to_start.timetuple())
                                                                     + START_OFFSET  - time.time()))
         logging.info('time to start experiment: {0}'.format(self.time_to_start.timetuple()))
-        self.led_start_experiment_signal()
-
+        self.experiment_rx_thread = threading.Thread(target=self._led_start_experiment_signal)
+        self.experiment_rx_thread.start()
+        self.experiment_rx_thread.name = 'Experiment Rx thread start led signal'
+        logging.info('threads alive after the push button is pressed: {0}'.format(threading.enumerate()))
 
     def _cb_rx_frame(self, frame_rcv, rssi, crc, mcs):
         self.gpio_handler.led_toggle(self.frame_received_pin)
@@ -335,8 +339,9 @@ class ExperimentRx(object):
 
     def _experiment_scheduling(self):
 
-        if self.experiment_counter < 31:
-            self.execute_experiment_rx()
+        logging.info('threads alive when entering the _experiment_scheduling: {0}'.format(threading.enumerate()))
+        if self.experiment_counter < len(self.settings['test_settings']):
+            self._execute_experiment_rx()
             self.time_next_experiment = self.settings['test_settings'][self.experiment_counter][
                                         'durationtx_s'] + SECURITY_TIME
 
@@ -344,23 +349,35 @@ class ExperimentRx(object):
             self.experiment_scheduled.start()
             self.experiment_counter += 1
         else:
-            self.stop_exp()
+            self._stop_exp()
             self.radio_driver.radio_off()
-            self.led_end_experiment_signal()
+            for led in self.led_array_pins:
+                self.gpio_handler.led_off(led)
+            self.gpio_handler.led_off(self.frame_received_pin)
+            self.gpio_handler.led_end_experiment_signal(self.led_array_pins)
 
+#  ============================ public ========================================
 
-# ========================== main ============================================
+    def getStats(self):
+        # logging.warning('Results ongoing {0}'.format(self.LoggerRx.results))
+        logging.warning('TO IMPLEMENT')
 
-def load_experiment_details():
-    with open('/home/pi/range_test/raspberry/experiment_settings.json', 'r') as f:
-        settings = f.read().replace('\n', ' ').replace('\r', '')
-        settings = json.loads(settings)
-        return settings
+# ========================== main =============================================
+
+# def load_experiment_details():
+#     with open('/home/pi/range_test/raspberry/experiment_settings.json', 'r') as f:
+#         settings = f.read().replace('\n', ' ').replace('\r', '')
+#         settings = json.loads(settings)
+#         return settings
 
 def main():
 
+    with open('/home/pi/range_test/raspberry/experiment_settings.json', 'r') as f:
+        settings = f.read().replace('\n', ' ').replace('\r', '')
+        settings = json.loads(settings)
+
     logging.basicConfig(stream=sys.__stdout__, level=logging.DEBUG)
-    experimentRx = ExperimentRx(load_experiment_details())
+    experimentRx = ExperimentRx(settings)
 
     while True:
         # for item in
