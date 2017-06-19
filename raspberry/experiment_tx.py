@@ -14,7 +14,6 @@ import json
 from datetime import datetime as dt
 import datetime
 import socket
-from threading import Timer
 
 import at86rf215_defs as defs
 import at86rf215_driver as radio
@@ -216,7 +215,8 @@ class ExperimentTx(threading.Thread):
             else:
                 offset = self.cumulative_time + 2
             for item in self.settings['test_settings']:
-                self.list_events_sched[self.settings['test_settings'].index(item)] = self.scheduler.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
+                self.list_events_sched[self.settings['test_settings'].index(item)] = self.scheduler.enterabs(
+                    time.mktime(self.time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
                 self.schedule_time[self.settings['test_settings'].index(item)] = offset
                 offset += item['durationtx_s'] + SECURITY_TIME
             self.cumulative_time = offset
@@ -358,13 +358,10 @@ class ExperimentTx(threading.Thread):
                 self.hours, self.minutes = self.start_time_experiment()
                 self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
                 logging.info('WITHIN THE WHILE TRUE MAIN --->> self.time_to_start: {0}'.format(self.time_to_start))
-                logging.info('removed items in the queue')
                 self.cumulative_time = 0
                 self.first_run = False
                 self.gpio_handler.binary_counter(0, self.led_array_pins)
-                logging.info('before self.LED_start_exp()')
                 self.LED_start_exp()
-                logging.info('after self.LED_start_exp()')
 
             # gives the signal to the scheduler thread to re-schedule the experiments
             with self.dataLock:
