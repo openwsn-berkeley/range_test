@@ -107,12 +107,14 @@ class ExperimentTx(threading.Thread):
         self.dataLock               = threading.RLock()
 
         # start the threads
-        self.end_experiment          = threading.Event()
+        self.end_experiment         = threading.Event()
         self.start_experiment       = threading.Event()
         self.f_schedule             = threading.Event()
+        self.f_exit                 = threading.Event()
         self.end_experiment.clear()
         self.start_experiment.clear()
         self.f_schedule.clear()
+        self.f_exit.clear()
 
         # start the thread
         threading.Thread.__init__(self)
@@ -199,6 +201,7 @@ class ExperimentTx(threading.Thread):
         self.queue_tx.put('Print last')
         with self.dataLock:
             self.end_experiment.set()
+            self.f_exit.set()
 
     def experiment_scheduling(self):
 
@@ -230,6 +233,7 @@ class ExperimentTx(threading.Thread):
         :param item
 
         """
+        logging.info('entering execute_experiment_tx, time: {0}'.format(time.time()))
         self.gpio_handler.led_off(self.frame_sent_pin)
         # clean the break execute_exp flag
         self.f_reset = False
@@ -298,9 +302,10 @@ class ExperimentTx(threading.Thread):
     def LED_start_exp(self):
         """
         it lights on a LED if the experiment will take place in the next minute
-        it uses the frame receive LED to indicate whether the experiment is going to start the next minute or not.
+        it uses the frame receive LED to indicate whether the experiment is going to start the next minute.
         :return:
         """
+        # FIXME: fishy code
         while not self.f_start_signal_LED:
             now = time.gmtime()
             if self.minutes - now[4] == 1 or self.minutes - now[4] == -59:
@@ -338,7 +343,7 @@ class ExperimentTx(threading.Thread):
         # minute
         self.LED_start_exp()
 
-        while True:
+        while not self.f_exit.is_set():
 
             # it waits for the self.end_experiment signal that can be triggered at the end of the 31st experiment
             # or when the push button is pressed
@@ -366,6 +371,9 @@ class ExperimentTx(threading.Thread):
             # gives the signal to the scheduler thread to re-schedule the experiments
             with self.dataLock:
                 self.f_schedule.set()
+
+        self.gpio_handler.led_end_experiment_signal()
+        logging.info('END OF EXPERIMENTS')
 
     #  ======================== private =======================================
     
