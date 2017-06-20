@@ -189,10 +189,10 @@ class ExperimentRx(object):
         self.gpio_handler           = None
 
         # start all the drivers
+        self._gps_init()
         self._radio_setup()
         self._logger_init()
         self._gpio_handler_init()
-        self._gps_ini()
         self._radio_init()
         logging.info('threads alive at the start of the program: {0}'.format(threading.enumerate()))
 
@@ -211,7 +211,7 @@ class ExperimentRx(object):
         self.radio_driver.radio_reset()
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
 
-    def _gps_ini(self):
+    def _gps_init(self):
         # start the gps thread
         self.gps            = gps.GpsThread()
 
@@ -265,7 +265,7 @@ class ExperimentRx(object):
         it uses the frame receive LED to indicate whether the experiment is going to start the next minute or not.
         :return:
         """
-        logging.info('entering led_start_experiment_signal')
+        logging.debug('entering led_start_experiment_signal')
         while not self.f_start_signal_LED:
             now = time.gmtime()
             if self.minutes - now[4] == 1 or self.minutes - now[4] == -59:
@@ -275,23 +275,21 @@ class ExperimentRx(object):
                 continue
             time.sleep(1)
         self.f_start_signal_LED = False
-        logging.info('OUTING led_start_experiment_signal')
+        logging.debug('OUTING led_start_experiment_signal')
 
     def _led_end_experiment_signal(self):
         i = 0
         for led in self.led_array_pins:
             self.gpio_handler.led_off(led)
         while i < 20 and not self.f_push_button:
-            logging.info('time before toggling pins: {0}'.format(time.time()))
             for led in self.led_array_pins:
                 self.gpio_handler.led_toggle(led)
-            logging.info('time after toggling pins: {0}'.format(time.time()))
             time.sleep(1)
             i += 1
 
     def _execute_experiment_rx(self):
         self.f_push_button = False
-        logging.info('entering execute_experiment_rx, time: {0}'.format(time.time()))
+        logging.debug('entering execute_experiment_rx, time: {0}'.format(time.time()))
         self.radio_driver.radio_reset()
         self.gpio_handler.led_off(self.frame_received_pin)
 
@@ -328,7 +326,7 @@ class ExperimentRx(object):
         self.gpio_handler.led_off(self.frame_received_pin)
         self.gpio_handler.binary_counter(0, self.led_array_pins)
         if self.experiment_scheduled:
-            logging.info('cancelling experiment')
+            logging.debug('cancelling experiment')
             self.experiment_scheduled.cancel()
             self.experiment_counter = 0
         self.experiment_scheduled = Timer(
@@ -341,7 +339,7 @@ class ExperimentRx(object):
         self.experiment_rx_thread = threading.Thread(target=self._led_start_experiment_signal)
         self.experiment_rx_thread.start()
         self.experiment_rx_thread.name = 'Experiment Rx thread start led signal'
-        logging.info('threads alive after the push button is pressed: {0}'.format(threading.enumerate()))
+        logging.debug('threads alive after the push button is pressed: {0}'.format(threading.enumerate()))
 
     def _cb_rx_frame(self, frame_rcv, rssi, crc, mcs):
         self.gpio_handler.led_toggle(self.frame_received_pin)
@@ -353,7 +351,7 @@ class ExperimentRx(object):
 
     def _experiment_scheduling(self):
 
-        logging.info('threads alive when entering the _experiment_scheduling: {0}'.format(threading.enumerate()))
+        logging.debug('threads alive when entering the _experiment_scheduling: {0}'.format(threading.enumerate()))
         if self.experiment_counter < len(self.settings['test_settings']):
             self._execute_experiment_rx()
             self.time_next_experiment = self.settings['test_settings'][self.experiment_counter][

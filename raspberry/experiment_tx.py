@@ -87,7 +87,6 @@ class ExperimentTx(threading.Thread):
 
         self.settings                   = settings
         self.queue_tx                   = Queue.Queue()
-        self.first_run                  = False
 
         self.f_start_signal_LED         = False
         self.f_reset_button             = False
@@ -131,10 +130,10 @@ class ExperimentTx(threading.Thread):
         self.gpio_handler               = None
 
         # start all the drivers
+        self._gps_init()
         self._radio_setup()
         self._logger_init()
         self._gpio_handler_init()
-        self._gps_init()
         self._radio_init()
 
         # configure the logging module
@@ -153,7 +152,7 @@ class ExperimentTx(threading.Thread):
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
 
     def _gps_init(self):
-        logging.info('in of GPS init')
+        logging.debug('in of GPS init')
         # start the gps thread
         self.gps            = gps.GpsThread()
         # waiting until the GPS time is valid
@@ -161,7 +160,7 @@ class ExperimentTx(threading.Thread):
         while self.gps.is_gps_time_valid() is False:
             time.sleep(1)
         logging.info('... time valid')
-        logging.info('out of GPS init')
+        logging.debug('out of GPS init')
 
     def _logger_init(self):
         # initializes the LoggerRx thread
@@ -206,23 +205,23 @@ class ExperimentTx(threading.Thread):
         logging.info('before the led_end_experiment_signal, time: {0}, thread: {1}'.format(time.time(),
                                                                                            threading.current_thread()))
         self._led_end_experiment_signal()
-        logging.info('END OF EXPERIMENTS')
+        logging.debug('END OF EXPERIMENTS')
 
     def _experiment_scheduling(self):
 
-        logging.info('entering the _experiment_scheduling')
+        logging.debug('entering the _experiment_scheduling')
         while True:
-            logging.info('IN THE _experiment_scheduling WAITING FOR THE self.f_schedule.set')
+            logging.debug('IN THE _experiment_scheduling WAITING FOR THE self.f_schedule.set')
             self.f_schedule.wait()
             self.f_schedule.clear()
-            logging.info('START SCHEDULING STUFF')
+            logging.debug('START SCHEDULING STUFF')
             offset = START_OFFSET
             for item in self.settings['test_settings']:
                 self.list_events_sched[self.settings['test_settings'].index(item)] = self.scheduler.enterabs(
                     time.mktime(self.time_to_start.timetuple()) + offset, 1, self._execute_experiment_tx, (item,))
                 self.schedule_time[self.settings['test_settings'].index(item)] = offset
                 offset += item['durationtx_s'] + SECURITY_TIME
-            logging.info('time for each set of settings: {0}'.format(self.schedule_time))
+            logging.debug('time for each set of settings: {0}'.format(self.schedule_time))
             self.scheduler.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self._stop_exp, ())
             self.scheduler.run()
             logging.info('END OF THE _experiment_scheduling')
@@ -232,7 +231,7 @@ class ExperimentTx(threading.Thread):
         :param item
 
         """
-        logging.info('entering _execute_experiment_txeriment_tx, time: {0}'.format(time.time()))
+        logging.debug('entering _execute_experiment_txeriment_tx, time: {0}'.format(time.time()))
         self.gpio_handler.led_off(self.frame_sent_pin)
         # clean the break _execute_experiment_tx flag
         self.f_reset = False
@@ -298,33 +297,17 @@ class ExperimentTx(threading.Thread):
         for ev in events:
             self.scheduler.cancel(ev)
 
-    def LED_start_exp(self):
-        """
-        it lights on a LED if the experiment will take place in the next minute
-        it uses the frame receive LED to indicate whether the experiment is going to start the next minute.
-        :return:
-        """
-        # FIXME: fishy code
-        while not self.f_start_signal_LED:
-            now = time.gmtime()
-            if self.minutes - now[4] == 1 or self.minutes - now[4] == -59:
-                self.gpio_handler.led_on(self.frame_sent_pin)
-                self.f_start_signal_LED = True
-                continue
-            time.sleep(1)
-        self.f_start_signal_LED = False
-
     def _led_end_experiment_signal(self):
         i = 0
         for led in self.led_array_pins:
             self.gpio_handler.led_off(led)
 
         while i < 20 and not self.f_reset:
-            logging.info('i: {0}, self.f_reset: {1}'.format(i, self.f_reset))
-            logging.info('time before toggling pins: {0}'.format(time.time()))
+            logging.debug('i: {0}, self.f_reset: {1}'.format(i, self.f_reset))
+            logging.debug('time before toggling pins: {0}'.format(time.time()))
             for led in self.led_array_pins:
                 self.gpio_handler.led_toggle(led)
-            logging.info('time after toggling pins: {0}'.format(time.time()))
+            logging.debug('time after toggling pins: {0}'.format(time.time()))
             time.sleep(1)
             i += 1
 
@@ -334,17 +317,17 @@ class ExperimentTx(threading.Thread):
         it uses the frame receive LED to indicate whether the experiment is going to start the next minute or not.
         :return:
         """
-        logging.info('entering led_start_experiment_signal')
+        logging.debug('entering led_start_experiment_signal')
         while not self.f_start_signal_LED:
             now = time.gmtime()
             if self.minutes - now[4] == 1 or self.minutes - now[4] == -59:
-                logging.info('SWITCHING LIGHT UP led_start_experiment_signal')
+                logging.debug('SWITCHING LIGHT UP led_start_experiment_signal')
                 self.gpio_handler.led_on(self.frame_sent_pin)
                 self.f_start_signal_LED = True
                 continue
             time.sleep(1)
         self.f_start_signal_LED = False
-        logging.info('OUTING led_start_experiment_signal')
+        logging.debug('OUTING led_start_experiment_signal')
     
     def run(self):
         # setup the radio
@@ -387,16 +370,15 @@ class ExperimentTx(threading.Thread):
             if self.f_reset:
                 self.gpio_handler.led_off(self.frame_sent_pin)
                 logging.info('button pressed')
-                logging.info('RESETTING SCHEDULE')
+                logging.debug('RESETTING SCHEDULE')
                 self._remove_scheduled_experiment()
-                logging.info('removed items in the queue')
+                logging.debug('removed items in the queue')
                 self.started_time = time.time()
 
                 # determines the starting time for the new set of experiments
                 self.hours, self.minutes = self._start_time_experiment()
                 self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
-                logging.info('WITHIN THE WHILE TRUE MAIN --->> self.time_to_start: {0}'.format(self.time_to_start))
-                self.first_run = False
+                logging.debug('WITHIN THE WHILE TRUE MAIN --->> self.time_to_start: {0}'.format(self.time_to_start))
                 self.gpio_handler.binary_counter(0, self.led_array_pins)
                 self.experiment_tx_led_start = threading.Thread(target=self._led_start_experiment_signal)
                 self.experiment_tx_led_start.start()
@@ -419,7 +401,7 @@ class ExperimentTx(threading.Thread):
             with self.dataLock:
                 self.end_experiment.set()
                 self.f_reset        = True
-                logging.warning('self.f_reset_cmd set to true?: {0}'.format(self.f_reset))
+                logging.info('f_reset set to true?: {0}'.format(self.f_reset))
 
 #  ============================ main ==========================================
 
