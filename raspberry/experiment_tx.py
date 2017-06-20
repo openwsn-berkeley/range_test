@@ -94,6 +94,7 @@ class ExperimentTx(threading.Thread):
         self.f_start_signal_LED     = False
         self.f_reset_button         = False
         self.f_reset                = False
+        self.f_exit                 = False
         self.cumulative_time        = 0
         self.radio_isr_pin          = 11
         self.push_button_pin        = 13
@@ -110,11 +111,11 @@ class ExperimentTx(threading.Thread):
         self.end_experiment         = threading.Event()
         self.start_experiment       = threading.Event()
         self.f_schedule             = threading.Event()
-        self.f_exit                 = threading.Event()
+
         self.end_experiment.clear()
         self.start_experiment.clear()
         self.f_schedule.clear()
-        self.f_exit.clear()
+
 
         # start the thread
         threading.Thread.__init__(self)
@@ -201,7 +202,7 @@ class ExperimentTx(threading.Thread):
         self.queue_tx.put('Print last')
         with self.dataLock:
             self.end_experiment.set()
-            self.f_exit.set()
+            self.f_exit = True
 
     def experiment_scheduling(self):
 
@@ -343,7 +344,7 @@ class ExperimentTx(threading.Thread):
         # minute
         self.LED_start_exp()
 
-        while not self.f_exit.is_set():
+        while not self.f_exit:
 
             # it waits for the self.end_experiment signal that can be triggered at the end of the 31st experiment
             # or when the push button is pressed
@@ -368,11 +369,11 @@ class ExperimentTx(threading.Thread):
                 self.gpio_handler.binary_counter(0, self.led_array_pins)
                 self.LED_start_exp()
 
-            # gives the signal to the scheduler thread to re-schedule the experiments
-            with self.dataLock:
-                self.f_schedule.set()
+                # gives the signal to the scheduler thread to re-schedule the experiments
+                with self.dataLock:
+                    self.f_schedule.set()
 
-        self.gpio_handler.led_end_experiment_signal()
+        self.gpio_handler.led_end_experiment_signal(self.led_array_pins)
         logging.info('END OF EXPERIMENTS')
 
     #  ======================== private =======================================
