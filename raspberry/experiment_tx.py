@@ -202,7 +202,10 @@ class ExperimentTx(threading.Thread):
         self.queue_tx.put('Print last')
         with self.dataLock:
             self.end_experiment.set()
-            self.f_exit = True
+        logging.info('before the led_end_experiment_signal, time: {0}, thread: {1}'.format(time.time(),
+                                                                                           threading.current_thread()))
+        self._led_end_experiment_signal()
+        logging.info('END OF EXPERIMENTS')
 
     def experiment_scheduling(self):
 
@@ -315,6 +318,20 @@ class ExperimentTx(threading.Thread):
                 continue
             time.sleep(1)
         self.f_start_signal_LED = False
+
+    def _led_end_experiment_signal(self):
+        i = 0
+        for led in self.led_array_pins:
+            self.gpio_handler.led_off(led)
+
+        while i < 20 and not self.f_reset:
+            logging.info('i: {0}, self.f_reset: {1}'.format(i, self.f_reset))
+            logging.info('time before toggling pins: {0}'.format(time.time()))
+            for led in self.led_array_pins:
+                self.gpio_handler.led_toggle(led)
+            logging.info('time after toggling pins: {0}'.format(time.time()))
+            time.sleep(1)
+            i += 1
     
     def run(self):
         # setup the radio
@@ -344,7 +361,7 @@ class ExperimentTx(threading.Thread):
         # minute
         self.LED_start_exp()
 
-        while not self.f_exit:
+        while True:
 
             # it waits for the self.end_experiment signal that can be triggered at the end of the 31st experiment
             # or when the push button is pressed
@@ -372,9 +389,6 @@ class ExperimentTx(threading.Thread):
                 # gives the signal to the scheduler thread to re-schedule the experiments
                 with self.dataLock:
                     self.f_schedule.set()
-
-        self.gpio_handler.led_end_experiment_signal(self.led_array_pins)
-        logging.info('END OF EXPERIMENTS')
 
     #  ======================== private =======================================
     

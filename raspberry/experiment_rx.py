@@ -177,7 +177,8 @@ class ExperimentRx(object):
         self.f_start_signal_LED     = False
         self.experiment_counter     = 0
         self.experiment_scheduled   = None
-        self.experiment_rx_thread   = None  
+        self.experiment_rx_thread   = None
+        self.f_push_button          = False
         # FIXME change this name variable
 
         self.dataLock               = threading.RLock()
@@ -276,7 +277,20 @@ class ExperimentRx(object):
         self.f_start_signal_LED = False
         logging.info('OUTING led_start_experiment_signal')
 
+    def _led_end_experiment_signal(self):
+        i = 0
+        for led in self.led_array_pins:
+            self.gpio_handler.led_off(led)
+        while i < 20 and not self.f_push_button:
+            logging.info('time before toggling pins: {0}'.format(time.time()))
+            for led in self.led_array_pins:
+                self.gpio_handler.led_toggle(led)
+            logging.info('time after toggling pins: {0}'.format(time.time()))
+            time.sleep(1)
+            i += 1
+
     def _execute_experiment_rx(self):
+        self.f_push_button = False
         logging.info('entering execute_experiment_rx, time: {0}'.format(time.time()))
         self.radio_driver.radio_reset()
         self.gpio_handler.led_off(self.frame_received_pin)
@@ -306,7 +320,7 @@ class ExperimentRx(object):
     # ========================= callbacks =====================================
 
     def _cb_push_button(self, channel = 13):
-
+        self.f_push_button = True
         self.started_time = time.time()
         self.hours, self.minutes = self._start_time_experiment()
         self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
@@ -354,7 +368,7 @@ class ExperimentRx(object):
             for led in self.led_array_pins:
                 self.gpio_handler.led_off(led)
             self.gpio_handler.led_off(self.frame_received_pin)
-            self.gpio_handler.led_end_experiment_signal(self.led_array_pins)
+            self._led_end_experiment_signal()
 
 #  ============================ public ========================================
 

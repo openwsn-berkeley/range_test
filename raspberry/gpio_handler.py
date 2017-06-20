@@ -1,6 +1,8 @@
 import threading
 import RPi.GPIO as GPIO
 import time
+import logging
+import sys
 
 
 class GPIO_handler(object):
@@ -19,6 +21,8 @@ class GPIO_handler(object):
         GPIO.setup(push_button_pin, GPIO.IN)
         GPIO.add_event_detect(radio_isr_pin, GPIO.RISING, callback=self.cb_pin_11)
         GPIO.add_event_detect(push_button_pin, GPIO.RISING, callback=self.cb_pin_13, bouncetime=150)
+
+        logging.basicConfig(stream=sys.__stdout__, level=logging.DEBUG)
 
     def init_binary_pins(self, array):
         """
@@ -68,9 +72,3 @@ class GPIO_handler(object):
         with self.dataLock:
             self.f_reset_pin = False
 
-    def led_end_experiment_signal(self, led_array_pins):
-        for i in range(60):
-            for led in led_array_pins:
-                self.led_toggle(led)
-            time.sleep(2)
-            i += 1
