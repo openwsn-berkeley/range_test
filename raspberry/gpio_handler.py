@@ -20,7 +20,7 @@ class GPIO_handler(object):
         GPIO.setup(radio_isr_pin, GPIO.IN)
         GPIO.setup(push_button_pin, GPIO.IN)
         GPIO.add_event_detect(radio_isr_pin, GPIO.RISING, callback=self.cb_pin_11)
-        GPIO.add_event_detect(push_button_pin, GPIO.RISING, callback=self.cb_pin_13, bouncetime=150)
+        GPIO.add_event_detect(push_button_pin, GPIO.BOTH, callback=self.cb_pin_13, bouncetime=75)
 
         logging.basicConfig(stream=sys.__stdout__, level=logging.DEBUG)
 
