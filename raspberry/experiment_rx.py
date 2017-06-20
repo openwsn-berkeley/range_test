@@ -196,7 +196,7 @@ class ExperimentRx(object):
         self._radio_init()
         logging.info('threads alive at the start of the program: {0}'.format(threading.enumerate()))
 
-#  ====================== private =========================================
+#  ========================== private =========================================
 
     def _radio_setup(self):
         """
