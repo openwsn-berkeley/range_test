@@ -18,6 +18,7 @@ import socket
 import at86rf215_defs as defs
 import at86rf215_driver as radio
 import GpsThread as gps
+import gpio_handler as gpio
 
 FRAME_LENGTH  = 2047
 CRC_SIZE      = 4
@@ -32,6 +33,7 @@ class LoggerTx(threading.Thread):
         # store parameters
         self.queue = queue
         self.settings = settings
+
         # local variables
         self.name_file = '/home/pi/range_test_raw_data/experiments_results_' + socket.gethostname() + '.json'
         self.results = {'type': 'end_of_cycle_tx', 'start_time_str': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
@@ -82,32 +84,39 @@ class ExperimentTx(threading.Thread):
     def __init__(self, settings):
         
         # local variables
-        self.radio_driver           = None
-        self.settings               = settings
-        self.hours                  = 0
-        self.minutes                = 0
-        self.first_run              = False
-        self.queue_tx               = Queue.Queue()
-        self.started_time           = None
-        self.f_start_signal_LED     = False
-        self.cumulative_time        = 0
-        self.scheduler              = sched.scheduler(time.time, time.sleep)
-        self.list_events_sched      = [None for i in range(len(self.settings["test_settings"]))]
-        self.schedule_time          = ['time' for i in range(len(self.settings["test_settings"]))]
-        self.led_array_pins         = [29, 31, 33, 35, 37]
-        self.frame_sent_pin         = [36]
-        self.scheduler_aux          = None
-        self.time_to_start          = None
-        self.dataLock               = threading.RLock()
+
+        self.settings                   = settings
+        self.queue_tx                   = Queue.Queue()
+        self.first_run                  = False
+
+        self.f_start_signal_LED         = False
+        self.f_reset_button             = False
+        self.f_reset                    = False
+        self.f_exit                     = False
+
+        self.hours                      = 0
+        self.minutes                    = 0
+
+        self.scheduler                  = sched.scheduler(time.time, time.sleep)
+        self.list_events_sched          = [None for i in range(len(self.settings["test_settings"]))]
+        self.schedule_time              = ['time' for i in range(len(self.settings["test_settings"]))]
+        self.led_array_pins             = [29, 31, 33, 35, 37]
+        self.frame_sent_pin             = [36]
+        self.radio_isr_pin              = 11
+        self.push_button_pin            = 13
+        self.scheduler_aux              = None
+        self.time_to_start              = None
+        self.started_time               = None
+        self.experiment_tx_led_start    = None
+
+        self.dataLock                   = threading.RLock()
 
         # start the threads
-        self.end_of_series          = threading.Event()
-        self.start_experiment       = threading.Event()
-        self.data_is_valid          = threading.Event()
-        self.f_schedule             = threading.Event()
-        self.end_of_series.clear()
+        self.start_experiment           = threading.Event()
+        self.end_experiment             = threading.Event()
+        self.f_schedule                 = threading.Event()
         self.start_experiment.clear()
-        self.data_is_valid.clear()
+        self.end_experiment.clear()
         self.f_schedule.clear()
 
         # start the thread
@@ -116,40 +125,58 @@ class ExperimentTx(threading.Thread):
         self.daemon = True
         self.start()
 
-        # self.LoggerTx = LoggerTx(self.queue_tx, self.end_of_series, self.settings)
-        self.LoggerTx               = None
+        self.radio_driver               = None
+        self.LoggerTx                   = None
+        self.gps                        = None
+        self.gpio_handler               = None
 
-        # start the gps thread
-        self.gps                    = None
+        # start all the drivers
+        self._radio_setup()
+        self._logger_init()
+        self._gpio_handler_init()
+        self._gps_init()
+        self._radio_init()
 
         # configure the logging module
         logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
 
-    def radio_setup(self):
+    #  ====================== private =========================================
+
+    def _radio_setup(self):
 
         # initialize the radio driver
-        self.radio_driver = radio.At86rf215(self._cb_rx_frame, self.start_experiment, self.end_of_series)
-        self.radio_driver.radio_init(11, 13)
+        self.radio_driver = radio.At86rf215(None)
+        self.radio_driver.spi_init()
 
-        # start the LoggerTx thread
-        self.LoggerTx = LoggerTx(self.queue_tx, self.settings)
-
-        # start the gps thread
-        self.gps = gps.GpsThread()
-
-        self.radio_driver.init_binary_pins(self.led_array_pins)
-        self.radio_driver.init_binary_pins(self.frame_sent_pin)
+    def _radio_init(self):
         self.radio_driver.radio_reset()
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
 
+    def _gps_init(self):
+        logging.info('in of GPS init')
+        # start the gps thread
+        self.gps            = gps.GpsThread()
         # waiting until the GPS time is valid
         logging.info('waiting for valid GPS time...')
         while self.gps.is_gps_time_valid() is False:
             time.sleep(1)
-            # logging.warning('still waiting')
         logging.info('... time valid')
+        logging.info('out of GPS init')
 
-    def time_experiment(self):
+    def _logger_init(self):
+        # initializes the LoggerRx thread
+        self.LoggerTx = LoggerTx(self.queue_tx, self.settings)
+
+    def _gpio_handler_init(self):
+
+        self.gpio_handler = gpio.GPIO_handler(self.radio_isr_pin, self.push_button_pin,
+                                              self.radio_driver.cb_radio_isr,
+                                              self._cb_push_button)
+
+        self.gpio_handler.init_binary_pins(self.led_array_pins)
+        self.gpio_handler.init_binary_pins(self.frame_sent_pin)
+
+    def _start_time_experiment(self):
         """
         it sets the next runtime for the whole experiment sequence in hours, minutes
         current_time[3] = hours, current_time[4] = minutes, current_time[5] = seconds
@@ -169,41 +196,46 @@ class ExperimentTx(threading.Thread):
 
         return new_time
 
-    def stop_exp(self):
+    def _stop_exp(self):
         """
         it makes print the last modulation results
         """
         self.queue_tx.put('Print last')
-        self.end_of_series.set()
+        with self.dataLock:
+            self.end_experiment.set()
+        logging.info('before the led_end_experiment_signal, time: {0}, thread: {1}'.format(time.time(),
+                                                                                           threading.current_thread()))
+        self._led_end_experiment_signal()
+        logging.info('END OF EXPERIMENTS')
 
-    def experiment_scheduling(self):
+    def _experiment_scheduling(self):
 
+        logging.info('entering the _experiment_scheduling')
         while True:
+            logging.info('IN THE _experiment_scheduling WAITING FOR THE self.f_schedule.set')
             self.f_schedule.wait()
             self.f_schedule.clear()
-            if self.first_run is False:
-                offset = START_OFFSET
-                self.first_run = True
-                logging.info('TIME: {0}'.format(self.time_to_start))
-            else:
-                offset = self.cumulative_time + 2
+            logging.info('START SCHEDULING STUFF')
+            offset = START_OFFSET
             for item in self.settings['test_settings']:
-                self.list_events_sched[self.settings['test_settings'].index(item)] = self.scheduler.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self.execute_exp, (item,))
+                self.list_events_sched[self.settings['test_settings'].index(item)] = self.scheduler.enterabs(
+                    time.mktime(self.time_to_start.timetuple()) + offset, 1, self._execute_experiment_tx, (item,))
                 self.schedule_time[self.settings['test_settings'].index(item)] = offset
                 offset += item['durationtx_s'] + SECURITY_TIME
-            self.cumulative_time = offset
             logging.info('time for each set of settings: {0}'.format(self.schedule_time))
-            self.scheduler.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self.stop_exp, ())
+            self.scheduler.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self._stop_exp, ())
             self.scheduler.run()
+            logging.info('END OF THE _experiment_scheduling')
 
-    def execute_exp(self, item):
+    def _execute_experiment_tx(self, item):
         """"
         :param item
 
         """
-        self.radio_driver.LED_OFF(self.frame_sent_pin)
-        # clean the break execute_exp flag
-        self.radio_driver.clean_reset_cmd()
+        logging.info('entering _execute_experiment_txeriment_tx, time: {0}'.format(time.time()))
+        self.gpio_handler.led_off(self.frame_sent_pin)
+        # clean the break _execute_experiment_tx flag
+        self.f_reset = False
 
         self.queue_tx.put(time.time() - self.started_time)
         # initialize the frame counter
@@ -221,7 +253,7 @@ class ExperimentTx(threading.Thread):
                                                item['frequency_0_kHz'],
                                                item['channel']))
 
-        self.radio_driver.binary_counter(item['index'], self.led_array_pins)
+        self.gpio_handler.binary_counter(item['index'], self.led_array_pins)
         logging.info('modulation: {0}'.format(item["modulation"]))
         # let know to the informative class the beginning of a new experiment
         self.queue_tx.put('Start')
@@ -237,7 +269,7 @@ class ExperimentTx(threading.Thread):
 
             # check if the reset button has been pressed
             # logging.warning('self.radio_driver.read_reset_cmd(): {0}'.format(self.radio_driver.read_reset_cmd()))
-            if self.radio_driver.read_reset_cmd() is True:
+            if self.f_reset:
                 break
 
             self.radio_driver.radio_trx_enable()
@@ -256,71 +288,138 @@ class ExperimentTx(threading.Thread):
 
                 # IFS
                 time.sleep(ifs)
-                self.radio_driver.LED_toggle(self.frame_sent_pin)
+                self.gpio_handler.led_toggle(self.frame_sent_pin)
                 # logging.warning('self.radio_driver.read_reset_cmd(): {0}'.format(self.radio_driver.read_reset_cmd()))
-                if self.radio_driver.read_reset_cmd() is True:
+                if self.f_reset:
                     break
 
-    def remove_scheduled_experiment(self):
+    def _remove_scheduled_experiment(self):
         events = self.scheduler.queue
-
         for ev in events:
             self.scheduler.cancel(ev)
-        logging.info('events in queue: {0}'.format(self.scheduler.queue))
-        # self.radio_driver.clean_reset_cmd()
 
     def LED_start_exp(self):
+        """
+        it lights on a LED if the experiment will take place in the next minute
+        it uses the frame receive LED to indicate whether the experiment is going to start the next minute.
+        :return:
+        """
+        # FIXME: fishy code
+        while not self.f_start_signal_LED:
+            now = time.gmtime()
+            if self.minutes - now[4] == 1 or self.minutes - now[4] == -59:
+                self.gpio_handler.led_on(self.frame_sent_pin)
+                self.f_start_signal_LED = True
+                continue
+            time.sleep(1)
+        self.f_start_signal_LED = False
+
+    def _led_end_experiment_signal(self):
+        i = 0
+        for led in self.led_array_pins:
+            self.gpio_handler.led_off(led)
+
+        while i < 20 and not self.f_reset:
+            logging.info('i: {0}, self.f_reset: {1}'.format(i, self.f_reset))
+            logging.info('time before toggling pins: {0}'.format(time.time()))
+            for led in self.led_array_pins:
+                self.gpio_handler.led_toggle(led)
+            logging.info('time after toggling pins: {0}'.format(time.time()))
+            time.sleep(1)
+            i += 1
+
+    def _led_start_experiment_signal(self):
         """
         it lights on a LED if the experiment will take place in the next minute
         it uses the frame receive LED to indicate whether the experiment is going to start the next minute or not.
         :return:
         """
+        logging.info('entering led_start_experiment_signal')
         while not self.f_start_signal_LED:
             now = time.gmtime()
             if self.minutes - now[4] == 1 or self.minutes - now[4] == -59:
-                self.radio_driver.LED_ON(self.frame_sent_pin)
+                logging.info('SWITCHING LIGHT UP led_start_experiment_signal')
+                self.gpio_handler.led_on(self.frame_sent_pin)
                 self.f_start_signal_LED = True
                 continue
             time.sleep(1)
         self.f_start_signal_LED = False
+        logging.info('OUTING led_start_experiment_signal')
     
     def run(self):
-
-        self.radio_setup()
+        # setup the radio
+        self._radio_setup()
         logging.info('WAITING FOR THE START BUTTON TO BE PRESSED')
+
+        # push button signal
         self.start_experiment.wait()
         self.start_experiment.clear()
+
+        # gets current time and determines the running time for the experiment to start
         self.started_time = time.time()
-        self.hours, self.minutes = self.time_experiment()
+        self.hours, self.minutes = self._start_time_experiment()
         self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
-        self.scheduler_aux = threading.Thread(target=self.experiment_scheduling)
+
+        # it start the scheduler thread
+        self.scheduler_aux = threading.Thread(target=self._experiment_scheduling)
         self.scheduler_aux.start()
         self.scheduler_aux.name = 'Scheduler Tx'
         logging.info('waiting the end of the experiment')
-        self.f_schedule.set()
-        self.LED_start_exp()
+
+        # gives the signal to the scheduler to start scheduling the 31 experiments
+        with self.dataLock:
+            self.f_schedule.set()
+
+        # it will switch on the LED frame_received_pin to let the user know the experiment will start the following
+        # minute
+        self.experiment_tx_led_start = threading.Thread(target=self._led_start_experiment_signal)
+        self.experiment_tx_led_start.start()
+        self.experiment_tx_led_start.name = 'Experiment Rx thread start led signal'
 
         while True:
 
-            self.end_of_series.wait()
-            self.end_of_series.clear()
-            with self.dataLock:
-                if self.radio_driver.read_reset_cmd():
-                    logging.info('button pressed')
-                    self.started_time = time.time()
-                    self.hours, self.minutes = self.time_experiment()
-                    self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
-                    self.remove_scheduled_experiment()
-                    self.cumulative_time = 0
-                    self.first_run = False
-                    self.radio_driver.binary_counter(0, self.led_array_pins)
-                    self.LED_start_exp()
-            self.f_schedule.set()
+            # it waits for the self.end_experiment signal that can be triggered at the end of the 31st experiment
+            # or when the push button is pressed
+            self.end_experiment.wait()
+            self.end_experiment.clear()
 
-    #  ======================== private =======================================
+            # if push button, removes all the experiments scheduled
+            if self.f_reset:
+                self.gpio_handler.led_off(self.frame_sent_pin)
+                logging.info('button pressed')
+                logging.info('RESETTING SCHEDULE')
+                self._remove_scheduled_experiment()
+                logging.info('removed items in the queue')
+                self.started_time = time.time()
+
+                # determines the starting time for the new set of experiments
+                self.hours, self.minutes = self._start_time_experiment()
+                self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
+                logging.info('WITHIN THE WHILE TRUE MAIN --->> self.time_to_start: {0}'.format(self.time_to_start))
+                self.first_run = False
+                self.gpio_handler.binary_counter(0, self.led_array_pins)
+                self.experiment_tx_led_start = threading.Thread(target=self._led_start_experiment_signal)
+                self.experiment_tx_led_start.start()
+                self.experiment_tx_led_start.name = 'Experiment Tx thread start led signal'
+
+                # gives the signal to the scheduler thread to re-schedule the experiments
+                with self.dataLock:
+                    self.f_schedule.set()
+
+    #  ======================== callbacks =======================================
     
-    def _cb_rx_frame(self, frame_rcv, rssi, crc, mcs):
-        raise SystemError("frame received on transmitting mote")
+    def _cb_push_button(self, channel = 13):
+        if not self.f_reset_button:
+            with self.dataLock:
+                self.start_experiment.set()
+            self.f_reset_button         = True
+
+        else:
+            logging.warning('RESET BUTTON PRESSED')
+            with self.dataLock:
+                self.end_experiment.set()
+                self.f_reset        = True
+                logging.warning('self.f_reset_cmd set to true?: {0}'.format(self.f_reset))
 
 #  ============================ main ==========================================
 
