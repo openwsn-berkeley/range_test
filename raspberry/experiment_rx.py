@@ -172,7 +172,7 @@ class ExperimentRx(object):
         self.radio_isr_pin          = 11
         self.push_button_pin        = 13
         self.led_array_pins         = [29, 31, 33, 35, 37]
-        self.frame_received_pin     = [36]
+        self.TRX_frame_pin          = [36]
         self.time_to_start          = None
         self.f_start_signal_LED     = False
         self.experiment_counter     = 0
@@ -231,7 +231,10 @@ class ExperimentRx(object):
                                            self._cb_push_button)
         
         self.gpio_handler.init_binary_pins(self.led_array_pins)
-        self.gpio_handler.init_binary_pins(self.frame_received_pin)
+        self.gpio_handler.init_binary_pins(self.TRX_frame_pin)
+        for led in self.led_array_pins:
+            self.gpio_handler.led_off(led)
+        self.gpio_handler.led_off(self.TRX_frame_pin)
 
     def _start_time_experiment(self):
         """
@@ -270,7 +273,7 @@ class ExperimentRx(object):
             now = time.gmtime()
             if self.minutes - now[4] == 1 or self.minutes - now[4] == -59:
                 logging.info('SWITCHING LIGHT UP led_start_experiment_signal')
-                self.gpio_handler.led_on(self.frame_received_pin)
+                self.gpio_handler.led_on(self.TRX_frame_pin)
                 self.f_start_signal_LED = True
                 continue
             time.sleep(1)
@@ -291,7 +294,8 @@ class ExperimentRx(object):
         self.f_push_button = False
         logging.debug('entering execute_experiment_rx, time: {0}'.format(time.time()))
         self.radio_driver.radio_reset()
-        self.gpio_handler.led_off(self.frame_received_pin)
+        self.gpio_handler.led_off(self.TRX_frame_pin)
+        self.gpio_handler.binary_counter(0, self.led_array_pins)
 
         self.radio_driver.radio_write_config(defs.modulations_settings[self.settings['test_settings'][self.experiment_counter]['modulation']])
         self.radio_driver.radio_set_frequency((self.settings['test_settings'][self.experiment_counter]['channel_spacing_kHz'],
@@ -318,13 +322,16 @@ class ExperimentRx(object):
     # ========================= callbacks =====================================
 
     def _cb_push_button(self, channel = 13):
+        # switch on all leds to let the user know the push button has been pressed and it got the signal.
+        self.gpio_handler.binary_counter(31, self.led_array_pins)
+        logging.info('lights must be on')
         self.f_push_button = True
         self.started_time = time.time()
         self.hours, self.minutes = self._start_time_experiment()
         self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
         self.radio_driver.radio_off()
-        self.gpio_handler.led_off(self.frame_received_pin)
-        self.gpio_handler.binary_counter(0, self.led_array_pins)
+        self.gpio_handler.led_off(self.TRX_frame_pin)
+        # self.gpio_handler.binary_counter(0, self.led_array_pins)
         if self.experiment_scheduled:
             logging.debug('cancelling experiment')
             self.experiment_scheduled.cancel()
@@ -342,7 +349,7 @@ class ExperimentRx(object):
         logging.debug('threads alive after the push button is pressed: {0}'.format(threading.enumerate()))
 
     def _cb_rx_frame(self, frame_rcv, rssi, crc, mcs):
-        self.gpio_handler.led_toggle(self.frame_received_pin)
+        self.gpio_handler.led_toggle(self.TRX_frame_pin)
         # self.count_frames_rx += 1
         self.queue_rx.put((frame_rcv, rssi, crc, mcs))
 
@@ -365,7 +372,7 @@ class ExperimentRx(object):
             self.radio_driver.radio_off()
             for led in self.led_array_pins:
                 self.gpio_handler.led_off(led)
-            self.gpio_handler.led_off(self.frame_received_pin)
+            self.gpio_handler.led_off(self.TRX_frame_pin)
             self._led_end_experiment_signal()
 
 #  ============================ public ========================================

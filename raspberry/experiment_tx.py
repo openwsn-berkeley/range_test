@@ -100,7 +100,7 @@ class ExperimentTx(threading.Thread):
         self.list_events_sched          = [None for i in range(len(self.settings["test_settings"]))]
         self.schedule_time              = ['time' for i in range(len(self.settings["test_settings"]))]
         self.led_array_pins             = [29, 31, 33, 35, 37]
-        self.frame_sent_pin             = [36]
+        self.TRX_frame_pin              = [36]
         self.radio_isr_pin              = 11
         self.push_button_pin            = 13
         self.scheduler_aux              = None
@@ -173,7 +173,9 @@ class ExperimentTx(threading.Thread):
                                               self._cb_push_button)
 
         self.gpio_handler.init_binary_pins(self.led_array_pins)
-        self.gpio_handler.init_binary_pins(self.frame_sent_pin)
+        self.gpio_handler.init_binary_pins(self.TRX_frame_pin)
+        self.gpio_handler.led_off(self.TRX_frame_pin)
+        self.gpio_handler.binary_counter(0, self.led_array_pins)
 
     def _start_time_experiment(self):
         """
@@ -232,11 +234,12 @@ class ExperimentTx(threading.Thread):
 
         """
         logging.debug('entering _execute_experiment_txeriment_tx, time: {0}'.format(time.time()))
-        self.gpio_handler.led_off(self.frame_sent_pin)
+        self.gpio_handler.led_off(self.TRX_frame_pin)
         # clean the break _execute_experiment_tx flag
         self.f_reset = False
 
         self.queue_tx.put(time.time() - self.started_time)
+        self.gpio_handler.binary_counter(0, self.led_array_pins)
         # initialize the frame counter
         frame_counter = 0
 
@@ -287,7 +290,7 @@ class ExperimentTx(threading.Thread):
 
                 # IFS
                 time.sleep(ifs)
-                self.gpio_handler.led_toggle(self.frame_sent_pin)
+                self.gpio_handler.led_toggle(self.TRX_frame_pin)
                 # logging.warning('self.radio_driver.read_reset_cmd(): {0}'.format(self.radio_driver.read_reset_cmd()))
                 if self.f_reset:
                     break
@@ -322,7 +325,7 @@ class ExperimentTx(threading.Thread):
             now = time.gmtime()
             if self.minutes - now[4] == 1 or self.minutes - now[4] == -59:
                 logging.debug('SWITCHING LIGHT UP led_start_experiment_signal')
-                self.gpio_handler.led_on(self.frame_sent_pin)
+                self.gpio_handler.led_on(self.TRX_frame_pin)
                 self.f_start_signal_LED = True
                 continue
             time.sleep(1)
@@ -368,7 +371,7 @@ class ExperimentTx(threading.Thread):
 
             # if push button, removes all the experiments scheduled
             if self.f_reset:
-                self.gpio_handler.led_off(self.frame_sent_pin)
+                self.gpio_handler.led_off(self.TRX_frame_pin)
                 logging.info('button pressed')
                 logging.debug('RESETTING SCHEDULE')
                 self._remove_scheduled_experiment()
@@ -379,7 +382,7 @@ class ExperimentTx(threading.Thread):
                 self.hours, self.minutes = self._start_time_experiment()
                 self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
                 logging.debug('WITHIN THE WHILE TRUE MAIN --->> self.time_to_start: {0}'.format(self.time_to_start))
-                self.gpio_handler.binary_counter(0, self.led_array_pins)
+                # self.gpio_handler.binary_counter(0, self.led_array_pins)
                 self.experiment_tx_led_start = threading.Thread(target=self._led_start_experiment_signal)
                 self.experiment_tx_led_start.start()
                 self.experiment_tx_led_start.name = 'Experiment Tx thread start led signal'
@@ -391,6 +394,8 @@ class ExperimentTx(threading.Thread):
     #  ======================== callbacks =======================================
     
     def _cb_push_button(self, channel = 13):
+        # switch on all leds to let the user know the push button has been pressed and it got the signal.
+        self.gpio_handler.binary_counter(31, self.led_array_pins)
         if not self.f_reset_button:
             with self.dataLock:
                 self.start_experiment.set()
