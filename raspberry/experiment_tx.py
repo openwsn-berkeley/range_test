@@ -233,7 +233,7 @@ class ExperimentTx(threading.Thread):
         :param item
 
         """
-        logging.debug('entering _execute_experiment_txeriment_tx, time: {0}'.format(time.time()))
+        logging.debug('entering _execute_experiment_tx, time: {0}'.format(time.time()))
         self.gpio_handler.led_off(self.TRX_frame_pin)
         # clean the break _execute_experiment_tx flag
         self.f_reset = False
