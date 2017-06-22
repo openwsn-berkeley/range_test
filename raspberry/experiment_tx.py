@@ -90,8 +90,9 @@ class ExperimentTx(threading.Thread):
 
         self.f_start_signal_LED         = False
         self.f_reset_button             = False
-        self.f_reset                    = False
+
         self.f_exit                     = False
+        self.f_cancel_exp               = False
 
         self.hours                      = 0
         self.minutes                    = 0
@@ -111,9 +112,11 @@ class ExperimentTx(threading.Thread):
         self.dataLock                   = threading.RLock()
 
         # start the threads
+        self.f_reset                    = threading.Event()
         self.start_experiment           = threading.Event()
         self.end_experiment             = threading.Event()
         self.f_schedule                 = threading.Event()
+        self.f_reset.clear()
         self.start_experiment.clear()
         self.end_experiment.clear()
         self.f_schedule.clear()
@@ -236,7 +239,7 @@ class ExperimentTx(threading.Thread):
         logging.debug('entering _execute_experiment_tx, time: {0}'.format(time.time()))
         self.gpio_handler.led_off(self.TRX_frame_pin)
         # clean the break _execute_experiment_tx flag
-        self.f_reset = False
+        self.f_cancel_exp = False
 
         self.queue_tx.put(time.time() - self.started_time)
         self.gpio_handler.binary_counter(0, self.led_array_pins)
@@ -271,7 +274,7 @@ class ExperimentTx(threading.Thread):
 
             # check if the reset button has been pressed
             # logging.warning('self.radio_driver.read_reset_cmd(): {0}'.format(self.radio_driver.read_reset_cmd()))
-            if self.f_reset:
+            if self.f_cancel_exp:
                 break
 
             self.radio_driver.radio_trx_enable()
@@ -292,8 +295,9 @@ class ExperimentTx(threading.Thread):
                 time.sleep(ifs)
                 self.gpio_handler.led_toggle(self.TRX_frame_pin)
                 # logging.warning('self.radio_driver.read_reset_cmd(): {0}'.format(self.radio_driver.read_reset_cmd()))
-                if self.f_reset:
+                if self.f_cancel_exp:
                     break
+        logging.info('EXIT FROM THE _execute_experiment_tx: {0}'.format(time.gmtime()))
 
     def _remove_scheduled_experiment(self):
         events = self.scheduler.queue
@@ -305,7 +309,7 @@ class ExperimentTx(threading.Thread):
         for led in self.led_array_pins:
             self.gpio_handler.led_off(led)
 
-        while i < 20 and not self.f_reset:
+        while i < 20 and not self.f_reset.is_set():
             logging.debug('i: {0}, self.f_reset: {1}'.format(i, self.f_reset))
             logging.debug('time before toggling pins: {0}'.format(time.time()))
             for led in self.led_array_pins:
@@ -368,32 +372,37 @@ class ExperimentTx(threading.Thread):
             # or when the push button is pressed
             self.end_experiment.wait()
             self.end_experiment.clear()
+            logging.info('END of the experiment, is self.end_experiment set? {0}'.format(self.end_experiment.is_set()))
 
             # if push button, removes all the experiments scheduled
-            if self.f_reset:
-                self.gpio_handler.led_off(self.TRX_frame_pin)
-                logging.info('button pressed')
-                logging.debug('RESETTING SCHEDULE')
-                self._remove_scheduled_experiment()
-                logging.debug('removed items in the queue')
-                self.started_time = time.time()
+            self.f_reset.wait()
+            self.f_reset.clear()
+            logging.info('RESET experiment, is self.f_reset set? {0}'.format(self.f_reset.is_set()))
 
-                # determines the starting time for the new set of experiments
-                self.hours, self.minutes = self._start_time_experiment()
-                self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
-                logging.debug('WITHIN THE WHILE TRUE MAIN --->> self.time_to_start: {0}'.format(self.time_to_start))
-                # self.gpio_handler.binary_counter(0, self.led_array_pins)
-                self.experiment_tx_led_start = threading.Thread(target=self._led_start_experiment_signal)
-                self.experiment_tx_led_start.start()
-                self.experiment_tx_led_start.name = 'Experiment Tx thread start led signal'
+            self.gpio_handler.led_off(self.TRX_frame_pin)
+            logging.info('button pressed')
+            logging.debug('RESETTING SCHEDULE')
+            self._remove_scheduled_experiment()
+            logging.debug('removed items in the queue')
+            self.started_time = time.time()
 
-                # gives the signal to the scheduler thread to re-schedule the experiments
-                with self.dataLock:
-                    self.f_schedule.set()
+            # determines the starting time for the new set of experiments
+            self.hours, self.minutes = self._start_time_experiment()
+            self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
+            logging.debug('WITHIN THE WHILE TRUE MAIN --->> self.time_to_start: {0}'.format(self.time_to_start))
+            # self.gpio_handler.binary_counter(0, self.led_array_pins)
+            self.experiment_tx_led_start = threading.Thread(target=self._led_start_experiment_signal)
+            self.experiment_tx_led_start.start()
+            self.experiment_tx_led_start.name = 'Experiment Tx thread start led signal'
+
+            # gives the signal to the scheduler thread to re-schedule the experiments
+            # with self.dataLock:
+            #     self.f_schedule.set()
 
     #  ======================== callbacks =======================================
     
     def _cb_push_button(self, channel = 13):
+        self.gpio_handler.clear_cb(13)
         # switch on all leds to let the user know the push button has been pressed and it got the signal.
         self.gpio_handler.binary_counter(31, self.led_array_pins)
         if not self.f_reset_button:
@@ -405,8 +414,12 @@ class ExperimentTx(threading.Thread):
             logging.warning('RESET BUTTON PRESSED')
             with self.dataLock:
                 self.end_experiment.set()
-                self.f_reset        = True
-                logging.info('f_reset set to true?: {0}'.format(self.f_reset))
+                self.f_schedule.set()
+                self.f_reset.set()
+                self.f_cancel_exp   = True
+                logging.info('f_reset set to true?: {0}'.format(self.f_reset.isSet()))
+        time.sleep(1)
+        self.gpio_handler.add_cb(self._cb_push_button, self.push_button_pin)
 
 #  ============================ main ==========================================
 
