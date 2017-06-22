@@ -310,11 +310,9 @@ class ExperimentTx(threading.Thread):
             self.gpio_handler.led_off(led)
 
         while i < 20 and not self.f_reset.is_set():
-            logging.debug('i: {0}, self.f_reset: {1}'.format(i, self.f_reset))
-            logging.debug('time before toggling pins: {0}'.format(time.time()))
+
             for led in self.led_array_pins:
                 self.gpio_handler.led_toggle(led)
-            logging.debug('time after toggling pins: {0}'.format(time.time()))
             time.sleep(1)
             i += 1
 

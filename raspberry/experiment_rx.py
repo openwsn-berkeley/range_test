@@ -346,7 +346,7 @@ class ExperimentRx(object):
         self.experiment_rx_thread = threading.Thread(target=self._led_start_experiment_signal)
         self.experiment_rx_thread.start()
         self.experiment_rx_thread.name = 'Experiment Rx thread start led signal'
-        logging.debug('threads alive after the push button is pressed: {0}'.format(threading.enumerate()))
+        # logging.debug('threads alive after the push button is pressed: {0}'.format(threading.enumerate()))
 
     def _cb_rx_frame(self, frame_rcv, rssi, crc, mcs):
         self.gpio_handler.led_toggle(self.TRX_frame_pin)
@@ -358,7 +358,7 @@ class ExperimentRx(object):
 
     def _experiment_scheduling(self):
 
-        logging.debug('threads alive when entering the _experiment_scheduling: {0}'.format(threading.enumerate()))
+        # logging.debug('threads alive when entering the _experiment_scheduling: {0}'.format(threading.enumerate()))
         if self.experiment_counter < len(self.settings['test_settings']):
             self._execute_experiment_rx()
             self.time_next_experiment = self.settings['test_settings'][self.experiment_counter][
