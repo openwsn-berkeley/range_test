@@ -20,7 +20,7 @@ class GPIO_handler(object):
         GPIO.setup(radio_isr_pin, GPIO.IN)
         GPIO.setup(push_button_pin, GPIO.IN)
         GPIO.add_event_detect(radio_isr_pin, GPIO.RISING, callback=self.cb_pin_11)
-        GPIO.add_event_detect(push_button_pin, GPIO.BOTH, callback=self.cb_pin_13, bouncetime=75)
+        GPIO.add_event_detect(push_button_pin, GPIO.FALLING, callback=self.cb_pin_13, bouncetime=75)
 
         logging.basicConfig(stream=sys.__stdout__, level=logging.DEBUG)
 
@@ -71,5 +71,11 @@ class GPIO_handler(object):
     def clean_reset_pin(self):
         with self.dataLock:
             self.f_reset_pin = False
+
+    def clear_cb(self, channel):
+        GPIO.remove_event_detect(channel)
+
+    def add_cb(self, cb, channel):
+        GPIO.add_event_detect(channel, GPIO.FALLING, callback=cb, bouncetime=75)
 
 
