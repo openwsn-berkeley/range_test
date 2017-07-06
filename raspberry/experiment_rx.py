@@ -72,6 +72,7 @@ class LoggerRx(threading.Thread):
                 self.results['start_time_epoch'] = time.time()
                 self.results['rx_frames_wrong_fcs_count'] = 0
                 self.results['rx_frames_wrong_fcs_sequence_number'] = []
+                self.results['rx_frames_wrong'] = []
 
             elif type(item) is tuple:
                 # verify size of the tuple
@@ -93,6 +94,7 @@ class LoggerRx(threading.Thread):
                     else:
                         try:
                             self.results['rx_frames_wrong_fcs_sequence_number'].append(item[0][0] * 256 + item[0][1])
+                            self.results['rx_frames_wrong'].append(item[0])
 
                         except IndexError as err:
                             logging.warning('UNKNOWN: {0}'.format(item))
