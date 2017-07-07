@@ -339,11 +339,11 @@ class ExperimentRx(object):
             self.experiment_scheduled.cancel()
             self.experiment_counter = 0
         self.experiment_scheduled = Timer(
-            time.mktime(self.time_to_start.timetuple()) + START_OFFSET  - time.time(),
+            time.mktime(self.time_to_start.timetuple()) + START_OFFSET - time.time(),
             self._experiment_scheduling, ())
         self.experiment_scheduled.start()
         logging.info('time left for the experiment to start: {0}'.format(time.mktime(self.time_to_start.timetuple())
-                                                                    + START_OFFSET  - time.time()))
+                                                                    + START_OFFSET - time.time()))
         logging.info('time to start experiment: {0}'.format(self.time_to_start.timetuple()))
         self.experiment_rx_thread = threading.Thread(target=self._led_start_experiment_signal)
         self.experiment_rx_thread.start()

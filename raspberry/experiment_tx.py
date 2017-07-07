@@ -297,7 +297,7 @@ class ExperimentTx(threading.Thread):
                 # logging.warning('self.radio_driver.read_reset_cmd(): {0}'.format(self.radio_driver.read_reset_cmd()))
                 if self.f_cancel_exp:
                     break
-        logging.info('EXIT FROM THE _execute_experiment_tx: {0}'.format(time.gmtime()))
+        logging.info('EXIT FROM THE _execute_experiment_tx: {0}'.format(time.time()))
 
     def _remove_scheduled_experiment(self):
         events = self.scheduler.queue
