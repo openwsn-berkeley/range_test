@@ -6,21 +6,21 @@ import sys
 
 
 class GPIO_handler(object):
-    def __init__(self, radio_isr_pin=11, push_button_pin=13, cb_pin_11=None, cb_pin_13=None):
+    def __init__(self, radio_isr_pin=11, cb_pin_11=None):
 
         self.radio_isr_pin = radio_isr_pin
-        self.push_button_pin = push_button_pin
+        # self.push_button_pin = push_button_pin
         self.cb_pin_11 = cb_pin_11
-        self.cb_pin_13 = cb_pin_13
+        # self.cb_pin_13 = cb_pin_13
         self.dataLock = threading.RLock()
         self.toggle_LED = False
         self.f_reset_pin = False
 
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(radio_isr_pin, GPIO.IN)
-        GPIO.setup(push_button_pin, GPIO.IN)
+        # GPIO.setup(push_button_pin, GPIO.IN)
         GPIO.add_event_detect(radio_isr_pin, GPIO.RISING, callback=self.cb_pin_11)
-        GPIO.add_event_detect(push_button_pin, GPIO.FALLING, callback=self.cb_pin_13, bouncetime=75)
+        # GPIO.add_event_detect(push_button_pin, GPIO.FALLING, callback=self.cb_pin_13, bouncetime=75)
 
         logging.basicConfig(stream=sys.__stdout__, level=logging.DEBUG)
 
