@@ -4,7 +4,9 @@
     "version": "2.0.4",
     "numframes": 100,
     "test_settings":    [
+        {"channel_spacing_kHz":  800, "frequency_0_kHz": 863425, "channel": 5, "modulation": "ofdm_50kbps_800kHz_mcs0",     "durationtx_s":  64, "index": 11},
         {"channel_spacing_kHz":  200, "frequency_0_kHz": 865100, "channel": 8,  "modulation": "2fsk_100kbps_400kHz",         "durationtx_s":  37, "index": 5},
+        {"channel_spacing_kHz":  800, "frequency_0_kHz": 863425, "channel":  6, "modulation": "ofdm_50kbps_800kHz_mcs0",     "durationtx_s":  64, "index": 11},
         {"channel_spacing_kHz":  200, "frequency_0_kHz": 863125, "channel": 27, "modulation": "2fsk_50kbps_FEC_200kHz",      "durationtx_s": 114, "index": 1},
         {"channel_spacing_kHz":  400, "frequency_0_kHz": 863225, "channel": 15, "modulation": "2fsk_100kbps_FEC_400kHz",     "durationtx_s":  62, "index": 2},
         {"channel_spacing_kHz":  400, "frequency_0_kHz": 863225, "channel": 15, "modulation": "4fsk_200kbps_FEC_400kHz",     "durationtx_s":  37, "index": 3},

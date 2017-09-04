@@ -197,6 +197,8 @@ class ExperimentRx(object):
         self._gpio_handler_init()
         self._radio_init()
         logging.info('threads alive at the start of the program: {0}'.format(threading.enumerate()))
+        self.run()
+
 
 #  ========================== private =========================================
 
@@ -208,10 +210,13 @@ class ExperimentRx(object):
         # initialize the radio driver and the spi interface
         self.radio_driver   = radio.At86rf215(self._cb_rx_frame)
         self.radio_driver.spi_init()
+        logging.info('radio set up')
 
     def _radio_init(self):
         self.radio_driver.radio_reset()
         self.radio_driver.read_isr_source()  # no functional role, just clear the pending interrupt flag
+        logging.info('radio init')
+
 
     def _gps_init(self):
         # start the gps thread
@@ -226,7 +231,8 @@ class ExperimentRx(object):
 
     def _logger_init(self):
         # initializes the LoggerRx thread
-        self.LoggerRx       = LoggerRx(self.queue_rx, self.settings)
+        # self.LoggerRx       = LoggerRx(self.queue_rx, self.settings)
+        logging.info('logger init viod')
 
     def _gpio_handler_init(self):
         self.gpio_handler   = gpio.GPIO_handler(self.radio_isr_pin, self.radio_driver.cb_radio_isr)
@@ -234,9 +240,11 @@ class ExperimentRx(object):
     # ========================= callbacks =====================================
 
     def _cb_rx_frame(self, frame_rcv, rssi, crc, mcs):
+        logging.info('fodase caralho, got something')
         # either you put the frame in a queue or you print it in the screen
         # self.queue_rx.put((frame_rcv, rssi, crc, mcs))
         logging.info(frame_rcv)
+        logging.info(mcs)
         # re-arm the radio in RX mode
         self.radio_driver.radio_rx_now()
     
@@ -261,6 +269,7 @@ class ExperimentRx(object):
         # sends the config to the logger class through queue
         # self.queue_rx.put(self.settings['test_settings'][self.experiment_counter])
 
+
         # sends the  GPS info to the logger class through queue
         # self.queue_rx.put(self.gps.gps_info_read())
 
@@ -268,8 +277,7 @@ class ExperimentRx(object):
         self.radio_driver.radio_trx_enable()
         self.radio_driver.radio_rx_now()
         # self.queue_rx.put(time.time() - self.started_time)
-
-
+        logging.info('ss listening:')
 #  ============================ public ========================================
 
     def getStats(self):
@@ -286,7 +294,7 @@ class ExperimentRx(object):
 
 def main():
 
-    with open('/home/pi/range_test/raspberry/experiment_settings.json', 'r') as f:
+    with open('experiment_settings.json', 'r') as f:
         settings = f.read().replace('\n', ' ').replace('\r', '')
         settings = json.loads(settings)
 
