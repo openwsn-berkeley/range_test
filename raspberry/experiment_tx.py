@@ -197,6 +197,8 @@ class ExperimentTx(threading.Thread):
                 new_time = (current_time[3] + 1) % 24, 1
             else:
                 new_time = current_time[3], current_time[4] + 2
+        # hard coded the start of the experiment
+        new_time = (11, 15)
 
         return new_time
 
