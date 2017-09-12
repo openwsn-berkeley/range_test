@@ -257,7 +257,6 @@ class ExperimentRx(object):
                 new_time = current_time[3], current_time[4] + 2
         # hard coded the start of the experiment
         new_time = (11, 56)
-
         return new_time
 
     def _stop_exp(self):
