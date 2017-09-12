@@ -198,7 +198,7 @@ class ExperimentTx(threading.Thread):
             else:
                 new_time = current_time[3], current_time[4] + 2
         # hard coded the start of the experiment
-        new_time = (11, 25)
+        new_time = (11, 40)
 
         return new_time
 
@@ -348,6 +348,7 @@ class ExperimentTx(threading.Thread):
         # gets current time and determines the running time for the experiment to start
         self.started_time = time.time()
         self.hours, self.minutes = self._start_time_experiment()
+        logging.info('TIME TO START IS-> hours: {0}, minutes: {1}'.format(self.hours, self.minutes))
         self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
 
         # it start the scheduler thread

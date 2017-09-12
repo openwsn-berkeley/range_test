@@ -256,7 +256,7 @@ class ExperimentRx(object):
             else:
                 new_time = current_time[3], current_time[4] + 2
         # hard coded the start of the experiment
-        new_time = (11, 25)
+        new_time = (11, 40)
 
         return new_time
 
@@ -332,6 +332,7 @@ class ExperimentRx(object):
         self.f_push_button = True
         self.started_time = time.time()
         self.hours, self.minutes = self._start_time_experiment()
+        logging.info('TIME TO START IS-> hours: {0}, minutes: {1}'.format(self.hours, self.minutes))
         self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
         self.radio_driver.radio_off()
         self.gpio_handler.led_off(self.TRX_frame_pin)
