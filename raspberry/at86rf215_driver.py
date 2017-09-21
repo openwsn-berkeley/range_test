@@ -88,6 +88,16 @@ class At86rf215(object):
             with self.dataLock:
                 self.state['state_TRXprep'].set()
 
+        if isr[1] & defs.IRQS_WAKEUP:                   # 2.4 GHZ
+            self.at86_state = RADIOSTATE_RFOFF
+            with self.dataLock:
+                self.state['state_RF_reset'].set()
+
+        if isr[1] & defs.IRQS_TRXRDY_MASK:              # 2.4 GHZ
+            self.at86_state = RADIOSTATE_TRX_ENABLED
+            with self.dataLock:
+                self.state['state_TRXprep'].set()
+
         if isr[2] & defs.IRQS_TXFE_MASK:
             self.at86_state = RADIOSTATE_TXRX_DONE
             with self.dataLock:
@@ -98,6 +108,18 @@ class At86rf215(object):
             self.count += 1
             self.at86_state = RADIOSTATE_TXRX_DONE
             (pkt_rcv, rssi, crc, mcs) = self.radio_get_received_frame()
+            self.cb(pkt_rcv, rssi, crc, mcs)
+
+        if isr[3] & defs.IRQS_TXFE_MASK:                # 2.4 GHZ
+            self.at86_state = RADIOSTATE_TXRX_DONE
+            with self.dataLock:
+                self.state['state_TXnow'].set()
+            self.count += 1
+
+        if isr[3] & defs.IRQS_RXFE_MASK:                # 2.4 GHZ
+            self.count += 1
+            self.at86_state = RADIOSTATE_TXRX_DONE
+            (pkt_rcv, rssi, crc, mcs) = self.radio_get_received_frame_2_4_ghz()
             self.cb(pkt_rcv, rssi, crc, mcs)
 
     def cb_radio_isr(self, channel = 11):
@@ -134,6 +156,20 @@ class At86rf215(object):
         self.radio_write_spi(defs.RG_RF09_CNL, channel_set_up[2] & 0xFF)
         self.radio_write_spi(defs.RG_RF09_CNM, channel_set_up[2] >> 8)
 
+    def radio_set_frequency_2_4ghz(self, channel_set_up):
+        """
+        # channel_spacing in kHz
+        # frequency_0 in kHz
+        # channel number
+        # def set_frequency(channel_spacing, frequency_0, channel):
+        """
+        frequency_0 = channel_set_up[1] / 25
+        self.radio_write_spi(defs.RG_RF24_CS, channel_set_up[0] / 25)
+        self.radio_write_spi(defs.RG_RF24_CCF0L, frequency_0 & 0xFF)
+        self.radio_write_spi(defs.RG_RF24_CCF0H, frequency_0 >> 8)
+        self.radio_write_spi(defs.RG_RF24_CNL, channel_set_up[2] & 0xFF)
+        self.radio_write_spi(defs.RG_RF24_CNM, channel_set_up[2] >> 8)
+
     # FIXME: rename to radio_off
     def radio_off(self):
         """
@@ -141,6 +177,13 @@ class At86rf215(object):
         :return: Nothing
         """
         self.radio_write_spi(defs.RG_RF09_CMD, defs.CMD_RF_TRXOFF)
+
+    def radio_off_2_4ghz(self):
+        """
+        Puts the radio in the TRXOFF mode.
+        :return: Nothing
+        """
+        self.radio_write_spi(defs.RG_RF24_CMD, defs.CMD_RF_TRXOFF)
 
     # TX
     def radio_load_packet(self, packet):
@@ -158,12 +201,36 @@ class At86rf215(object):
         frame[0] |= 0x80
         self.radio_write_spi(frame)
 
+    def radio_load_packet_2_4ghz(self, packet):
+        """
+        Sends a packet to the buffer of the radio.
+        :param packet: the packet to be sent.
+        :return: Nothing
+        """
+        # send the size of the packet + size of the CRC (4 bytes)
+        fifo_tx_len = defs.RG_BBC1_TXFLL[:] + [((len(packet) + 2) & 0xFF), (((len(packet) + 2) >> 8) & 0x07)]
+        fifo_tx_len[0] |= 0x80
+        self.radio_write_spi(fifo_tx_len)
+        # send the packet to the modem tx fifo
+        frame = defs.RG_BBC1_FBTXS[:] + packet
+        frame[0] |= 0x80
+        self.radio_write_spi(frame)
+
     def radio_trx_enable(self):
         """
         Puts the radio in the TRXPREP, previous state to send/receive. It waits until receives a signal from the radio.
         :return: Nothing
         """
         self.radio_write_spi(defs.RG_RF09_CMD, defs.CMD_RF_TXPREP)
+        self.state['state_TRXprep'].wait()
+        self.state['state_TRXprep'].clear()
+
+    def radio_trx_enable_2_4ghz(self):
+        """
+        Puts the radio in the TRXPREP, previous state to send/receive. It waits until receives a signal from the radio.
+        :return: Nothing
+        """
+        self.radio_write_spi(defs.RG_RF24_CMD, defs.CMD_RF_TXPREP)
         self.state['state_TRXprep'].wait()
         self.state['state_TRXprep'].clear()
 
@@ -177,6 +244,16 @@ class At86rf215(object):
         self.state['state_TXnow'].wait()
         self.state['state_TXnow'].clear()
 
+    def radio_tx_now_2_4ghz(self):
+        """
+        Commands the radio to send a previous loaded packet. It waits until the radio confirms the success.
+        :return: Nothing
+        """
+        self.radio_write_spi(defs.RG_RF24_CMD, defs.CMD_RF_TX)
+        # TODO: foreseen the case when there is a failure in the tx -TXRERR.
+        self.state['state_TXnow'].wait()
+        self.state['state_TXnow'].clear()
+
     # RX
     def radio_rx_now(self):
         """
@@ -184,6 +261,13 @@ class At86rf215(object):
         :return:
         """
         self.radio_write_spi(defs.RG_RF09_CMD, defs.CMD_RF_RX)
+
+    def radio_rx_now_2_4ghz(self):
+        """
+        Puts the radio in reception mode, listening for frames.
+        :return:
+        """
+        self.radio_write_spi(defs.RG_RF24_CMD, defs.CMD_RF_RX)
 
     def radio_get_received_frame(self):
         """
@@ -202,6 +286,32 @@ class At86rf215(object):
         crc = ((self.radio_read_spi(defs.RG_BBC0_PC, 1))[0] >> 5) & 0x01
         mcs = self.radio_read_spi(defs.RG_BBC0_OFDMPHRRX, 1)[0] & defs.OFDMPHRRX_MCS_MASK
 
+        # representing the RSSI value in dBm
+        if rssi == 127:
+            rssi = 'not valid'
+
+        if rssi >= 128:
+            rssi = (((~rssi) & 0xFF) + 1) * -1
+
+        return frame_rcv, rssi, crc, mcs
+
+    def radio_get_received_frame_2_4ghz(self):
+        """
+        Demands to the radio the received packet
+        :return: a tuple with 1) packet received, 2) rssi, 3) crc(boolean) 4) mcs (valid for OFDM).
+        """
+        # get the length of the received frame
+        rcv = self.radio_read_spi(defs.RG_BBC1_RXFLL, 2)
+        len_frame = rcv[0] + ((rcv[1] & 0x07) << 8)
+
+        # read the packet
+        frame_rcv = self.radio_read_spi(defs.RG_BBC1_FBRXS, len_frame)
+        # logging.debug('frame number: {0}'.format(frame_rcv[0:2]))
+        # read from metadata
+        rssi = self.radio_read_spi(defs.RG_RF24_EDV, 1)[0]
+        crc = ((self.radio_read_spi(defs.RG_BBC1_PC, 1))[0] >> 5) & 0x01
+        # mcs = self.radio_read_spi(defs.RG_BBC0_OFDMPHRRX, 1)[0] & defs.OFDMPHRRX_MCS_MASK
+        mcs = 0
         # representing the RSSI value in dBm
         if rssi == 127:
             rssi = 'not valid'
@@ -253,53 +363,15 @@ class At86rf215(object):
         add = defs.RG_RF09_STATE[:] + [0x00]
         return self.spi.xfer2(add)[2]
 
-    # def init_binary_pins(self, array):
-    #     """
-    #     It initialises the set of pins for the binary counter
-    #     :param array: set of pins where a LED + resistor are connected.
-    #     :return: nothing
-    #     """
-    #     for pin in array:
-    #         GPIO.setup(pin, GPIO.OUT)
-    #         self.LED_OFF(pin)
-    #
-    # def binary_counter(self, number, array):
-    #     """
-    #     it switches on the LEDs according to the number, binary system.
-    #     :param number: The number to be shown in binary
-    #     :param array: amount of LEDs available
-    #     :return: light :)
-    #     """
-    #     for index in range(0, len(array)):
-    #         GPIO.output(array[index], GPIO.LOW)
-    #
-    #     # LED_val = [0 for i in range(0, len(array))]
-    #     for index in range(0, len(array)):
-    #         LED = number >> index
-    #         if LED & 1:
-    #             GPIO.output(array[index], GPIO.HIGH)
-    #
-    # def LED_ON(self, pin):
-    #     GPIO.output(pin, GPIO.HIGH)
-    #
-    # def LED_OFF(self, pin):
-    #     GPIO.output(pin, GPIO.LOW)
-    #
-    # def LED_toggle(self, pin):
-    #     if self.toggle_LED is False:
-    #         self.toggle_LED = True
-    #         GPIO.output(pin, GPIO.HIGH)
-    #     else:
-    #         self.toggle_LED = False
-    #         GPIO.output(pin, GPIO.LOW)
-    #
-    # def read_reset_pin(self):
-    #     with self.dataLock:
-    #         return self.f_reset_pin
-    #
-    # def clean_reset_pin(self):
-    #     with self.dataLock:
-    #         self.f_reset_pin = False
+    def check_radio_state_rf24(self):
+        """
+        It reads the radio state value
+        :return: that read value
+        """
+        add = defs.RG_RF24_STATE[:] + [0x00]
+        return self.spi.xfer2(add)[2]
+
+
 
 
 
