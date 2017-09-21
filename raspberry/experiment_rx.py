@@ -26,6 +26,8 @@ SECURITY_TIME       = 3    # 3 seconds to give more time to TRX to complete the 
 START_OFFSET        = 3.5  # 3.5 seconds after the starting time arrives.
 FCS_VALID           = 1
 FRAME_MINIMUM_SIZE  = 7
+MODEM_SUB_GHZ       = 0
+MODEM_2GHZ          = 1
 
 
 class LoggerRx(threading.Thread):
@@ -181,6 +183,7 @@ class ExperimentRx(object):
         self.experiment_scheduled   = None
         self.experiment_rx_thread   = None
         self.f_push_button          = False
+        self.modem_base_band_state  = MODEM_SUB_GHZ
         # FIXME change this name variable
 
         self.dataLock               = threading.RLock()
@@ -206,7 +209,7 @@ class ExperimentRx(object):
         :return:
         """
         # initialize the radio driver and the spi interface
-        self.radio_driver   = radio.At86rf215(self._cb_rx_frame)
+        self.radio_driver   = radio.At86rf215(self._cb_rx_frame, self.modem_base_band_state)
         self.radio_driver.spi_init()
 
     def _radio_init(self):
@@ -299,26 +302,43 @@ class ExperimentRx(object):
         self.gpio_handler.led_off(self.TRX_frame_pin)
         self.gpio_handler.binary_counter(0, self.led_array_pins)
 
-        self.radio_driver.radio_write_config(defs.modulations_settings[self.settings['test_settings'][self.experiment_counter]['modulation']])
-        self.radio_driver.radio_set_frequency((self.settings['test_settings'][self.experiment_counter]['channel_spacing_kHz'],
+        if self.experiment_counter < len(self.settings['test_settings']):
+            self.radio_driver.radio_write_config(defs.modulations_settings[self.settings['test_settings'][self.experiment_counter]['modulation']])
+            self.radio_driver.radio_set_frequency((self.settings['test_settings'][self.experiment_counter]['channel_spacing_kHz'],
                                                self.settings['test_settings'][self.experiment_counter]['frequency_0_kHz'],
                                                self.settings['test_settings'][self.experiment_counter]['channel']))
+        else:
+            self.radio_driver.radio_write_config(defs.modulations_settings[self.settings['test_settings_2.4GHz'][0]['modulation']])
+            self.radio_driver.radio_set_frequency((self.settings['test_settings_2.4GHz'][0]['channel_spacing_kHz'],
+                                               self.settings['test_settings_2.4GHz'][0]['frequency_0_kHz'],
+                                               self.settings['test_settings_2.4GHz'][0]['channel']))
 
-        self.gpio_handler.binary_counter(self.settings['test_settings'][self.experiment_counter]['index'], self.led_array_pins)
-        logging.info('modulation: {0}'.format(self.settings['test_settings'][self.experiment_counter]["modulation"]))
-
-        # sends the signal to the logger class through queue, letting it know a new experiment just started.
-        self.queue_rx.put('Start')
-
-        # sends the config to the logger class through queue
-        self.queue_rx.put(self.settings['test_settings'][self.experiment_counter])
+        if self.experiment_counter < len(self.settings['test_settings']):
+            self.gpio_handler.binary_counter(self.settings['test_settings'][self.experiment_counter]['index'], self.led_array_pins)
+            logging.info('modulation: {0}'.format(self.settings['test_settings'][self.experiment_counter]["modulation"]))
+            # sends the signal to the logger class through queue, letting it know a new experiment just started.
+            self.queue_rx.put('Start')
+            # sends the config to the logger class through queue
+            self.queue_rx.put(self.settings['test_settings'][self.experiment_counter])
+        else:
+            self.gpio_handler.binary_counter(self.settings['test_settings_2.4GHz'][0]['index'], self.led_array_pins)
+            logging.info('modulation: {0}'.format(self.settings['test_settings_2.4GHz'][0]["modulation"]))
+            # sends the signal to the logger class through queue, letting it know a new experiment just started.
+            self.queue_rx.put('Start')
+            # sends the config to the logger class through queue
+            self.queue_rx.put(self.settings['test_settings_2.4GHz'][0])
 
         # sends the  GPS info to the logger class through queue
         self.queue_rx.put(self.gps.gps_info_read())
 
-        # put the radio into RX mode
-        self.radio_driver.radio_trx_enable()
-        self.radio_driver.radio_rx_now()
+        if self.experiment_counter < len(self.settings['test_settings']):
+            # put the radio into RX mode
+            self.radio_driver.radio_trx_enable()
+            self.radio_driver.radio_rx_now()
+        else:
+            # put the radio into RX mode
+            self.radio_driver.radio_trx_enable_2_4ghz()
+            self.radio_driver.radio_rx_now_2_4ghz()
         self.queue_rx.put(time.time() - self.started_time)
 
     # ========================= callbacks =====================================
@@ -356,19 +376,25 @@ class ExperimentRx(object):
         self.queue_rx.put((frame_rcv, rssi, crc, mcs))
 
         # re-arm the radio in RX mode
-        self.radio_driver.radio_rx_now()
+        if self.modem_base_band_state == MODEM_2GHZ:
+            self.radio_driver.radio_rx_now_2_4ghz()
+        else:
+            self.radio_driver.radio_rx_now()
 
     def _experiment_scheduling(self):
 
         # logging.debug('threads alive when entering the _experiment_scheduling: {0}'.format(threading.enumerate()))
-        if self.experiment_counter < len(self.settings['test_settings']):
+        if self.experiment_counter < (len(self.settings['test_settings']) + len(self.settings['test_settings_2.4GHz'])):
             self._execute_experiment_rx()
-            self.time_next_experiment = self.settings['test_settings'][self.experiment_counter][
-                                        'durationtx_s'] + SECURITY_TIME
-
+            if self.experiment_counter < (len(self.settings['test_settings'])):
+                self.time_next_experiment = self.settings['test_settings'][self.experiment_counter][
+                                           'durationtx_s'] + SECURITY_TIME
+            else:
+                self.time_next_experiment = self.settings['test_settings_2.4GHz'][0]['durationtx_s'] + SECURITY_TIME
             self.experiment_scheduled = Timer(self.time_next_experiment, self._experiment_scheduling, ())
             self.experiment_scheduled.start()
             self.experiment_counter += 1
+
         else:
             self._stop_exp()
             self.radio_driver.radio_off()

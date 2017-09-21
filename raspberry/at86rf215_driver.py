@@ -33,27 +33,31 @@ RADIOSTATE_TRX_ENABLED = 0x03  # ///< Done configuring the frequency.
 RADIOSTATE_RECEIVING = 0x04  # ///< Loading packet into the radio's TX buffer.
 RADIOSTATE_TXRX_DONE = 0x05  # ///< Packet is fully loaded in the radio's TX buffer.
 
+MODEM_SUB_GHZ       = 0
+MODEM_2GHZ          = 1
+
 
 class At86rf215(object):
 
-    def __init__(self, cb):
+    def __init__(self, cb, modem_base_band_state):
 
         # store params
-        self.cb                 = cb
+        self.cb                     = cb
 
         # local variables
-        self.at86_state         = RADIOSTATE_RFOFF
-        self.spi                = spidev.SpiDev()
-        self.state_trx_prep     = threading.Event()
-        self.state_tx_now       = threading.Event()
-        self.state_IFS          = threading.Event()
-        self.state_reset        = threading.Event()
-        self.dataLock           = threading.RLock()
-        self.count              = 0
-        self.counter            = 0
-        self.toggle_LED         = False
-        self.f_reset_button     = False
-        self.f_reset_pin        = False
+        self.at86_state             = RADIOSTATE_RFOFF
+        self.spi                    = spidev.SpiDev()
+        self.state_trx_prep         = threading.Event()
+        self.state_tx_now           = threading.Event()
+        self.state_IFS              = threading.Event()
+        self.state_reset            = threading.Event()
+        self.dataLock               = threading.RLock()
+        self.count                  = 0
+        self.counter                = 0
+        self.toggle_LED             = False
+        self.f_reset_button         = False
+        self.f_reset_pin            = False
+        self.modem_base_band_state  = MODEM_SUB_GHZ
 
         self.state              = {'state_TRXprep': self.state_trx_prep, 'state_TXnow': self.state_tx_now,
                                    'state_RF_reset': self.state_reset}
@@ -107,6 +111,7 @@ class At86rf215(object):
         if isr[2] & defs.IRQS_RXFE_MASK:
             self.count += 1
             self.at86_state = RADIOSTATE_TXRX_DONE
+            self.modem_base_band_state = MODEM_SUB_GHZ
             (pkt_rcv, rssi, crc, mcs) = self.radio_get_received_frame()
             self.cb(pkt_rcv, rssi, crc, mcs)
 
@@ -119,6 +124,7 @@ class At86rf215(object):
         if isr[3] & defs.IRQS_RXFE_MASK:                # 2.4 GHZ
             self.count += 1
             self.at86_state = RADIOSTATE_TXRX_DONE
+            self.modem_base_band_state = MODEM_2GHZ
             (pkt_rcv, rssi, crc, mcs) = self.radio_get_received_frame_2_4ghz()
             self.cb(pkt_rcv, rssi, crc, mcs)
 
