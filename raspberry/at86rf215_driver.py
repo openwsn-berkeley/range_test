@@ -119,7 +119,7 @@ class At86rf215(object):
         if isr[3] & defs.IRQS_RXFE_MASK:                # 2.4 GHZ
             self.count += 1
             self.at86_state = RADIOSTATE_TXRX_DONE
-            (pkt_rcv, rssi, crc, mcs) = self.radio_get_received_frame_2_4_ghz()
+            (pkt_rcv, rssi, crc, mcs) = self.radio_get_received_frame_2_4ghz()
             self.cb(pkt_rcv, rssi, crc, mcs)
 
     def cb_radio_isr(self, channel = 11):

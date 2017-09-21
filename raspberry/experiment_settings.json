@@ -1,7 +1,7 @@
 {
     "IFS":              [ 0.02, 0.02, 0.02, 0.02],
     "frame_lengths":    [8, 127, 1000, 2047],
-    "version": "2.0.4",
+    "version": "2.0.5",
     "numframes": 100,
     "test_settings":    [
         {"channel_spacing_kHz":  200, "frequency_0_kHz": 863125, "channel": 27, "modulation": "2fsk_50kbps_FEC_200kHz",      "durationtx_s": 114, "index": 1},
@@ -35,5 +35,10 @@
         {"channel_spacing_kHz":  600, "frequency_0_kHz": 868300, "channel":  0, "modulation": "oqpsk_12.5kbps_600kHz",       "durationtx_s": 238, "index": 29},
         {"channel_spacing_kHz":  600, "frequency_0_kHz": 868300, "channel":  0, "modulation": "oqpsk_25kbps_600kHz",         "durationtx_s": 130, "index": 30},
         {"channel_spacing_kHz":  600, "frequency_0_kHz": 868300, "channel":  0, "modulation": "oqpsk_50kbps_600kHz",         "durationtx_s":  75, "index": 31}
+    ],
+    "IFS_2.4GHz": [0.02, 0.02],
+    "frame_lengths_2.4GHz":    [8, 127],
+    "test_settings_2.4GHz": [
+        {"channel_spacing_kHz":  5000, "frequency_0_kHz": 850000, "channel": 13, "modulation": "oqpsk_250kbps_2000kHz", "durationtx_s": 6, "index": 32}
     ]
 }
