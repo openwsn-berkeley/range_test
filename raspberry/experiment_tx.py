@@ -239,7 +239,7 @@ class ExperimentTx(threading.Thread):
             offset += 0.5
             self.list_events_sched[len(self.settings['test_settings']) + 1] = self.scheduler.enterabs(
                 time.mktime(self.time_to_start.timetuple()) + offset, 1, self._execute_experiment_tx, (
-                                                                                self.settings['test_settings_2.4GHz'],))
+                                                                                self.settings['test_settings_2.4GHz'][0],))
             self.schedule_time[len(self.settings['test_settings']) + 1] = offset
             offset += self.settings['test_settings_2.4GHz'][0]['durationtx_s'] + SECURITY_TIME
             logging.debug('time for each set of settings: {0}'.format(self.schedule_time))
