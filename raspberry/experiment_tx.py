@@ -24,6 +24,9 @@ FRAME_LENGTH  = 2047
 CRC_SIZE      = 4
 SECURITY_TIME = 3  # 3 seconds to give more time to TRX to complete the 400 frame bursts.
 START_OFFSET  = 4.5  # 4.5 seconds after the starting time arrives.
+MODEM_SUB_GHZ = 0
+MODEM_2GHZ    = 1
+COUNTER_LENGTH = 2
 
 
 class LoggerTx(threading.Thread):
@@ -98,8 +101,10 @@ class ExperimentTx(threading.Thread):
         self.minutes                    = 0
 
         self.scheduler                  = sched.scheduler(time.time, time.sleep)
-        self.list_events_sched          = [None for i in range(len(self.settings["test_settings"]))]
-        self.schedule_time              = ['time' for i in range(len(self.settings["test_settings"]))]
+        self.list_events_sched          = [None for i in range(len(self.settings["test_settings"]) + len(
+                                                                            self.settings["test_settings_2.4GHz"]) + 1)]
+        self.schedule_time              = ['time' for i in range(len(self.settings["test_settings"]) + len(
+                                                                            self.settings["test_settings_2.4GHz"]) + 1)]
         self.led_array_pins             = [29, 31, 33, 35, 37]
         self.TRX_frame_pin              = [36]
         self.radio_isr_pin              = 11
@@ -108,6 +113,7 @@ class ExperimentTx(threading.Thread):
         self.time_to_start              = None
         self.started_time               = None
         self.experiment_tx_led_start    = None
+        self.modem_base_band_state      = MODEM_SUB_GHZ
 
         self.dataLock                   = threading.RLock()
 
@@ -133,7 +139,7 @@ class ExperimentTx(threading.Thread):
         self.gpio_handler               = None
 
         # start all the drivers
-        self._gps_init()
+        # self._gps_init()
         self._radio_setup()
         self._logger_init()
         self._gpio_handler_init()
@@ -226,10 +232,23 @@ class ExperimentTx(threading.Thread):
                     time.mktime(self.time_to_start.timetuple()) + offset, 1, self._execute_experiment_tx, (item,))
                 self.schedule_time[self.settings['test_settings'].index(item)] = offset
                 offset += item['durationtx_s'] + SECURITY_TIME
+            # add the 2.4GHz experiment at the end of the list
+            self.list_events_sched[len(self.settings['test_settings'])] = self.scheduler.enterabs(
+                time.mktime(self.time_to_start.timetuple()) + offset, 1, self._modem_2ghz, ())
+            self.schedule_time[len(self.settings['test_settings'])] = offset
+            offset += 0.5
+            self.list_events_sched[len(self.settings['test_settings']) + 1] = self.scheduler.enterabs(
+                time.mktime(self.time_to_start.timetuple()) + offset, 1, self._execute_experiment_tx, (
+                                                                                self.settings['test_settings_2.4GHz'],))
+            self.schedule_time[len(self.settings['test_settings']) + 1] = offset
+            offset += self.settings['test_settings_2.4GHz'][0]['durationtx_s'] + SECURITY_TIME
             logging.debug('time for each set of settings: {0}'.format(self.schedule_time))
             self.scheduler.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self._stop_exp, ())
             self.scheduler.run()
             logging.info('END OF THE _experiment_scheduling')
+
+    def _modem_2ghz(self):
+        self.modem_base_band_state = MODEM_2GHZ
 
     def _execute_experiment_tx(self, item):
         """"
@@ -253,10 +272,16 @@ class ExperimentTx(threading.Thread):
         self.radio_driver.radio_write_config(defs.modulations_settings[item['modulation']])
 
         # select the frequency
-        self.radio_driver.radio_off()
-        self.radio_driver.radio_set_frequency((item['channel_spacing_kHz'],
-                                               item['frequency_0_kHz'],
-                                               item['channel']))
+        if self.modem_base_band_state == MODEM_SUB_GHZ:
+            self.radio_driver.radio_off()
+            self.radio_driver.radio_set_frequency((item['channel_spacing_kHz'],
+                                                   item['frequency_0_kHz'],
+                                                   item['channel']))
+        else:
+            self.radio_driver.radio_off_2_4ghz()
+            self.radio_driver.radio_set_frequency_2_4ghz((item['channel_spacing_kHz'],
+                                                          item['frequency_0_kHz'],
+                                                          item['channel']))
 
         self.gpio_handler.binary_counter(item['index'], self.led_array_pins)
         logging.info('modulation: {0}'.format(item["modulation"]))
@@ -267,37 +292,70 @@ class ExperimentTx(threading.Thread):
         self.queue_tx.put(item)
 
         # log GPS info
-        self.queue_tx.put(self.gps.gps_info_read())
+        # self.queue_tx.put(self.gps.gps_info_read())
 
-        # loop through packet lengths
-        for frame_length, ifs in zip(self.settings["frame_lengths"], self.settings["IFS"]):
+        if self.modem_base_band_state == MODEM_SUB_GHZ:
+            # loop through packet lengths
+            for frame_length, ifs in zip(self.settings["frame_lengths"], self.settings["IFS"]):
 
-            # check if the reset button has been pressed
-            # logging.warning('self.radio_driver.read_reset_cmd(): {0}'.format(self.radio_driver.read_reset_cmd()))
-            if self.f_cancel_exp:
-                break
-
-            self.radio_driver.radio_trx_enable()
-            # send burst of frames
-            for i in range(self.settings['numframes']):
-
-                # create frame
-                frameToSend = [frame_counter >> 8, frame_counter & 0xFF] + [i & 0xFF for i in range(FRAME_LENGTH - 2)]
-
-                # increment the frame counter
-                frame_counter += 1
-
-                # send frame
-                self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE])
-                self.radio_driver.radio_tx_now()
-
-                # IFS
-                time.sleep(ifs)
-                self.gpio_handler.led_toggle(self.TRX_frame_pin)
+                # check if the reset button has been pressed
                 # logging.warning('self.radio_driver.read_reset_cmd(): {0}'.format(self.radio_driver.read_reset_cmd()))
                 if self.f_cancel_exp:
                     break
-        logging.info('EXIT FROM THE _execute_experiment_tx: {0}'.format(time.time()))
+
+                self.radio_driver.radio_trx_enable()
+                # send burst of frames
+                for i in range(self.settings['numframes']):
+
+                    # create frame
+                    frameToSend = [frame_counter >> 8, frame_counter & 0xFF] + [i & 0xFF for i in range(FRAME_LENGTH - COUNTER_LENGTH)]
+
+                    # increment the frame counter
+                    frame_counter += 1
+
+                    # send frame
+                    self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE])
+                    self.radio_driver.radio_tx_now()
+
+                    # IFS
+                    time.sleep(ifs)
+                    self.gpio_handler.led_toggle(self.TRX_frame_pin)
+                    # logging.warning('self.radio_driver.read_reset_cmd(): {0}'.format(self.radio_driver.read_reset_cmd()))
+                    if self.f_cancel_exp:
+                        break
+            logging.info('EXIT FROM THE _execute_experiment_tx: {0}'.format(time.time()))
+
+        else:
+            # loop through packet lengths
+            for frame_length, ifs in zip(self.settings["frame_lengths_2.4GHz"], self.settings["IFS_2.4GHz"]):
+
+                # check if the reset button has been pressed
+                # logging.warning('self.radio_driver.read_reset_cmd(): {0}'.format(self.radio_driver.read_reset_cmd()))
+                if self.f_cancel_exp:
+                    break
+
+                self.radio_driver.radio_trx_enable_2_4ghz()
+                # send burst of frames
+                for i in range(self.settings['numframes']):
+
+                    # create frame
+                    frameToSend = [frame_counter >> 8, frame_counter & 0xFF] + [i & 0xFF for i in
+                                                                                range(FRAME_LENGTH - COUNTER_LENGTH)]
+
+                    # increment the frame counter
+                    frame_counter += 1
+
+                    # send frame
+                    self.radio_driver.radio_load_packet_2_4ghz(frameToSend[:frame_length - CRC_SIZE])
+                    self.radio_driver.radio_tx_now_2_4ghz()
+
+                    # IFS
+                    time.sleep(ifs)
+                    self.gpio_handler.led_toggle(self.TRX_frame_pin)
+                    # logging.warning('self.radio_driver.read_reset_cmd(): {0}'.format(self.radio_driver.read_reset_cmd()))
+                    if self.f_cancel_exp:
+                        break
+            logging.info('EXIT FROM THE _execute_experiment_tx: {0}'.format(time.time()))
 
     def _remove_scheduled_experiment(self):
         events = self.scheduler.queue
@@ -340,8 +398,8 @@ class ExperimentTx(threading.Thread):
         logging.info('WAITING FOR THE START BUTTON TO BE PRESSED')
 
         # push button signal
-        self.start_experiment.wait()
-        self.start_experiment.clear()
+        # self.start_experiment.wait()
+        # self.start_experiment.clear()
 
         # gets current time and determines the running time for the experiment to start
         self.started_time = time.time()
