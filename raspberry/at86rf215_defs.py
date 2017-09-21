@@ -89,6 +89,26 @@ RG_RF09_TXDFE =             [0x01, 0x13]
 RG_RF09_PAC =               [0x01, 0x14]
 
 RG_RF24_IRQM =              [0x02, 0x00]
+RG_RF24_AUXS =              [0x02, 0x01]
+RG_RF24_STATE =             [0x02, 0x02]
+RG_RF24_CMD =               [0x02, 0x03]
+RG_RF24_CS =                [0x02, 0x04]
+RG_RF24_CCF0L =             [0x02, 0x05]
+RG_RF24_CCF0H =             [0x02, 0x06]
+RG_RF24_CNL =               [0x02, 0x07]
+RG_RF24_CNM =               [0x02, 0x08]
+RG_RF24_RXBWC =             [0x02, 0x09]
+RG_RF24_RXDFE =             [0x02, 0x0A]
+RG_RF24_AGCC =              [0x02, 0x0B]
+RG_RF24_AGCS =              [0x02, 0x0C]
+RG_RF24_RSSI =              [0x02, 0x0D]
+RG_RF24_EDC =               [0x02, 0x0E]
+RG_RF24_EDD =               [0x02, 0x0F]
+RG_RF24_EDV =               [0x02, 0x10]
+RG_RF24_RNDV =              [0x02, 0x11]
+RG_RF24_TXCUTC =            [0x02, 0x12]
+RG_RF24_TXDFE =             [0x02, 0x13]
+RG_RF24_PAC =               [0x02, 0x14]
 
 RG_BBC0_IRQM =              [0x03, 0x00]
 RG_BBC0_PC =                [0x03, 0x01]
@@ -130,11 +150,52 @@ RG_BBC0_FSKSDF1H =          [0x03, 0x69]
 
 
 RG_BBC1_IRQM =              [0x04, 0x00]
+RG_BBC1_PC =                [0x04, 0x01]
+RG_BBC1_PS =                [0x04, 0x02]
+RG_BBC1_RXFLL =             [0x04, 0x04]
+RG_BBC1_RXFLH =             [0x04, 0x05]
+RG_BBC1_TXFLL =             [0x04, 0x06]
+RG_BBC1_TXFLH =             [0x04, 0x07]
+RG_BBC1_FBLL =              [0x04, 0x08]
+RG_BBC1_FBLH =              [0x04, 0x09]
+RG_BBC1_FBLIL =             [0x04, 0x0A]
+RG_BBC1_FBLIH =             [0x04, 0x0B]
+
+RG_BBC1_OFDMPHRTX =         [0x04, 0x0C]
+RG_BBC1_OFDMPHRRX =         [0x04, 0x0D]
+RG_BBC1_OFDMC =             [0x04, 0x0E]
+RG_BBC1_OFDMSW =            [0x04, 0x0F]
+RG_BBC1_OQPSKC0 =           [0x04, 0x10]
+RG_BBC1_OQPSKC1 =           [0x04, 0x11]
+RG_BBC1_OQPSKC2 =           [0x04, 0x12]
+RG_BBC1_OQPSKC3 =           [0x04, 0x13]
+RG_BBC1_OQPSKPHRTX =        [0x04, 0x14]
+RG_BBC1_OQPSKPHRRX =        [0x04, 0x15]
+RG_BBC1_FSKC0 =             [0x04, 0x60]
+RG_BBC1_FSKC1 =             [0x04, 0x61]
+RG_BBC1_FSKC2 =             [0x04, 0x62]
+RG_BBC1_FSKC3 =             [0x04, 0x63]
+RG_BBC1_FSKC4 =             [0x04, 0x64]
+RG_BBC1_FSKPHRTX =          [0x04, 0x6A]
+RG_BBC1_FSKPHRRX =          [0x04, 0x6B]
+RG_BBC1_FSKDM =             [0x04, 0x72]
+RG_BBC1_FSKPE0 =            [0x04, 0x73]
+RG_BBC1_FSKPE1 =            [0x04, 0x74]
+RG_BBC1_FSKPE2 =            [0x04, 0x75]
+RG_BBC1_FSKSDF0L =          [0x04, 0x66]
+RG_BBC1_FSKSDF0H =          [0x04, 0x67]
+RG_BBC1_FSKSDF1L =          [0x04, 0x68]
+RG_BBC1_FSKSDF1H =          [0x04, 0x69]
 
 RG_BBC0_FBRXS =             [0x20, 0x00]
 RG_BBC0_FBRXE =             [0x27, 0xFE]
 RG_BBC0_FBTXS =             [0x28, 0x00]
 RG_BBC0_FBTXE =             [0x2F, 0xFE]
+
+RG_BBC1_FBRXS =             [0x30, 0x00]
+RG_BBC1_FBRXE =             [0x37, 0xFE]
+RG_BBC1_FBTXS =             [0x38, 0x00]
+RG_BBC1_FBTXE =             [0x3F, 0xFE]
 
 OFDMPHRRX_MCS_MASK =        0x07
 
@@ -769,5 +830,26 @@ modulations_settings = {
         (RG_BBC1_IRQM,          0x00),
         (RG_BBC0_PC,            0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
         (RG_BBC0_OFDMC,         0x03),
-        (RG_BBC0_OFDMPHRTX,     0x06)]
+        (RG_BBC0_OFDMPHRTX,     0x06)],
+
+    # legacy
+    'oqpsk_250kbps_2000kHz': [
+        (RG_BBC1_PC, 0x1F),
+        (RG_BBC1_OQPSKPHRTX, 0x09),  # # QPSK - legacy
+        (RG_BBC1_OQPSKC0, 0x03),  ## 2000 kchips/s
+        (RG_BBC1_OQPSKC1, 0x47),  # MINIMUM preamble-detection sensitivities, rx-override disabled
+        (RG_BBC1_OQPSKC2, 0x05),  # FCS type legacy (16bit) & listen for LEG-OQPSK frames only
+        (RG_BBC1_OQPSKC3, 0x00),  # legacy OQPSK, search for SFD_1 only
+        (RG_BBC0_IRQM, 0x00),  # # TXFE, RXFE, RXFS interrupts enabled
+        (RG_BBC1_IRQM, 0x13),  # TXFE, RXFE, RXFS interrupts enabled
+        (RG_RF09_IRQM, 0x00),  # # TRXERR, TRXRDY interrupts enabled
+        (RG_RF24_IRQM, 0x12),  # TRXERR, TRXRDY interrupts enabled
+        (RG_RF24_RXBWC, 0x0B),  # #  Rx BW 2000kHz, IF 2000kHz
+        (RG_RF24_RXDFE, 0x41),  # #
+        (RG_RF24_AGCC, 0x01),  #
+        (RG_RF24_EDD, 0x13),  #
+        (RG_RF24_AGCS, 0x77),  #
+        (RG_RF24_TXCUTC, 0x0B),  # # .PARAMP = 3, .LPFCUT = 7
+        (RG_RF24_TXDFE, 0x81),  # # .SR = 0xA, .RCUT = 3
+        (RG_RF24_PAC, 0x7F)]  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x64 - 0dBm  mettre 0x7F
 }
