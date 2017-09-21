@@ -194,12 +194,13 @@ class ExperimentRx(object):
         self.gpio_handler           = None
 
         # start all the drivers
-        self._gps_init()
+        # self._gps_init()
         self._radio_setup()
         self._logger_init()
         self._gpio_handler_init()
         self._radio_init()
         logging.info('threads alive at the start of the program: {0}'.format(threading.enumerate()))
+        self.start_exp()
 
 #  ========================== private =========================================
 
@@ -303,13 +304,16 @@ class ExperimentRx(object):
         self.gpio_handler.binary_counter(0, self.led_array_pins)
 
         if self.experiment_counter < len(self.settings['test_settings']):
+            self.modem_base_band_state = MODEM_SUB_GHZ
             self.radio_driver.radio_write_config(defs.modulations_settings[self.settings['test_settings'][self.experiment_counter]['modulation']])
             self.radio_driver.radio_set_frequency((self.settings['test_settings'][self.experiment_counter]['channel_spacing_kHz'],
                                                self.settings['test_settings'][self.experiment_counter]['frequency_0_kHz'],
                                                self.settings['test_settings'][self.experiment_counter]['channel']))
         else:
+            logging.info('LEGACY set up')
+            self.modem_base_band_state = MODEM_2GHZ
             self.radio_driver.radio_write_config(defs.modulations_settings[self.settings['test_settings_2.4GHz'][0]['modulation']])
-            self.radio_driver.radio_set_frequency((self.settings['test_settings_2.4GHz'][0]['channel_spacing_kHz'],
+            self.radio_driver.radio_set_frequency_2_4ghz((self.settings['test_settings_2.4GHz'][0]['channel_spacing_kHz'],
                                                self.settings['test_settings_2.4GHz'][0]['frequency_0_kHz'],
                                                self.settings['test_settings_2.4GHz'][0]['channel']))
 
@@ -329,17 +333,43 @@ class ExperimentRx(object):
             self.queue_rx.put(self.settings['test_settings_2.4GHz'][0])
 
         # sends the  GPS info to the logger class through queue
-        self.queue_rx.put(self.gps.gps_info_read())
+        # self.queue_rx.put(self.gps.gps_info_read())
 
         if self.experiment_counter < len(self.settings['test_settings']):
             # put the radio into RX mode
             self.radio_driver.radio_trx_enable()
             self.radio_driver.radio_rx_now()
         else:
+            logging.info('LISTENING IN 2.4GHz')
             # put the radio into RX mode
             self.radio_driver.radio_trx_enable_2_4ghz()
             self.radio_driver.radio_rx_now_2_4ghz()
-        self.queue_rx.put(time.time() - self.started_time)
+        self.queue_rx.put(time.time())
+
+    def start_exp(self):
+        self.gpio_handler.binary_counter(31, self.led_array_pins)
+        logging.info('lights must be on')
+        self.f_push_button = True
+        self.started_time = time.time()
+        self.hours, self.minutes = self._start_time_experiment()
+        self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
+        self.radio_driver.radio_off()
+        self.gpio_handler.led_off(self.TRX_frame_pin)
+        # self.gpio_handler.binary_counter(0, self.led_array_pins)
+        if self.experiment_scheduled:
+            logging.debug('cancelling experiment')
+            self.experiment_scheduled.cancel()
+            self.experiment_counter = 0
+        self.experiment_scheduled = Timer(
+            time.mktime(self.time_to_start.timetuple()) + START_OFFSET - time.time(),
+            self._experiment_scheduling, ())
+        self.experiment_scheduled.start()
+        logging.info('time left for the experiment to start: {0}'.format(time.mktime(self.time_to_start.timetuple())
+                                                                    + START_OFFSET - time.time()))
+        logging.info('time to start experiment: {0}'.format(self.time_to_start.timetuple()))
+        self.experiment_rx_thread = threading.Thread(target=self._led_start_experiment_signal)
+        self.experiment_rx_thread.start()
+        self.experiment_rx_thread.name = 'Experiment Rx thread start led signal'
 
     # ========================= callbacks =====================================
 
@@ -377,6 +407,7 @@ class ExperimentRx(object):
 
         # re-arm the radio in RX mode
         if self.modem_base_band_state == MODEM_2GHZ:
+            logging.info('rearmed 2.4GHz    ')
             self.radio_driver.radio_rx_now_2_4ghz()
         else:
             self.radio_driver.radio_rx_now()

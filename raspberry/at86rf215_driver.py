@@ -128,6 +128,9 @@ class At86rf215(object):
             (pkt_rcv, rssi, crc, mcs) = self.radio_get_received_frame_2_4ghz()
             self.cb(pkt_rcv, rssi, crc, mcs)
 
+    def radio_base_band_mode(self):
+        return self.modem_base_band_state
+
     def cb_radio_isr(self, channel = 11):
         self.read_isr_source()
 

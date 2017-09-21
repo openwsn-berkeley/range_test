@@ -20,13 +20,14 @@ import at86rf215_driver as radio
 import GpsThread as gps
 import gpio_handler as gpio
 
-FRAME_LENGTH  = 2047
-CRC_SIZE      = 4
-SECURITY_TIME = 3  # 3 seconds to give more time to TRX to complete the 400 frame bursts.
-START_OFFSET  = 4.5  # 4.5 seconds after the starting time arrives.
-MODEM_SUB_GHZ = 0
-MODEM_2GHZ    = 1
-COUNTER_LENGTH = 2
+FRAME_LENGTH    = 2047
+CRC_SIZE_4      = 4
+CRC_SIZE_2      = 2
+SECURITY_TIME   = 3  # 3 seconds to give more time to TRX to complete the 400 frame bursts.
+START_OFFSET    = 4.5  # 4.5 seconds after the starting time arrives.
+MODEM_SUB_GHZ   = 0
+MODEM_2GHZ      = 1
+COUNTER_LENGTH  = 2
 
 
 class LoggerTx(threading.Thread):
@@ -153,7 +154,7 @@ class ExperimentTx(threading.Thread):
     def _radio_setup(self):
 
         # initialize the radio driver
-        self.radio_driver = radio.At86rf215(None)
+        self.radio_driver = radio.At86rf215(None, None)
         self.radio_driver.spi_init()
 
     def _radio_init(self):
@@ -314,7 +315,7 @@ class ExperimentTx(threading.Thread):
                     frame_counter += 1
 
                     # send frame
-                    self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE])
+                    self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE_4])
                     self.radio_driver.radio_tx_now()
 
                     # IFS
@@ -346,7 +347,7 @@ class ExperimentTx(threading.Thread):
                     frame_counter += 1
 
                     # send frame
-                    self.radio_driver.radio_load_packet_2_4ghz(frameToSend[:frame_length - CRC_SIZE])
+                    self.radio_driver.radio_load_packet_2_4ghz(frameToSend[:frame_length - CRC_SIZE_2])
                     self.radio_driver.radio_tx_now_2_4ghz()
 
                     # IFS
