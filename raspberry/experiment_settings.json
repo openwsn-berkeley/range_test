@@ -39,6 +39,9 @@
     "IFS_2.4GHz": [0.02, 0.02],
     "frame_lengths_2.4GHz":    [8, 127],
     "test_settings_2.4GHz": [
-        {"channel_spacing_kHz":  5000, "frequency_0_kHz": 850000, "channel": 13, "modulation": "oqpsk_250kbps_2000kHz", "durationtx_s": 6, "index": 32}
+        {"channel_spacing_kHz":  5000, "frequency_0_kHz": 850000, "channel": 11, "modulation": "oqpsk_250kbps_2000kHz", "durationtx_s": 6, "index": 32},
+        {"channel_spacing_kHz":  5000, "frequency_0_kHz": 850000, "channel": 15, "modulation": "oqpsk_250kbps_2000kHz", "durationtx_s": 6, "index": 33},
+        {"channel_spacing_kHz":  5000, "frequency_0_kHz": 850000, "channel": 20, "modulation": "oqpsk_250kbps_2000kHz", "durationtx_s": 6, "index": 34},
+        {"channel_spacing_kHz":  5000, "frequency_0_kHz": 850000, "channel": 26, "modulation": "oqpsk_250kbps_2000kHz", "durationtx_s": 6, "index": 35}
     ]
 }
