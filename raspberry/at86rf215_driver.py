@@ -186,6 +186,7 @@ class At86rf215(object):
         :return: Nothing
         """
         self.radio_write_spi(defs.RG_RF09_CMD, defs.CMD_RF_TRXOFF)
+        self.radio_write_spi(defs.RG_RF24_CMD, defs.CMD_RF_SLEEP)
 
     def radio_off_2_4ghz(self):
         """
@@ -193,6 +194,7 @@ class At86rf215(object):
         :return: Nothing
         """
         self.radio_write_spi(defs.RG_RF24_CMD, defs.CMD_RF_TRXOFF)
+        self.radio_write_spi(defs.RG_RF09_CMD, defs.CMD_RF_SLEEP)
 
     # TX
     def radio_load_packet(self, packet):

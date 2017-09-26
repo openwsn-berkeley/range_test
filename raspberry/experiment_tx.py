@@ -489,16 +489,21 @@ def load_experiment_details():
 
 
 def main():
-
+    f_start = False
     logging.basicConfig(stream=sys.__stdout__, level=logging.DEBUG)
-    experimentTx = ExperimentTx(load_experiment_details())
+    # experimentTx = ExperimentTx(load_experiment_details())
 
     while True:
         input = raw_input('>')
         if input == 's':
-            # print experimentTx.getStats()
-            # print 'print stats TX'
-            logging.warning('TO IMPLEMENT')
+            if not f_start:
+                f_start = True
+                logging.info('PROGRAM STARTING...')
+                experimentTx = ExperimentTx(load_experiment_details())
+                logging.info('PROGRAM RUNNING')
+            else:
+                logging.info('PROGRAM ALREADY STARTED')
+
         if input == 'q':
             sys.exit(0)
 

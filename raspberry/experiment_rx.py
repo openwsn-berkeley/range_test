@@ -310,7 +310,7 @@ class ExperimentRx(object):
                                                self.settings['test_settings'][self.experiment_counter]['frequency_0_kHz'],
                                                self.settings['test_settings'][self.experiment_counter]['channel']))
         else:
-            logging.info('LEGACY set up')
+            logging.debug('LEGACY set up')
             self.modem_base_band_state = MODEM_2GHZ
             self.radio_driver.radio_write_config(defs.modulations_settings[self.settings['test_settings_2.4GHz'][0]['modulation']])
             self.radio_driver.radio_set_frequency_2_4ghz((self.settings['test_settings_2.4GHz'][0]['channel_spacing_kHz'],
@@ -407,7 +407,6 @@ class ExperimentRx(object):
 
         # re-arm the radio in RX mode
         if self.modem_base_band_state == MODEM_2GHZ:
-            logging.info('rearmed 2.4GHz    ')
             self.radio_driver.radio_rx_now_2_4ghz()
         else:
             self.radio_driver.radio_rx_now()
@@ -442,26 +441,35 @@ class ExperimentRx(object):
 
 # ========================== main =============================================
 
-# def load_experiment_details():
-#     with open('/home/pi/range_test/raspberry/experiment_settings.json', 'r') as f:
-#         settings = f.read().replace('\n', ' ').replace('\r', '')
-#         settings = json.loads(settings)
-#         return settings
 
-def main():
-
+def load_experiment_details():
     with open('/home/pi/range_test/raspberry/experiment_settings.json', 'r') as f:
         settings = f.read().replace('\n', ' ').replace('\r', '')
         settings = json.loads(settings)
+        return settings
+
+
+def main():
+    f_start = False
+
+    # with open('/home/pi/range_test/raspberry/experiment_settings.json', 'r') as f:
+    #     settings = f.read().replace('\n', ' ').replace('\r', '')
+    #     settings = json.loads(settings)
 
     logging.basicConfig(stream=sys.__stdout__, level=logging.DEBUG)
-    experimentRx = ExperimentRx(settings)
+    # experimentRx = ExperimentRx(settings)
 
     while True:
         # for item in
         input = raw_input('>')
         if input == 's':
-            print experimentRx.getStats()
+            if not f_start:
+                f_start = True
+                logging.info('PROGRAM STARTING...')
+                experimentTx = ExperimentRx(load_experiment_details())
+                logging.info('PROGRAM RUNNING')
+            else:
+                logging.info('PROGRAM ALREADY STARTED')
         elif input == 'q':
             sys.exit(0)
 
