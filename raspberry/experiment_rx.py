@@ -87,7 +87,8 @@ class LoggerRx(threading.Thread):
                                     self.rssi_values[item[0][0] * 256 + item[0][1]] = float(item[1])
                                     self.results['rx_frames_count'] += 1
                                 else:
-                                    logging.warning('UNKNOWN ITEM (frame_rcv, rssi, crc, mcs): {0}'.format(item))
+                                    # logging.warning('UNKNOWN ITEM (frame_rcv, rssi, crc, mcs): {0}'.format(item))
+                                    logging.warning('.....')
 
                             except IndexError as err:
                                 logging.warning('item: {0}'.format(item))
@@ -312,10 +313,11 @@ class ExperimentRx(object):
         else:
             logging.debug('LEGACY set up')
             self.modem_base_band_state = MODEM_2GHZ
-            self.radio_driver.radio_write_config(defs.modulations_settings[self.settings['test_settings_2.4GHz'][0]['modulation']])
+            self.radio_driver.radio_write_config(defs.modulations_settings[self.settings['test_settings_2.4GHz'][
+                self.experiment_counter - len(self.settings['test_settings'])]['modulation']])
             self.radio_driver.radio_set_frequency_2_4ghz((self.settings['test_settings_2.4GHz'][0]['channel_spacing_kHz'],
-                                               self.settings['test_settings_2.4GHz'][0]['frequency_0_kHz'],
-                                               self.settings['test_settings_2.4GHz'][0]['channel']))
+                self.settings['test_settings_2.4GHz'][self.experiment_counter - len(self.settings['test_settings'])]['frequency_0_kHz'],
+                self.settings['test_settings_2.4GHz'][self.experiment_counter - len(self.settings['test_settings'])]['channel']))
 
         if self.experiment_counter < len(self.settings['test_settings']):
             self.gpio_handler.binary_counter(self.settings['test_settings'][self.experiment_counter]['index'], self.led_array_pins)
@@ -325,12 +327,15 @@ class ExperimentRx(object):
             # sends the config to the logger class through queue
             self.queue_rx.put(self.settings['test_settings'][self.experiment_counter])
         else:
-            self.gpio_handler.binary_counter(self.settings['test_settings_2.4GHz'][0]['index'], self.led_array_pins)
-            logging.info('modulation: {0}'.format(self.settings['test_settings_2.4GHz'][0]["modulation"]))
+            self.gpio_handler.binary_counter(self.settings['test_settings_2.4GHz'][self.experiment_counter - len(
+                self.settings['test_settings'])]['index'], self.led_array_pins)
+            logging.info('modulation: {0}'.format(self.settings['test_settings_2.4GHz'][self.experiment_counter - len(
+                self.settings['test_settings'])]["modulation"]))
             # sends the signal to the logger class through queue, letting it know a new experiment just started.
             self.queue_rx.put('Start')
             # sends the config to the logger class through queue
-            self.queue_rx.put(self.settings['test_settings_2.4GHz'][0])
+            self.queue_rx.put(self.settings['test_settings_2.4GHz'][self.experiment_counter - len(
+                self.settings['test_settings'])])
 
         # sends the  GPS info to the logger class through queue
         # self.queue_rx.put(self.gps.gps_info_read())
@@ -420,7 +425,8 @@ class ExperimentRx(object):
                 self.time_next_experiment = self.settings['test_settings'][self.experiment_counter][
                                            'durationtx_s'] + SECURITY_TIME
             else:
-                self.time_next_experiment = self.settings['test_settings_2.4GHz'][0]['durationtx_s'] + SECURITY_TIME
+                self.time_next_experiment = self.settings['test_settings_2.4GHz'][self.experiment_counter - len(
+                    self.settings['test_settings'])]['durationtx_s'] + SECURITY_TIME
             self.experiment_scheduled = Timer(self.time_next_experiment, self._experiment_scheduling, ())
             self.experiment_scheduled.start()
             self.experiment_counter += 1

@@ -836,8 +836,8 @@ modulations_settings = {
     'oqpsk_250kbps_2000kHz': [
         (RG_BBC1_PC, 0x1F),
         (RG_BBC1_OQPSKPHRTX, 0x09),  # # QPSK - legacy
-        (RG_BBC1_OQPSKC0, 0x03),  ## 2000 kchips/s
-        (RG_BBC1_OQPSKC1, 0x47),  # MINIMUM preamble-detection sensitivities, rx-override disabled
+        (RG_BBC1_OQPSKC0, 0x03),  # # 2000 kchips/s
+        (RG_BBC1_OQPSKC1, 0x47),  # MINIMUM preamble-detection sensitivities, rx-override enabled
         (RG_BBC1_OQPSKC2, 0x05),  # FCS type legacy (16bit) & listen for LEG-OQPSK frames only
         (RG_BBC1_OQPSKC3, 0x00),  # legacy OQPSK, search for SFD_1 only
         (RG_BBC0_IRQM, 0x00),  # # TXFE, RXFE, RXFS interrupts enabled

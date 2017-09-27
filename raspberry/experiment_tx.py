@@ -237,14 +237,22 @@ class ExperimentTx(threading.Thread):
             self.list_events_sched[len(self.settings['test_settings'])] = self.scheduler.enterabs(
                 time.mktime(self.time_to_start.timetuple()) + offset, 1, self._modem_2ghz, ())
             self.schedule_time[len(self.settings['test_settings'])] = offset
-            offset += 0.5
-            self.list_events_sched[len(self.settings['test_settings']) + 1] = self.scheduler.enterabs(
-                time.mktime(self.time_to_start.timetuple()) + offset, 1, self._execute_experiment_tx, (
-                                                                                self.settings['test_settings_2.4GHz'][0],))
-            self.schedule_time[len(self.settings['test_settings']) + 1] = offset
-            offset += self.settings['test_settings_2.4GHz'][0]['durationtx_s'] + SECURITY_TIME
+            offset += 0.2
+            for item2GHz in self.settings['test_settings_2.4GHz']:
+                # self.list_events_sched[len(self.settings['test_settings']) + 1] = self.scheduler.enterabs(
+                #     time.mktime(self.time_to_start.timetuple()) + offset, 1, self._execute_experiment_tx, (
+                #                                                                 self.settings['test_settings_2.4GHz'][0],))
+                # offset += self.settings['test_settings_2.4GHz'][0]['durationtx_s'] + SECURITY_TIME
+                self.list_events_sched[len(self.settings['test_settings']) + 1] = self.scheduler.enterabs(
+                    time.mktime(self.time_to_start.timetuple()) + offset, 1, self._execute_experiment_tx, (item2GHz,))
+                self.schedule_time[len(self.settings['test_settings']) + 1 + self.settings['test_settings_2.4GHz'].index(
+                    item2GHz)] = offset
+                offset += item2GHz['durationtx_s'] + SECURITY_TIME
             logging.debug('time for each set of settings: {0}'.format(self.schedule_time))
             self.scheduler.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self._stop_exp, ())
+            logging.info('time left for the experiment to start: {0}'.format(time.mktime(self.time_to_start.timetuple())
+                                                                             + START_OFFSET - time.time()))
+            logging.info('time to start experiment: {0}'.format(self.time_to_start.timetuple()))
             self.scheduler.run()
             logging.info('END OF THE _experiment_scheduling')
 
@@ -411,7 +419,7 @@ class ExperimentTx(threading.Thread):
         self.scheduler_aux = threading.Thread(target=self._experiment_scheduling)
         self.scheduler_aux.start()
         self.scheduler_aux.name = 'Scheduler Tx'
-        logging.info('waiting the end of the experiment')
+        logging.debug('waiting the end of the experiment')
 
         # gives the signal to the scheduler to start scheduling the 31 experiments
         with self.dataLock:
