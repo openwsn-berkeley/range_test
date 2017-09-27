@@ -78,4 +78,7 @@ class GPIO_handler(object):
     def add_cb(self, cb, channel):
         GPIO.add_event_detect(channel, GPIO.FALLING, callback=cb, bouncetime=75)
 
+    def clean_gpio(self):
+        GPIO.cleanup()  # clean exit
+
 

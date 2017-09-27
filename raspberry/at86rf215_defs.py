@@ -212,7 +212,7 @@ modulations_settings = {
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0xC0),
         (RG_RF09_TXDFE,         0x98),
-        (RG_RF09_PAC,           0x7F),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
+        (RG_RF09_PAC,           0x77),  # // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. 0x17~11 dBm
         (RG_BBC0_IRQM,          0x12),  # TXFE, RXFE, interrupts enabled
         (RG_BBC1_IRQM,          0x00),
         (RG_BBC0_PC,            0x15),  # // NO FCS FILTER in RX, FCS automatically added in TX, 32 bits FCS, FSK.
@@ -239,7 +239,7 @@ modulations_settings = {
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0x83),
         (RG_RF09_TXDFE,         0x94),
-        (RG_RF09_PAC,           0x7F),  # // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.//
+        (RG_RF09_PAC,           0x77),  # // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. 0x17~11 dBm
         (RG_BBC0_IRQM,          0x12),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
         (RG_BBC1_IRQM,          0x00),
         (RG_BBC0_PC,            0x15),  # // NO FCS FILTER in RX, FCS automatically added in TX, 32 bits FCS, FSK.
@@ -266,7 +266,7 @@ modulations_settings = {
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0x83),  #
         (RG_RF09_TXDFE,         0x94),  # //find the right values
-        (RG_RF09_PAC,           0x7F),  # // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
+        (RG_RF09_PAC,           0x77),  # // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. 0x17~11 dBm
         (RG_BBC0_IRQM,          0x12),  # // TXFE, RXFE interrupts enabled.  RXFS , RXEM, RXAM, disabled
         (RG_BBC1_IRQM,          0x00),
         (RG_BBC0_PC,            0x15),  # // NO FCS FILTER in RX, FCS automatically added in TX, 32 bits FCS, FSK.
@@ -297,7 +297,7 @@ modulations_settings = {
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0xC0),
         (RG_RF09_TXDFE,         0x98),
-        (RG_RF09_PAC,           0x7F),  # // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
+        (RG_RF09_PAC,           0x77),  # // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. 0x17~11 dBm
         (RG_BBC0_IRQM,          0x12),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
         (RG_BBC1_IRQM,          0x00),
         (RG_BBC0_PC,            0x15),  # // NO FCS FILTER in RX, FCS automatically added in TX, 32 bits FCS, FSK.
@@ -324,7 +324,7 @@ modulations_settings = {
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0x83),
         (RG_RF09_TXDFE,         0x94),
-        (RG_RF09_PAC,           0x7F),  # // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.//
+        (RG_RF09_PAC,           0x77),  # // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. 0x17~11 dBm
         (RG_BBC0_IRQM,          0x12),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
         (RG_BBC1_IRQM,          0x00),
         (RG_BBC0_PC,            0x15),  # // NO FCS FILTER in RX, FCS automatically added in TX, 32 bits FCS, FSK.
@@ -351,7 +351,7 @@ modulations_settings = {
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0x83),  #
         (RG_RF09_TXDFE,         0x94),  #
-        (RG_RF09_PAC,           0x7F),  # // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
+        (RG_RF09_PAC,           0x77),  # // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. 0x17~11 dBm
         (RG_BBC0_IRQM,          0x12),  # // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
         (RG_BBC1_IRQM,          0x00),
         (RG_BBC0_PC,            0x15),  # // NO FCS FILTER in RX, FCS automatically added in TX, 32 bits FCS, FSK.
@@ -389,7 +389,7 @@ modulations_settings = {
         (RG_RF09_AGCS,          0x77),
         (RG_RF09_TXCUTC,        0xC7),  # .PARAMP = 3, .LPFCUT = 7
         (RG_RF09_TXDFE,         0x7A),  # // .SR = 0xA, .RCUT = 3
-        (RG_RF09_PAC,           0x7F)],  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x64 - 0dBm  mettre 0x7F
+        (RG_RF09_PAC,           0x78)],  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x18~11 dBm
 
     # oqpsk_rate1
     'oqpsk_12.5kbps_600kHz': [
@@ -410,7 +410,7 @@ modulations_settings = {
         (RG_RF09_AGCS,          0x77),
         (RG_RF09_TXCUTC,        0xC7),  # // .PARAMP = 3, .LPFCUT = 7
         (RG_RF09_TXDFE,         0x7A),  # // .SR = 0xA, .RCUT = 3
-        (RG_RF09_PAC,           0x7F)],  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x64 - 0dBm  mettre 0x7F
+        (RG_RF09_PAC,           0x78)],  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x18~11 dBm
 
     # oqpsk_rate2
     'oqpsk_25kbps_600kHz': [
@@ -431,7 +431,7 @@ modulations_settings = {
         (RG_RF09_AGCS,          0x77),
         (RG_RF09_TXCUTC,        0xC7),  # # .PARAMP = 3, .LPFCUT = 7
         (RG_RF09_TXDFE,         0x7A),  # # .SR = 0xA, .RCUT = 3
-        (RG_RF09_PAC,           0x7F)],  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x64 - 0dBm  mettre 0x7F
+        (RG_RF09_PAC,           0x78)],  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x18~11 dBm
 
     # oqpsk_rate3
     'oqpsk_50kbps_600kHz': [
@@ -452,7 +452,7 @@ modulations_settings = {
         (RG_RF09_AGCS,          0x77),
         (RG_RF09_TXCUTC,        0xC7),  # # .PARAMP = 3, .LPFCUT = 7
         (RG_RF09_TXDFE,         0x7A),  # # .SR = 0xA, .RCUT = 3
-        (RG_RF09_PAC,           0x7F)],  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x64 - 0dBm  mettre 0x7F
+        (RG_RF09_PAC,           0x78)],  # Tx Power 5 bits >>.0x64~txPwr=>0x04, max: 0x1F.# 0x18~11 dBm
 
     # ofdm_1_mcs0
     'ofdm_100kbps_1200kHz_mcs0': [
@@ -851,5 +851,5 @@ modulations_settings = {
         (RG_RF24_AGCS, 0x77),  #
         (RG_RF24_TXCUTC, 0x0B),  # # .PARAMP = 3, .LPFCUT = 7
         (RG_RF24_TXDFE, 0x81),  # # .SR = 0xA, .RCUT = 3
-        (RG_RF24_PAC, 0x7F)]  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x64 - 0dBm  mettre 0x7F
+        (RG_RF24_PAC, 0x78)]  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x64 - 0dBm: 24~11dBm
 }

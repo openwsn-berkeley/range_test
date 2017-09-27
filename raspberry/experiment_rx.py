@@ -200,7 +200,6 @@ class ExperimentRx(object):
         self._logger_init()
         self._gpio_handler_init()
         self._radio_init()
-        logging.info('threads alive at the start of the program: {0}'.format(threading.enumerate()))
         self.start_exp()
 
 #  ========================== private =========================================
@@ -234,6 +233,7 @@ class ExperimentRx(object):
         self.LoggerRx       = LoggerRx(self.queue_rx, self.settings)
 
     def _gpio_handler_init(self):
+        logging.info('gpio init!')
         self.gpio_handler   = gpio.GPIO_handler(self.radio_isr_pin, self.push_button_pin, self.radio_driver.cb_radio_isr,
                                            self._cb_push_button)
         
@@ -472,11 +472,13 @@ def main():
             if not f_start:
                 f_start = True
                 logging.info('PROGRAM STARTING...')
-                experimentTx = ExperimentRx(load_experiment_details())
+                experimentRx = ExperimentRx(load_experiment_details())
                 logging.info('PROGRAM RUNNING')
             else:
                 logging.info('PROGRAM ALREADY STARTED')
         elif input == 'q':
+            if f_start:
+                experimentRx.gpio_handler.clean_gpio()
             sys.exit(0)
 
 if __name__ == '__main__':

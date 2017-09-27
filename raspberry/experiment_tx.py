@@ -178,6 +178,7 @@ class ExperimentTx(threading.Thread):
 
     def _gpio_handler_init(self):
 
+        logging.info('gpio init!')
         self.gpio_handler = gpio.GPIO_handler(self.radio_isr_pin, self.push_button_pin,
                                               self.radio_driver.cb_radio_isr,
                                               self._cb_push_button)
@@ -511,8 +512,9 @@ def main():
                 logging.info('PROGRAM RUNNING')
             else:
                 logging.info('PROGRAM ALREADY STARTED')
-
         if input == 'q':
+            if f_start:
+                experimentTx.gpio_handler.clean_gpio()
             sys.exit(0)
 
 if __name__ == '__main__':
