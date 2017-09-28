@@ -97,7 +97,8 @@ class LoggerRx(threading.Thread):
                     else:
                         try:
                             self.results['rx_frames_wrong_fcs_sequence_number'].append(item[0][0] * 256 + item[0][1])
-                            self.results['rx_frames_wrong'].append(item[0])
+                            # uncomment if you want to save the wrong frames. Takes a lot of CPU power.
+                            # self.results['rx_frames_wrong'].append(item[0])
 
                         except IndexError as err:
                             logging.warning('UNKNOWN: {0}'.format(item))
