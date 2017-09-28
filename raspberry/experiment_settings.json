@@ -1,7 +1,7 @@
 {
     "IFS":              [ 0.02, 0.02, 0.02, 0.02],
     "frame_lengths":    [8, 127, 1000, 2047],
-    "version": "2.0.5",
+    "version": "2.0.7",
     "numframes": 100,
     "test_settings":    [
         {"channel_spacing_kHz":  200, "frequency_0_kHz": 863125, "channel": 27, "modulation": "2fsk_50kbps_FEC_200kHz",      "durationtx_s": 120, "index": 1},
