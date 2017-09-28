@@ -22,8 +22,8 @@ import gpio_handler as gpio
 
 PACKET_LENGTH       = 2047
 CRC_SIZE            = 4
-SECURITY_TIME       = 3    # 3 seconds to give more time to TRX to complete the 400 frame bursts.
-START_OFFSET        = 3.5  # 3.5 seconds after the starting time arrives.
+SECURITY_TIME       = 5  # 5 seconds to give more time to TRX to complete the 400 frame bursts.
+START_OFFSET        = 1  # 1 second after the starting time arrives.
 FCS_VALID           = 1
 FRAME_MINIMUM_SIZE  = 7
 MODEM_SUB_GHZ       = 0
