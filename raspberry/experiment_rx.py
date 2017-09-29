@@ -435,6 +435,7 @@ class ExperimentRx(object):
         else:
             self._stop_exp()
             self.radio_driver.radio_off()
+            self.radio_driver.radio_off_2_4ghz()
             for led in self.led_array_pins:
                 self.gpio_handler.led_off(led)
             self.gpio_handler.led_off(self.TRX_frame_pin)
