@@ -265,7 +265,8 @@ class ExperimentTx(threading.Thread):
         :param item
 
         """
-        logging.debug('entering _execute_experiment_tx, time: {0}'.format(time.time()))
+        total_time = time.time()
+        # logging.debug('entering _execute_experiment_tx, time: {0}, {1}'.format(time.time(), item['modulation']))
         self.gpio_handler.led_off(self.TRX_frame_pin)
         # clean the break _execute_experiment_tx flag
         self.f_cancel_exp = False
@@ -333,7 +334,8 @@ class ExperimentTx(threading.Thread):
                     # logging.warning('self.radio_driver.read_reset_cmd(): {0}'.format(self.radio_driver.read_reset_cmd()))
                     if self.f_cancel_exp:
                         break
-            logging.info('EXIT FROM THE _execute_experiment_tx: {0}'.format(time.time()))
+            # logging.info('EXIT FROM THE _execute_experiment_tx: {0}, {1}'.format(time.time(), item['modulation']))
+            logging.info('DURATION OF {0} is: {1}'.format(item["modulation"], (time.time() - total_time)))
 
         else:
             # loop through packet lengths
@@ -365,7 +367,10 @@ class ExperimentTx(threading.Thread):
                     # logging.warning('self.radio_driver.read_reset_cmd(): {0}'.format(self.radio_driver.read_reset_cmd()))
                     if self.f_cancel_exp:
                         break
-            logging.info('EXIT FROM THE _execute_experiment_tx: {0}'.format(time.time()))
+            # logging.info('EXIT FROM THE _execute_experiment_tx: {0}, {1}'.format(time.time(), item['modulation']))
+            logging.info('DURATION OF {0} is: {1}'.format(item["modulation"], (time.time() - total_time)))
+        self.radio_driver.radio_off_2_4ghz()
+        self.radio_driver.radio_off()
 
     def _remove_scheduled_experiment(self):
         events = self.scheduler.queue
