@@ -461,7 +461,7 @@ modulations_settings = {
         (RG_RF24_IRQM,          0x00),
         (RG_RF09_RXBWC,         0x19),
         (RG_RF09_RXDFE,         0x83),
-        (RG_RF09_AGCC,          0x11),
+        # (RG_RF09_AGCC,          0x11),
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0x0A),  # recommended value (0x0B)
         (RG_RF09_TXDFE,         0x83),
@@ -479,7 +479,7 @@ modulations_settings = {
         (RG_RF24_IRQM,          0x00),
         (RG_RF09_RXBWC,         0x19),
         (RG_RF09_RXDFE,         0x83),
-        (RG_RF09_AGCC,          0x11),
+        # (RG_RF09_AGCC,          0x11),
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0x0A),  # recommended value (0x0B)
         (RG_RF09_TXDFE,         0x83),
@@ -497,7 +497,7 @@ modulations_settings = {
         (RG_RF24_IRQM,          0x00),
         (RG_RF09_RXBWC,         0x19),
         (RG_RF09_RXDFE,         0x83),
-        (RG_RF09_AGCC,          0x11),
+        # (RG_RF09_AGCC,          0x11),
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0x0A),  # recommended value (0x0B)
         (RG_RF09_TXDFE,         0x83),
@@ -515,7 +515,7 @@ modulations_settings = {
         (RG_RF24_IRQM,          0x00),
         (RG_RF09_RXBWC,         0x19),
         (RG_RF09_RXDFE,         0x83),
-        (RG_RF09_AGCC,          0x11),
+        # (RG_RF09_AGCC,          0x11),
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0x0A),  # recommended value (0x0B)
         (RG_RF09_TXDFE,         0x83),
@@ -533,7 +533,7 @@ modulations_settings = {
         (RG_RF24_IRQM,          0x00),
         (RG_RF09_RXBWC,         0x17),
         (RG_RF09_RXDFE,         0x43),
-        (RG_RF09_AGCC,          0x11),
+        # (RG_RF09_AGCC,          0x11),
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0x08),  # recommended value ()
         (RG_RF09_TXDFE,         0x63),
@@ -551,7 +551,7 @@ modulations_settings = {
         (RG_RF24_IRQM,          0x00),
         (RG_RF09_RXBWC,         0x17),
         (RG_RF09_RXDFE,         0x43),
-        (RG_RF09_AGCC,          0x11),
+        # (RG_RF09_AGCC,          0x11),
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0x08),  # recommended value ()
         (RG_RF09_TXDFE,         0x63),
@@ -569,7 +569,7 @@ modulations_settings = {
         (RG_RF24_IRQM,          0x00),
         (RG_RF09_RXBWC,         0x17),
         (RG_RF09_RXDFE,         0x43),
-        (RG_RF09_AGCC,          0x11),
+        # (RG_RF09_AGCC,          0x11),
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0x08),  # recommended value ()
         (RG_RF09_TXDFE,         0x63),
@@ -587,7 +587,7 @@ modulations_settings = {
         (RG_RF24_IRQM,          0x00),
         (RG_RF09_RXBWC,         0x17),
         (RG_RF09_RXDFE,         0x43),
-        (RG_RF09_AGCC,          0x11),
+        # (RG_RF09_AGCC,          0x11),
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0x08),  # recommended value ()
         (RG_RF09_TXDFE,         0x63),
@@ -605,7 +605,7 @@ modulations_settings = {
         (RG_RF24_IRQM,          0x00),
         (RG_RF09_RXBWC,         0x17),
         (RG_RF09_RXDFE,         0x43),
-        (RG_RF09_AGCC,          0x11),
+        # (RG_RF09_AGCC,          0x11),
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0x08),  # recommended value ()
         (RG_RF09_TXDFE,         0x63),
@@ -623,7 +623,7 @@ modulations_settings = {
         (RG_RF24_IRQM,          0x00),
         (RG_RF09_RXBWC,         0x17),
         (RG_RF09_RXDFE,         0x43),
-        (RG_RF09_AGCC,          0x11),
+        # (RG_RF09_AGCC,          0x11),
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0x08),  # recommended value ()
         (RG_RF09_TXDFE,         0x63),
@@ -641,7 +641,7 @@ modulations_settings = {
         (RG_RF24_IRQM,          0x00),
         (RG_RF09_RXBWC,         0x04),
         (RG_RF09_RXDFE,         0x46),
-        (RG_RF09_AGCC,          0x11),
+        # (RG_RF09_AGCC,          0x11),
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0x05),  # recommended value ()
         (RG_RF09_TXDFE,         0x66),
@@ -659,7 +659,7 @@ modulations_settings = {
         (RG_RF24_IRQM,          0x00),
         (RG_RF09_RXBWC,         0x04),
         (RG_RF09_RXDFE,         0x46),
-        (RG_RF09_AGCC,          0x11),
+        # (RG_RF09_AGCC,          0x11),
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0x05),  # recommended value ()
         (RG_RF09_TXDFE,         0x66),
@@ -677,7 +677,7 @@ modulations_settings = {
         (RG_RF24_IRQM,          0x00),
         (RG_RF09_RXBWC,         0x04),
         (RG_RF09_RXDFE,         0x46),
-        (RG_RF09_AGCC,          0x11),
+        # (RG_RF09_AGCC,          0x11),
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0x05),  # recommended value ()
         (RG_RF09_TXDFE,         0x66),
@@ -695,7 +695,7 @@ modulations_settings = {
         (RG_RF24_IRQM,          0x00),
         (RG_RF09_RXBWC,         0x04),
         (RG_RF09_RXDFE,         0x46),
-        (RG_RF09_AGCC,          0x11),
+        # (RG_RF09_AGCC,          0x11),
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0x05),  # recommended value ()
         (RG_RF09_TXDFE,         0x66),
@@ -713,7 +713,7 @@ modulations_settings = {
         (RG_RF24_IRQM,          0x00),
         (RG_RF09_RXBWC,         0x04),
         (RG_RF09_RXDFE,         0x46),
-        (RG_RF09_AGCC,          0x11),
+        # (RG_RF09_AGCC,          0x11),
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0x05),  # recommended value ()
         (RG_RF09_TXDFE,         0x66),
@@ -731,7 +731,7 @@ modulations_settings = {
         (RG_RF24_IRQM,          0x00),
         (RG_RF09_RXBWC,         0x04),
         (RG_RF09_RXDFE,         0x46),
-        (RG_RF09_AGCC,          0x11),
+        # (RG_RF09_AGCC,          0x11),
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0x05),  # recommended value ()
         (RG_RF09_TXDFE,         0x66),
@@ -749,7 +749,7 @@ modulations_settings = {
         (RG_RF24_IRQM,          0x00),
         (RG_RF09_RXBWC,         0x12),
         (RG_RF09_RXDFE,         0x26),
-        (RG_RF09_AGCC,          0x11),
+        # (RG_RF09_AGCC,          0x11),
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0x03),  # recommended value ()
         (RG_RF09_TXDFE,         0x46),
@@ -767,7 +767,7 @@ modulations_settings = {
         (RG_RF24_IRQM,          0x00),
         (RG_RF09_RXBWC,         0x12),
         (RG_RF09_RXDFE,         0x26),
-        (RG_RF09_AGCC,          0x11),
+        # (RG_RF09_AGCC,          0x11),
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0x03),  # recommended value ()
         (RG_RF09_TXDFE,         0x46),
@@ -785,7 +785,7 @@ modulations_settings = {
         (RG_RF24_IRQM,          0x00),
         (RG_RF09_RXBWC,         0x12),
         (RG_RF09_RXDFE,         0x26),
-        (RG_RF09_AGCC,          0x11),
+        # (RG_RF09_AGCC,          0x11),
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0x03),  # recommended value ()
         (RG_RF09_TXDFE,         0x46),
@@ -803,7 +803,7 @@ modulations_settings = {
         (RG_RF24_IRQM,          0x00),
         (RG_RF09_RXBWC,         0x12),
         (RG_RF09_RXDFE,         0x26),
-        (RG_RF09_AGCC,          0x11),
+        # (RG_RF09_AGCC,          0x11),
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0x03),  # recommended value ()
         (RG_RF09_TXDFE,         0x46),
@@ -821,7 +821,7 @@ modulations_settings = {
         (RG_RF24_IRQM,          0x00),
         (RG_RF09_RXBWC,         0x12),
         (RG_RF09_RXDFE,         0x26),
-        (RG_RF09_AGCC,          0x11),
+        # (RG_RF09_AGCC,          0x11),
         (RG_RF09_EDD,           0x7A),
         (RG_RF09_TXCUTC,        0x03),  # recommended value ()
         (RG_RF09_TXDFE,         0x46),
@@ -860,374 +860,374 @@ modulations_settings = {
         (RG_RF24_IRQM, 0x1F),
         (RG_RF24_RXBWC, 0x1A),
         (RG_RF24_RXDFE, 0x83),
-        (RG_RF09_AGCC, 0x11),
-        (RG_RF09_EDD, 0x7A),
-        (RG_RF09_TXCUTC, 0x0A),  # recommended value (0x0B)
-        (RG_RF09_TXDFE, 0x83),
-        (RG_RF09_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
-        (RG_BBC0_IRQM, 0x12),
-        (RG_BBC1_IRQM, 0x00),
-        (RG_BBC0_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
-        (RG_BBC0_OFDMC, 0x00),
-        (RG_BBC0_OFDMPHRTX, 0x00)],
+        # (RG_RF09_AGCC, 0x11),
+        (RG_RF24_EDD, 0x7A),
+        (RG_RF24_TXCUTC, 0x0A),  # recommended value (0x0B)
+        (RG_RF24_TXDFE, 0x83),
+        (RG_RF24_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
+        (RG_BBC0_IRQM, 0x00),
+        (RG_BBC1_IRQM, 0x12),
+        (RG_BBC1_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC1_OFDMC, 0x00),
+        (RG_BBC1_OFDMPHRTX, 0x00)],
 
     # 2400MHz_ofdm_1_mcs1
     '2400MHz_ofdm_200kbps_1200kHz_mcs1': [
-        (RG_RF09_CMD, 0x02),
-        (RG_RF09_IRQM, 0x1F),
-        (RG_RF24_IRQM, 0x00),
-        (RG_RF09_RXBWC, 0x19),
-        (RG_RF09_RXDFE, 0x83),
-        (RG_RF09_AGCC, 0x11),
-        (RG_RF09_EDD, 0x7A),
-        (RG_RF09_TXCUTC, 0x0A),  # recommended value (0x0B)
-        (RG_RF09_TXDFE, 0x83),
-        (RG_RF09_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
-        (RG_BBC0_IRQM, 0x12),
-        (RG_BBC1_IRQM, 0x00),
-        (RG_BBC0_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
-        (RG_BBC0_OFDMC, 0x00),
-        (RG_BBC0_OFDMPHRTX, 0x01)],
+        (RG_RF24_CMD, 0x02),
+        (RG_RF09_IRQM, 0x00),
+        (RG_RF24_IRQM, 0x1F),
+        (RG_RF24_RXBWC, 0x1A),
+        (RG_RF24_RXDFE, 0x83),
+        # (RG_RF09_AGCC, 0x11),
+        (RG_RF24_EDD, 0x7A),
+        (RG_RF24_TXCUTC, 0x0A),  # recommended value (0x0B)
+        (RG_RF24_TXDFE, 0x83),
+        (RG_RF24_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
+        (RG_BBC0_IRQM, 0x00),
+        (RG_BBC1_IRQM, 0x12),
+        (RG_BBC1_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC1_OFDMC, 0x00),
+        (RG_BBC1_OFDMPHRTX, 0x01)],
 
     # 2400MHz_ofdm_1_mcs2
     '2400MHz_ofdm_400kbps_1200kHz_mcs2': [
-        (RG_RF09_CMD, 0x02),
-        (RG_RF09_IRQM, 0x1F),
-        (RG_RF24_IRQM, 0x00),
-        (RG_RF09_RXBWC, 0x19),
-        (RG_RF09_RXDFE, 0x83),
-        (RG_RF09_AGCC, 0x11),
-        (RG_RF09_EDD, 0x7A),
-        (RG_RF09_TXCUTC, 0x0A),  # recommended value (0x0B)
-        (RG_RF09_TXDFE, 0x83),
-        (RG_RF09_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
-        (RG_BBC0_IRQM, 0x12),
-        (RG_BBC1_IRQM, 0x00),
-        (RG_BBC0_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
-        (RG_BBC0_OFDMC, 0x00),
-        (RG_BBC0_OFDMPHRTX, 0x02)],
+        (RG_RF24_CMD, 0x02),
+        (RG_RF09_IRQM, 0x00),
+        (RG_RF24_IRQM, 0x1F),
+        (RG_RF24_RXBWC, 0x1A),
+        (RG_RF24_RXDFE, 0x83),
+        # (RG_RF09_AGCC, 0x11),
+        (RG_RF24_EDD, 0x7A),
+        (RG_RF24_TXCUTC, 0x0A),  # recommended value (0x0B)
+        (RG_RF24_TXDFE, 0x83),
+        (RG_RF24_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
+        (RG_BBC0_IRQM, 0x00),
+        (RG_BBC1_IRQM, 0x12),
+        (RG_BBC1_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC1_OFDMC, 0x00),
+        (RG_BBC1_OFDMPHRTX, 0x02)],
 
     # 2400MHz_ofdm_1_mcs3
     '2400MHz_ofdm_800kbps_1200kHz_mcs3': [
-        (RG_RF09_CMD, 0x02),
-        (RG_RF09_IRQM, 0x1F),
-        (RG_RF24_IRQM, 0x00),
-        (RG_RF09_RXBWC, 0x19),
-        (RG_RF09_RXDFE, 0x83),
-        (RG_RF09_AGCC, 0x11),
-        (RG_RF09_EDD, 0x7A),
-        (RG_RF09_TXCUTC, 0x0A),  # recommended value (0x0B)
-        (RG_RF09_TXDFE, 0x83),
-        (RG_RF09_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
-        (RG_BBC0_IRQM, 0x12),
-        (RG_BBC1_IRQM, 0x00),
-        (RG_BBC0_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
-        (RG_BBC0_OFDMC, 0x00),
-        (RG_BBC0_OFDMPHRTX, 0x03)],
+        (RG_RF24_CMD, 0x02),
+        (RG_RF09_IRQM, 0x00),
+        (RG_RF24_IRQM, 0x1F),
+        (RG_RF24_RXBWC, 0x1A),
+        (RG_RF24_RXDFE, 0x83),
+        # (RG_RF09_AGCC, 0x11),
+        (RG_RF24_EDD, 0x7A),
+        (RG_RF24_TXCUTC, 0x0A),  # recommended value (0x0B)
+        (RG_RF24_TXDFE, 0x83),
+        (RG_RF24_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
+        (RG_BBC0_IRQM, 0x00),
+        (RG_BBC1_IRQM, 0x12),
+        (RG_BBC1_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC1_OFDMC, 0x00),
+        (RG_BBC1_OFDMPHRTX, 0x03)],
 
     # 2400MHz_ofdm_2_mcs0
     '2400MHz_ofdm_50kbps_800kHz_mcs0': [
-        (RG_RF09_CMD, 0x02),
-        (RG_RF09_IRQM, 0x1F),
-        (RG_RF24_IRQM, 0x00),
-        (RG_RF09_RXBWC, 0x17),
-        (RG_RF09_RXDFE, 0x43),
-        (RG_RF09_AGCC, 0x11),
-        (RG_RF09_EDD, 0x7A),
-        (RG_RF09_TXCUTC, 0x08),  # recommended value ()
-        (RG_RF09_TXDFE, 0x63),
-        (RG_RF09_PAC, 0x7C),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1C~8dBm
-        (RG_BBC0_IRQM, 0x12),
-        (RG_BBC1_IRQM, 0x00),
-        (RG_BBC0_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
-        (RG_BBC0_OFDMC, 0x01),
-        (RG_BBC0_OFDMPHRTX, 0x00)],
+        (RG_RF24_CMD, 0x02),
+        (RG_RF09_IRQM, 0x00),
+        (RG_RF24_IRQM, 0x1F),
+        (RG_RF24_RXBWC, 0x17),
+        (RG_RF24_RXDFE, 0x43),
+        # (RG_RF09_AGCC, 0x11),
+        (RG_RF24_EDD, 0x7A),
+        (RG_RF24_TXCUTC, 0x08),  # recommended value (0x0B)
+        (RG_RF24_TXDFE, 0x63),
+        (RG_RF24_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
+        (RG_BBC0_IRQM, 0x00),
+        (RG_BBC1_IRQM, 0x12),
+        (RG_BBC1_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC1_OFDMC, 0x01),
+        (RG_BBC1_OFDMPHRTX, 0x00)],
 
     # 2400MHz_ofdm_2_mcs1
     '2400MHz_ofdm_100kbps_800kHz_mcs1': [
-        (RG_RF09_CMD, 0x02),
-        (RG_RF09_IRQM, 0x1F),
-        (RG_RF24_IRQM, 0x00),
-        (RG_RF09_RXBWC, 0x17),
-        (RG_RF09_RXDFE, 0x43),
-        (RG_RF09_AGCC, 0x11),
-        (RG_RF09_EDD, 0x7A),
-        (RG_RF09_TXCUTC, 0x08),  # recommended value ()
-        (RG_RF09_TXDFE, 0x63),
-        (RG_RF09_PAC, 0x7C),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1C~8dBm
-        (RG_BBC0_IRQM, 0x12),
-        (RG_BBC1_IRQM, 0x00),
-        (RG_BBC0_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
-        (RG_BBC0_OFDMC, 0x01),
-        (RG_BBC0_OFDMPHRTX, 0x01)],
+        (RG_RF24_CMD, 0x02),
+        (RG_RF09_IRQM, 0x00),
+        (RG_RF24_IRQM, 0x1F),
+        (RG_RF24_RXBWC, 0x17),
+        (RG_RF24_RXDFE, 0x43),
+        # (RG_RF09_AGCC, 0x11),
+        (RG_RF24_EDD, 0x7A),
+        (RG_RF24_TXCUTC, 0x08),  # recommended value (0x0B)
+        (RG_RF24_TXDFE, 0x63),
+        (RG_RF24_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
+        (RG_BBC0_IRQM, 0x00),
+        (RG_BBC1_IRQM, 0x12),
+        (RG_BBC1_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC1_OFDMC, 0x01),
+        (RG_BBC1_OFDMPHRTX, 0x01)],
 
     # 2400MHz_ofdm_2_mcs2
     '2400MHz_ofdm_200kbps_800kHz_mcs2': [
-        (RG_RF09_CMD, 0x02),
-        (RG_RF09_IRQM, 0x1F),
-        (RG_RF24_IRQM, 0x00),
-        (RG_RF09_RXBWC, 0x17),
-        (RG_RF09_RXDFE, 0x43),
-        (RG_RF09_AGCC, 0x11),
-        (RG_RF09_EDD, 0x7A),
-        (RG_RF09_TXCUTC, 0x08),  # recommended value ()
-        (RG_RF09_TXDFE, 0x63),
-        (RG_RF09_PAC, 0x7C),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1C~8dBm
-        (RG_BBC0_IRQM, 0x12),
-        (RG_BBC1_IRQM, 0x00),
-        (RG_BBC0_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
-        (RG_BBC0_OFDMC, 0x01),
-        (RG_BBC0_OFDMPHRTX, 0x02)],
+        (RG_RF24_CMD, 0x02),
+        (RG_RF09_IRQM, 0x00),
+        (RG_RF24_IRQM, 0x1F),
+        (RG_RF24_RXBWC, 0x17),
+        (RG_RF24_RXDFE, 0x43),
+        # (RG_RF09_AGCC, 0x11),
+        (RG_RF24_EDD, 0x7A),
+        (RG_RF24_TXCUTC, 0x08),  # recommended value (0x0B)
+        (RG_RF24_TXDFE, 0x63),
+        (RG_RF24_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
+        (RG_BBC0_IRQM, 0x00),
+        (RG_BBC1_IRQM, 0x12),
+        (RG_BBC1_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC1_OFDMC, 0x01),
+        (RG_BBC1_OFDMPHRTX, 0x02)],
 
     # 2400MHz_ofdm_2_mcs3
     '2400MHz_ofdm_400kbps_800kHz_mcs3': [
-        (RG_RF09_CMD, 0x02),
-        (RG_RF09_IRQM, 0x1F),
-        (RG_RF24_IRQM, 0x00),
-        (RG_RF09_RXBWC, 0x17),
-        (RG_RF09_RXDFE, 0x43),
-        (RG_RF09_AGCC, 0x11),
-        (RG_RF09_EDD, 0x7A),
-        (RG_RF09_TXCUTC, 0x08),  # recommended value ()
-        (RG_RF09_TXDFE, 0x63),
-        (RG_RF09_PAC, 0x7C),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1C~8dBm
-        (RG_BBC0_IRQM, 0x12),
-        (RG_BBC1_IRQM, 0x00),
-        (RG_BBC0_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
-        (RG_BBC0_OFDMC, 0x01),
-        (RG_BBC0_OFDMPHRTX, 0x03)],
+        (RG_RF24_CMD, 0x02),
+        (RG_RF09_IRQM, 0x00),
+        (RG_RF24_IRQM, 0x1F),
+        (RG_RF24_RXBWC, 0x17),
+        (RG_RF24_RXDFE, 0x43),
+        # (RG_RF09_AGCC, 0x11),
+        (RG_RF24_EDD, 0x7A),
+        (RG_RF24_TXCUTC, 0x08),  # recommended value (0x0B)
+        (RG_RF24_TXDFE, 0x63),
+        (RG_RF24_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
+        (RG_BBC0_IRQM, 0x00),
+        (RG_BBC1_IRQM, 0x12),
+        (RG_BBC1_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC1_OFDMC, 0x01),
+        (RG_BBC1_OFDMPHRTX, 0x03)],
 
     # 2400MHz_ofdm_2_mcs4
     '2400MHz_ofdm_600kbps_800kHz_mcs4': [
-        (RG_RF09_CMD, 0x02),
-        (RG_RF09_IRQM, 0x1F),
-        (RG_RF24_IRQM, 0x00),
-        (RG_RF09_RXBWC, 0x17),
-        (RG_RF09_RXDFE, 0x43),
-        (RG_RF09_AGCC, 0x11),
-        (RG_RF09_EDD, 0x7A),
-        (RG_RF09_TXCUTC, 0x08),  # recommended value ()
-        (RG_RF09_TXDFE, 0x63),
-        (RG_RF09_PAC, 0x7C),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1C~8dBm
-        (RG_BBC0_IRQM, 0x12),
-        (RG_BBC1_IRQM, 0x00),
-        (RG_BBC0_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
-        (RG_BBC0_OFDMC, 0x01),
-        (RG_BBC0_OFDMPHRTX, 0x04)],
+        (RG_RF24_CMD, 0x02),
+        (RG_RF09_IRQM, 0x00),
+        (RG_RF24_IRQM, 0x1F),
+        (RG_RF24_RXBWC, 0x17),
+        (RG_RF24_RXDFE, 0x43),
+        # (RG_RF09_AGCC, 0x11),
+        (RG_RF24_EDD, 0x7A),
+        (RG_RF24_TXCUTC, 0x08),  # recommended value (0x0B)
+        (RG_RF24_TXDFE, 0x63),
+        (RG_RF24_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
+        (RG_BBC0_IRQM, 0x00),
+        (RG_BBC1_IRQM, 0x12),
+        (RG_BBC1_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC1_OFDMC, 0x01),
+        (RG_BBC1_OFDMPHRTX, 0x04)],
 
     # 2400MHz_ofdm_2_mcs5
     '2400MHz_ofdm_800kbps_800kHz_mcs5': [
-        (RG_RF09_CMD, 0x02),
-        (RG_RF09_IRQM, 0x1F),
-        (RG_RF24_IRQM, 0x00),
-        (RG_RF09_RXBWC, 0x17),
-        (RG_RF09_RXDFE, 0x43),
-        (RG_RF09_AGCC, 0x11),
-        (RG_RF09_EDD, 0x7A),
-        (RG_RF09_TXCUTC, 0x08),  # recommended value ()
-        (RG_RF09_TXDFE, 0x63),
-        (RG_RF09_PAC, 0x7C),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1C~8dBm
-        (RG_BBC0_IRQM, 0x12),
-        (RG_BBC1_IRQM, 0x00),
-        (RG_BBC0_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
-        (RG_BBC0_OFDMC, 0x01),
-        (RG_BBC0_OFDMPHRTX, 0x05)],
+        (RG_RF24_CMD, 0x02),
+        (RG_RF09_IRQM, 0x00),
+        (RG_RF24_IRQM, 0x1F),
+        (RG_RF24_RXBWC, 0x17),
+        (RG_RF24_RXDFE, 0x43),
+        # (RG_RF09_AGCC, 0x11),
+        (RG_RF24_EDD, 0x7A),
+        (RG_RF24_TXCUTC, 0x08),  # recommended value (0x0B)
+        (RG_RF24_TXDFE, 0x63),
+        (RG_RF24_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
+        (RG_BBC0_IRQM, 0x00),
+        (RG_BBC1_IRQM, 0x12),
+        (RG_BBC1_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC1_OFDMC, 0x01),
+        (RG_BBC1_OFDMPHRTX, 0x05)],
 
     # 2400MHz_ofdm_3_mcs1
     '2400MHz_ofdm_50kbps_400kHz_mcs1': [
-        (RG_RF09_CMD, 0x02),
-        (RG_RF09_IRQM, 0x1F),
-        (RG_RF24_IRQM, 0x00),
-        (RG_RF09_RXBWC, 0x04),
-        (RG_RF09_RXDFE, 0x46),
-        (RG_RF09_AGCC, 0x11),
-        (RG_RF09_EDD, 0x7A),
-        (RG_RF09_TXCUTC, 0x05),  # recommended value ()
-        (RG_RF09_TXDFE, 0x66),
-        (RG_RF09_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
-        (RG_BBC0_IRQM, 0x12),
-        (RG_BBC1_IRQM, 0x00),
-        (RG_BBC0_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
-        (RG_BBC0_OFDMC, 0x02),
-        (RG_BBC0_OFDMPHRTX, 0x01)],
+        (RG_RF24_CMD, 0x02),
+        (RG_RF09_IRQM, 0x00),
+        (RG_RF24_IRQM, 0x1F),
+        (RG_RF24_RXBWC, 0x15),
+        (RG_RF24_RXDFE, 0x66),
+        # (RG_RF09_AGCC, 0x11),
+        (RG_RF24_EDD, 0x7A),
+        (RG_RF24_TXCUTC, 0x05),  # recommended value (0x0B)
+        (RG_RF24_TXDFE, 0x66),
+        (RG_RF24_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
+        (RG_BBC0_IRQM, 0x00),
+        (RG_BBC1_IRQM, 0x12),
+        (RG_BBC1_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC1_OFDMC, 0x02),
+        (RG_BBC1_OFDMPHRTX, 0x01)],
 
     # 2400MHz_ofdm_3_mcs2
     '2400MHz_ofdm_100kbps_400kHz_mcs2': [
-        (RG_RF09_CMD, 0x02),
-        (RG_RF09_IRQM, 0x1F),
-        (RG_RF24_IRQM, 0x00),
-        (RG_RF09_RXBWC, 0x04),
-        (RG_RF09_RXDFE, 0x46),
-        (RG_RF09_AGCC, 0x11),
-        (RG_RF09_EDD, 0x7A),
-        (RG_RF09_TXCUTC, 0x05),  # recommended value ()
-        (RG_RF09_TXDFE, 0x66),
-        (RG_RF09_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
-        (RG_BBC0_IRQM, 0x12),
-        (RG_BBC1_IRQM, 0x00),
-        (RG_BBC0_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
-        (RG_BBC0_OFDMC, 0x02),
-        (RG_BBC0_OFDMPHRTX, 0x02)],
+        (RG_RF24_CMD, 0x02),
+        (RG_RF09_IRQM, 0x00),
+        (RG_RF24_IRQM, 0x1F),
+        (RG_RF24_RXBWC, 0x15),
+        (RG_RF24_RXDFE, 0x66),
+        # (RG_RF09_AGCC, 0x11),
+        (RG_RF24_EDD, 0x7A),
+        (RG_RF24_TXCUTC, 0x05),  # recommended value (0x0B)
+        (RG_RF24_TXDFE, 0x66),
+        (RG_RF24_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
+        (RG_BBC0_IRQM, 0x00),
+        (RG_BBC1_IRQM, 0x12),
+        (RG_BBC1_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC1_OFDMC, 0x02),
+        (RG_BBC1_OFDMPHRTX, 0x02)],
 
     # 2400MHz_ofdm_3_mcs3
     '2400MHz_ofdm_200kbps_400kHz_mcs3': [
-        (RG_RF09_CMD, 0x02),
-        (RG_RF09_IRQM, 0x1F),
-        (RG_RF24_IRQM, 0x00),
-        (RG_RF09_RXBWC, 0x04),
-        (RG_RF09_RXDFE, 0x46),
-        (RG_RF09_AGCC, 0x11),
-        (RG_RF09_EDD, 0x7A),
-        (RG_RF09_TXCUTC, 0x05),  # recommended value ()
-        (RG_RF09_TXDFE, 0x66),
-        (RG_RF09_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
-        (RG_BBC0_IRQM, 0x12),
-        (RG_BBC1_IRQM, 0x00),
-        (RG_BBC0_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
-        (RG_BBC0_OFDMC, 0x02),
-        (RG_BBC0_OFDMPHRTX, 0x03)],
+        (RG_RF24_CMD, 0x02),
+        (RG_RF09_IRQM, 0x00),
+        (RG_RF24_IRQM, 0x1F),
+        (RG_RF24_RXBWC, 0x15),
+        (RG_RF24_RXDFE, 0x66),
+        # (RG_RF09_AGCC, 0x11),
+        (RG_RF24_EDD, 0x7A),
+        (RG_RF24_TXCUTC, 0x05),  # recommended value (0x0B)
+        (RG_RF24_TXDFE, 0x66),
+        (RG_RF24_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
+        (RG_BBC0_IRQM, 0x00),
+        (RG_BBC1_IRQM, 0x12),
+        (RG_BBC1_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC1_OFDMC, 0x02),
+        (RG_BBC1_OFDMPHRTX, 0x03)],
 
     # 2400MHz_ofdm_3_mcs4
     '2400MHz_ofdm_300kbps_400kHz_mcs4': [
-        (RG_RF09_CMD, 0x02),
-        (RG_RF09_IRQM, 0x1F),
-        (RG_RF24_IRQM, 0x00),
-        (RG_RF09_RXBWC, 0x04),
-        (RG_RF09_RXDFE, 0x46),
-        (RG_RF09_AGCC, 0x11),
-        (RG_RF09_EDD, 0x7A),
-        (RG_RF09_TXCUTC, 0x05),  # recommended value ()
-        (RG_RF09_TXDFE, 0x66),
-        (RG_RF09_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
-        (RG_BBC0_IRQM, 0x12),
-        (RG_BBC1_IRQM, 0x00),
-        (RG_BBC0_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
-        (RG_BBC0_OFDMC, 0x02),
-        (RG_BBC0_OFDMPHRTX, 0x04)],
+        (RG_RF24_CMD, 0x02),
+        (RG_RF09_IRQM, 0x00),
+        (RG_RF24_IRQM, 0x1F),
+        (RG_RF24_RXBWC, 0x15),
+        (RG_RF24_RXDFE, 0x66),
+        # (RG_RF09_AGCC, 0x11),
+        (RG_RF24_EDD, 0x7A),
+        (RG_RF24_TXCUTC, 0x05),  # recommended value (0x0B)
+        (RG_RF24_TXDFE, 0x66),
+        (RG_RF24_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
+        (RG_BBC0_IRQM, 0x00),
+        (RG_BBC1_IRQM, 0x12),
+        (RG_BBC1_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC1_OFDMC, 0x02),
+        (RG_BBC1_OFDMPHRTX, 0x04)],
 
     # 2400MHz_ofdm_3_mcs5
     '2400MHz_ofdm_400kbps_400kHz_mcs5': [
-        (RG_RF09_CMD, 0x02),
-        (RG_RF09_IRQM, 0x1F),
-        (RG_RF24_IRQM, 0x00),
-        (RG_RF09_RXBWC, 0x04),
-        (RG_RF09_RXDFE, 0x46),
-        (RG_RF09_AGCC, 0x11),
-        (RG_RF09_EDD, 0x7A),
-        (RG_RF09_TXCUTC, 0x05),  # recommended value ()
-        (RG_RF09_TXDFE, 0x66),
-        (RG_RF09_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
-        (RG_BBC0_IRQM, 0x12),
-        (RG_BBC1_IRQM, 0x00),
-        (RG_BBC0_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
-        (RG_BBC0_OFDMC, 0x02),
-        (RG_BBC0_OFDMPHRTX, 0x05)],
+        (RG_RF24_CMD, 0x02),
+        (RG_RF09_IRQM, 0x00),
+        (RG_RF24_IRQM, 0x1F),
+        (RG_RF24_RXBWC, 0x15),
+        (RG_RF24_RXDFE, 0x66),
+        # (RG_RF09_AGCC, 0x11),
+        (RG_RF24_EDD, 0x7A),
+        (RG_RF24_TXCUTC, 0x05),  # recommended value (0x0B)
+        (RG_RF24_TXDFE, 0x66),
+        (RG_RF24_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
+        (RG_BBC0_IRQM, 0x00),
+        (RG_BBC1_IRQM, 0x12),
+        (RG_BBC1_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC1_OFDMC, 0x02),
+        (RG_BBC1_OFDMPHRTX, 0x05)],
 
     # 2400MHz_ofdm_3_mcs6
     '2400MHz_ofdm_600kbps_400kHz_mcs6': [
-        (RG_RF09_CMD, 0x02),
-        (RG_RF09_IRQM, 0x1F),
-        (RG_RF24_IRQM, 0x00),
-        (RG_RF09_RXBWC, 0x04),
-        (RG_RF09_RXDFE, 0x46),
-        (RG_RF09_AGCC, 0x11),
-        (RG_RF09_EDD, 0x7A),
-        (RG_RF09_TXCUTC, 0x05),  # recommended value ()
-        (RG_RF09_TXDFE, 0x66),
-        (RG_RF09_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
-        (RG_BBC0_IRQM, 0x12),
-        (RG_BBC1_IRQM, 0x00),
-        (RG_BBC0_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
-        (RG_BBC0_OFDMC, 0x02),
-        (RG_BBC0_OFDMPHRTX, 0x06)],
+        (RG_RF24_CMD, 0x02),
+        (RG_RF09_IRQM, 0x00),
+        (RG_RF24_IRQM, 0x1F),
+        (RG_RF24_RXBWC, 0x15),
+        (RG_RF24_RXDFE, 0x66),
+        # (RG_RF09_AGCC, 0x11),
+        (RG_RF24_EDD, 0x7A),
+        (RG_RF24_TXCUTC, 0x05),  # recommended value (0x0B)
+        (RG_RF24_TXDFE, 0x66),
+        (RG_RF24_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
+        (RG_BBC0_IRQM, 0x00),
+        (RG_BBC1_IRQM, 0x12),
+        (RG_BBC1_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC1_OFDMC, 0x02),
+        (RG_BBC1_OFDMPHRTX, 0x06)],
 
     # 2400MHz_ofdm_4_mcs2
     '2400MHz_ofdm_50kbps_200kHz_mcs2': [
-        (RG_RF09_CMD, 0x02),
-        (RG_RF09_IRQM, 0x1F),
-        (RG_RF24_IRQM, 0x00),
-        (RG_RF09_RXBWC, 0x12),
-        (RG_RF09_RXDFE, 0x26),
-        (RG_RF09_AGCC, 0x11),
-        (RG_RF09_EDD, 0x7A),
-        (RG_RF09_TXCUTC, 0x03),  # recommended value ()
-        (RG_RF09_TXDFE, 0x46),
-        (RG_RF09_PAC, 0x7B),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1B~8dBm
-        (RG_BBC0_IRQM, 0x12),
-        (RG_BBC1_IRQM, 0x00),
-        (RG_BBC0_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
-        (RG_BBC0_OFDMC, 0x03),
-        (RG_BBC0_OFDMPHRTX, 0x02)],
+        (RG_RF24_CMD, 0x02),
+        (RG_RF09_IRQM, 0x00),
+        (RG_RF24_IRQM, 0x1F),
+        (RG_RF24_RXBWC, 0x03),
+        (RG_RF24_RXDFE, 0x26),
+        # (RG_RF09_AGCC, 0x11),
+        (RG_RF24_EDD, 0x7A),
+        (RG_RF24_TXCUTC, 0x03),  # recommended value (0x0B)
+        (RG_RF24_TXDFE, 0x46),
+        (RG_RF24_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
+        (RG_BBC0_IRQM, 0x00),
+        (RG_BBC1_IRQM, 0x12),
+        (RG_BBC1_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC1_OFDMC, 0x03),
+        (RG_BBC1_OFDMPHRTX, 0x02)],
 
     # 2400MHz_ofdm_4_mcs3
     '2400MHz_ofdm_100kbps_200kHz_mcs3': [
-        (RG_RF09_CMD, 0x02),
-        (RG_RF09_IRQM, 0x1F),
-        (RG_RF24_IRQM, 0x00),
-        (RG_RF09_RXBWC, 0x12),
-        (RG_RF09_RXDFE, 0x26),
-        (RG_RF09_AGCC, 0x11),
-        (RG_RF09_EDD, 0x7A),
-        (RG_RF09_TXCUTC, 0x03),  # recommended value ()
-        (RG_RF09_TXDFE, 0x46),
-        (RG_RF09_PAC, 0x7B),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1B~8dBm
-        (RG_BBC0_IRQM, 0x12),
-        (RG_BBC1_IRQM, 0x00),
-        (RG_BBC0_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
-        (RG_BBC0_OFDMC, 0x03),
-        (RG_BBC0_OFDMPHRTX, 0x03)],
+        (RG_RF24_CMD, 0x02),
+        (RG_RF09_IRQM, 0x00),
+        (RG_RF24_IRQM, 0x1F),
+        (RG_RF24_RXBWC, 0x03),
+        (RG_RF24_RXDFE, 0x26),
+        # (RG_RF09_AGCC, 0x11),
+        (RG_RF24_EDD, 0x7A),
+        (RG_RF24_TXCUTC, 0x03),  # recommended value (0x0B)
+        (RG_RF24_TXDFE, 0x46),
+        (RG_RF24_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
+        (RG_BBC0_IRQM, 0x00),
+        (RG_BBC1_IRQM, 0x12),
+        (RG_BBC1_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC1_OFDMC, 0x03),
+        (RG_BBC1_OFDMPHRTX, 0x03)],
 
     # 2400MHz_ofdm_4_mcs4
     '2400MHz_ofdm_150kbps_200kHz_mcs4': [
-        (RG_RF09_CMD, 0x02),
-        (RG_RF09_IRQM, 0x1F),
-        (RG_RF24_IRQM, 0x00),
-        (RG_RF09_RXBWC, 0x12),
-        (RG_RF09_RXDFE, 0x26),
-        (RG_RF09_AGCC, 0x11),
-        (RG_RF09_EDD, 0x7A),
-        (RG_RF09_TXCUTC, 0x03),  # recommended value ()
-        (RG_RF09_TXDFE, 0x46),
-        (RG_RF09_PAC, 0x7B),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1B~8dBm
-        (RG_BBC0_IRQM, 0x12),
-        (RG_BBC1_IRQM, 0x00),
-        (RG_BBC0_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
-        (RG_BBC0_OFDMC, 0x03),
-        (RG_BBC0_OFDMPHRTX, 0x04)],
+        (RG_RF24_CMD, 0x02),
+        (RG_RF09_IRQM, 0x00),
+        (RG_RF24_IRQM, 0x1F),
+        (RG_RF24_RXBWC, 0x03),
+        (RG_RF24_RXDFE, 0x26),
+        # (RG_RF09_AGCC, 0x11),
+        (RG_RF24_EDD, 0x7A),
+        (RG_RF24_TXCUTC, 0x03),  # recommended value (0x0B)
+        (RG_RF24_TXDFE, 0x46),
+        (RG_RF24_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
+        (RG_BBC0_IRQM, 0x00),
+        (RG_BBC1_IRQM, 0x12),
+        (RG_BBC1_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC1_OFDMC, 0x03),
+        (RG_BBC1_OFDMPHRTX, 0x04)],
 
     # 2400MHz_ofdm_4_mcs5
     '2400MHz_ofdm_200kbps_200kHz_mcs5': [
-        (RG_RF09_CMD, 0x02),
-        (RG_RF09_IRQM, 0x1F),
-        (RG_RF24_IRQM, 0x00),
-        (RG_RF09_RXBWC, 0x12),
-        (RG_RF09_RXDFE, 0x26),
-        (RG_RF09_AGCC, 0x11),
-        (RG_RF09_EDD, 0x7A),
-        (RG_RF09_TXCUTC, 0x03),  # recommended value ()
-        (RG_RF09_TXDFE, 0x46),
-        (RG_RF09_PAC, 0x7B),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1B~8dBm
-        (RG_BBC0_IRQM, 0x12),
-        (RG_BBC1_IRQM, 0x00),
-        (RG_BBC0_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
-        (RG_BBC0_OFDMC, 0x03),
-        (RG_BBC0_OFDMPHRTX, 0x05)],
+        (RG_RF24_CMD, 0x02),
+        (RG_RF09_IRQM, 0x00),
+        (RG_RF24_IRQM, 0x1F),
+        (RG_RF24_RXBWC, 0x03),
+        (RG_RF24_RXDFE, 0x26),
+        # (RG_RF09_AGCC, 0x11),
+        (RG_RF24_EDD, 0x7A),
+        (RG_RF24_TXCUTC, 0x03),  # recommended value (0x0B)
+        (RG_RF24_TXDFE, 0x46),
+        (RG_RF24_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
+        (RG_BBC0_IRQM, 0x00),
+        (RG_BBC1_IRQM, 0x12),
+        (RG_BBC1_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC1_OFDMC, 0x03),
+        (RG_BBC1_OFDMPHRTX, 0x05)],
 
     # 2400MHz_ofdm_4_mcs6
     '2400MHz_ofdm_300kbps_200kHz_mcs6': [
-        (RG_RF09_CMD, 0x02),
-        (RG_RF09_IRQM, 0x1F),
-        (RG_RF24_IRQM, 0x00),
-        (RG_RF09_RXBWC, 0x12),
-        (RG_RF09_RXDFE, 0x26),
-        (RG_RF09_AGCC, 0x11),
-        (RG_RF09_EDD, 0x7A),
-        (RG_RF09_TXCUTC, 0x03),  # recommended value ()
-        (RG_RF09_TXDFE, 0x46),
-        (RG_RF09_PAC, 0x7B),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1B~8dBm
-        (RG_BBC0_IRQM, 0x12),
-        (RG_BBC1_IRQM, 0x00),
-        (RG_BBC0_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
-        (RG_BBC0_OFDMC, 0x03),
-        (RG_BBC0_OFDMPHRTX, 0x06)]
+        (RG_RF24_CMD, 0x02),
+        (RG_RF09_IRQM, 0x00),
+        (RG_RF24_IRQM, 0x1F),
+        (RG_RF24_RXBWC, 0x03),
+        (RG_RF24_RXDFE, 0x26),
+        # (RG_RF09_AGCC, 0x11),
+        (RG_RF24_EDD, 0x7A),
+        (RG_RF24_TXCUTC, 0x03),  # recommended value (0x0B)
+        (RG_RF24_TXDFE, 0x46),
+        (RG_RF24_PAC, 0x7D),  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x1D~8dBm
+        (RG_BBC0_IRQM, 0x00),
+        (RG_BBC1_IRQM, 0x12),
+        (RG_BBC1_PC, 0x16),  # NO FCS FILTER in RX, FCS automatically added in TX
+        (RG_BBC1_OFDMC, 0x03),
+        (RG_BBC1_OFDMPHRTX, 0x06)]
 }
