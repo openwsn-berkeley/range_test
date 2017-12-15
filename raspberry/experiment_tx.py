@@ -283,7 +283,8 @@ class ExperimentTx(threading.Thread):
         self.radio_driver.radio_write_config(defs.modulations_settings[item['modulation']])
 
         # select the frequency
-        if self.modem_base_band_state == MODEM_SUB_GHZ:
+        # if self.modem_base_band_state == MODEM_SUB_GHZ:
+        if item['modem'] == "subGHZ":
             self.radio_driver.radio_off()
             self.radio_driver.radio_set_frequency((item['channel_spacing_kHz'],
                                                    item['frequency_0_kHz'],
@@ -305,7 +306,8 @@ class ExperimentTx(threading.Thread):
         # log GPS info
         # self.queue_tx.put(self.gps.gps_info_read())
 
-        if self.modem_base_band_state == MODEM_SUB_GHZ:
+        # if self.modem_base_band_state == MODEM_SUB_GHZ:
+        if item['standard'] == '802.15.4g':
             # loop through packet lengths
             for frame_length, ifs in zip(self.settings["frame_lengths"], self.settings["IFS"]):
 
@@ -358,7 +360,8 @@ class ExperimentTx(threading.Thread):
                     frame_counter += 1
 
                     # send frame
-                    self.radio_driver.radio_load_packet_2_4ghz(frameToSend[:frame_length - CRC_SIZE_2])
+                    # self.radio_driver.radio_load_packet_2_4ghz(frameToSend[:frame_length - CRC_SIZE_2])
+                    self.radio_driver.radio_load_packet_2_4ghz(frameToSend[:frame_length - CRC_SIZE_4])
                     self.radio_driver.radio_tx_now_2_4ghz()
 
                     # IFS

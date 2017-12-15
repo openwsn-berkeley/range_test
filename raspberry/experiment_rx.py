@@ -414,6 +414,8 @@ class ExperimentRx(object):
         self.gpio_handler.led_toggle(self.TRX_frame_pin)
         # self.count_frames_rx += 1
         self.queue_rx.put((frame_rcv, rssi, crc, mcs))
+        logging.debug('counter frame received: {0} , RSSI: {1}, MCS: {2}, length: {3}'
+                      .format(frame_rcv[:2], rssi, mcs, len(frame_rcv)))
 
         # re-arm the radio in RX mode
         if self.modem_base_band_state == MODEM_2GHZ:
