@@ -279,16 +279,19 @@ class ExperimentTx(threading.Thread):
 
         # select the frequency
         # if self.modem_base_band_state == MODEM_SUB_GHZ:
-        if item['modem'] == "subGHZ":
+        logging.debug('ITEM: {0}'.format(item))
+        if item['modem'] == "subGHz":
             self.radio_driver.radio_off()
             self.radio_driver.radio_set_frequency((item['channel_spacing_kHz'],
                                                    item['frequency_0_kHz'],
                                                    item['channel']))
-        else:
+        elif item['modem'] == "2.4GHz":
             self.radio_driver.radio_off_2_4ghz()
             self.radio_driver.radio_set_frequency_2_4ghz((item['channel_spacing_kHz'],
                                                           item['frequency_0_kHz'],
                                                           item['channel']))
+        else:
+            logging.CRITICAL('ERROR')
 
         self.gpio_handler.binary_counter(item['index'], self.led_array_pins)
         logging.info('modulation: {0}'.format(item["modulation"]))
