@@ -102,10 +102,8 @@ class ExperimentTx(threading.Thread):
         self.minutes                    = 0
 
         self.scheduler                  = sched.scheduler(time.time, time.sleep)
-        self.list_events_sched          = [None for i in range(len(self.settings["test_settings"]) + len(
-                                                                            self.settings["test_settings_2.4GHz"]) + 1)]
-        self.schedule_time              = ['time' for i in range(len(self.settings["test_settings"]) + len(
-                                                                            self.settings["test_settings_2.4GHz"]) + 1)]
+        self.list_events_sched          = [None for i in range(len(self.settings["test_settings"]) + 1)]
+        self.schedule_time              = ['time' for i in range(len(self.settings["test_settings"]) + 1)]
         self.led_array_pins             = [29, 31, 33, 35, 37]
         self.TRX_frame_pin              = [36]
         self.radio_isr_pin              = 11
@@ -145,6 +143,7 @@ class ExperimentTx(threading.Thread):
         self._logger_init()
         self._gpio_handler_init()
         self._radio_init()
+        logging.debug('INIT COMPLETE')
 
         # configure the logging module
         logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
@@ -234,21 +233,17 @@ class ExperimentTx(threading.Thread):
                     time.mktime(self.time_to_start.timetuple()) + offset, 1, self._execute_experiment_tx, (item,))
                 self.schedule_time[self.settings['test_settings'].index(item)] = offset
                 offset += item['durationtx_s'] + SECURITY_TIME
-            # add the 2.4GHz experiment at the end of the list
-            self.list_events_sched[len(self.settings['test_settings'])] = self.scheduler.enterabs(
-                time.mktime(self.time_to_start.timetuple()) + offset, 1, self._modem_2ghz, ())
-            self.schedule_time[len(self.settings['test_settings'])] = offset
-            offset += 0.2
-            for item2GHz in self.settings['test_settings_2.4GHz']:
-                # self.list_events_sched[len(self.settings['test_settings']) + 1] = self.scheduler.enterabs(
-                #     time.mktime(self.time_to_start.timetuple()) + offset, 1, self._execute_experiment_tx, (
-                #                                                                 self.settings['test_settings_2.4GHz'][0],))
-                # offset += self.settings['test_settings_2.4GHz'][0]['durationtx_s'] + SECURITY_TIME
-                self.list_events_sched[len(self.settings['test_settings']) + 1] = self.scheduler.enterabs(
-                    time.mktime(self.time_to_start.timetuple()) + offset, 1, self._execute_experiment_tx, (item2GHz,))
-                self.schedule_time[len(self.settings['test_settings']) + 1 + self.settings['test_settings_2.4GHz'].index(
-                    item2GHz)] = offset
-                offset += item2GHz['durationtx_s'] + SECURITY_TIME
+            # # add the 2.4GHz experiment at the end of the list
+            # self.list_events_sched[len(self.settings['test_settings'])] = self.scheduler.enterabs(
+            #     time.mktime(self.time_to_start.timetuple()) + offset, 1, self._modem_2ghz, ())
+            # self.schedule_time[len(self.settings['test_settings'])] = offset
+            # offset += 0.2
+            # for item2GHz in self.settings['test_settings_2.4GHz']:
+            #     self.list_events_sched[len(self.settings['test_settings']) + 1] = self.scheduler.enterabs(
+            #         time.mktime(self.time_to_start.timetuple()) + offset, 1, self._execute_experiment_tx, (item2GHz,))
+            #     self.schedule_time[len(self.settings['test_settings']) + 1 + self.settings['test_settings_2.4GHz'].index(
+            #         item2GHz)] = offset
+            #     offset += item2GHz['durationtx_s'] + SECURITY_TIME
             logging.debug('time for each set of settings: {0}'.format(self.schedule_time))
             self.scheduler.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self._stop_exp, ())
             logging.info('time left for the experiment to start: {0}'.format(time.mktime(self.time_to_start.timetuple())
@@ -309,29 +304,37 @@ class ExperimentTx(threading.Thread):
         # if self.modem_base_band_state == MODEM_SUB_GHZ:
         if item['standard'] == '802.15.4g':
             # loop through packet lengths
-            for frame_length, ifs in zip(self.settings["frame_lengths"], self.settings["IFS"]):
+            for frame_length in self.settings["frame_lengths_15.4g"]:
 
                 # check if the reset button has been pressed
                 # logging.warning('self.radio_driver.read_reset_cmd(): {0}'.format(self.radio_driver.read_reset_cmd()))
                 if self.f_cancel_exp:
                     break
 
-                self.radio_driver.radio_trx_enable()
+                if item['modem'] == 'subGHz':
+                    self.radio_driver.radio_trx_enable()
+                else:
+                    self.radio_driver.radio_trx_enable_2_4ghz()
                 # send burst of frames
                 for i in range(self.settings['numframes']):
 
                     # create frame
-                    frameToSend = [frame_counter >> 8, frame_counter & 0xFF] + [i & 0xFF for i in range(FRAME_LENGTH - COUNTER_LENGTH)]
-
+                    frameToSend = [frame_counter >> 8, frame_counter & 0xFF] + [i & 0xFF for i in range(FRAME_LENGTH -
+                                                                                                        COUNTER_LENGTH)]
                     # increment the frame counter
                     frame_counter += 1
 
                     # send frame
-                    self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE_4])
-                    self.radio_driver.radio_tx_now()
+                    if item['modem'] == 'subGHz':
+                        self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE_4])
+                        self.radio_driver.radio_tx_now()
+
+                    else:
+                        self.radio_driver.radio_load_packet_2_4ghz(frameToSend[:frame_length - CRC_SIZE_4])
+                        self.radio_driver.radio_tx_now_2_4ghz()
 
                     # IFS
-                    time.sleep(ifs)
+                    time.sleep(self.settings['IFS'])
                     self.gpio_handler.led_toggle(self.TRX_frame_pin)
                     # logging.warning('self.radio_driver.read_reset_cmd(): {0}'.format(self.radio_driver.read_reset_cmd()))
                     if self.f_cancel_exp:
@@ -339,9 +342,10 @@ class ExperimentTx(threading.Thread):
             # logging.info('EXIT FROM THE _execute_experiment_tx: {0}, {1}'.format(time.time(), item['modulation']))
             logging.info('DURATION OF {0} is: {1}'.format(item["modulation"], (time.time() - total_time)))
 
+        # standard is IEEE802.15.4-2006
         else:
             # loop through packet lengths
-            for frame_length, ifs in zip(self.settings["frame_lengths_2.4GHz"], self.settings["IFS_2.4GHz"]):
+            for frame_length in self.settings["frame_lengths_15.4-2006"]:
 
                 # check if the reset button has been pressed
                 # logging.warning('self.radio_driver.read_reset_cmd(): {0}'.format(self.radio_driver.read_reset_cmd()))
@@ -355,17 +359,15 @@ class ExperimentTx(threading.Thread):
                     # create frame
                     frameToSend = [frame_counter >> 8, frame_counter & 0xFF] + [i & 0xFF for i in
                                                                                 range(FRAME_LENGTH - COUNTER_LENGTH)]
-
                     # increment the frame counter
                     frame_counter += 1
 
                     # send frame
-                    # self.radio_driver.radio_load_packet_2_4ghz(frameToSend[:frame_length - CRC_SIZE_2])
-                    self.radio_driver.radio_load_packet_2_4ghz(frameToSend[:frame_length - CRC_SIZE_4])
+                    self.radio_driver.radio_load_packet_2_4ghz(frameToSend[:frame_length - CRC_SIZE_2])
                     self.radio_driver.radio_tx_now_2_4ghz()
 
                     # IFS
-                    time.sleep(ifs)
+                    time.sleep(self.settings["IFS"])
                     self.gpio_handler.led_toggle(self.TRX_frame_pin)
                     # logging.warning('self.radio_driver.read_reset_cmd(): {0}'.format(self.radio_driver.read_reset_cmd()))
                     if self.f_cancel_exp:
@@ -438,7 +440,7 @@ class ExperimentTx(threading.Thread):
         # minute
         self.experiment_tx_led_start = threading.Thread(target=self._led_start_experiment_signal)
         self.experiment_tx_led_start.start()
-        self.experiment_tx_led_start.name = 'Experiment Rx thread start led signal'
+        self.experiment_tx_led_start.name = 'Experiment Tx thread start led signal'
 
         while True:
 
@@ -469,31 +471,29 @@ class ExperimentTx(threading.Thread):
             self.experiment_tx_led_start.start()
             self.experiment_tx_led_start.name = 'Experiment Tx thread start led signal'
 
-            # gives the signal to the scheduler thread to re-schedule the experiments
-            # with self.dataLock:
-            #     self.f_schedule.set()
 
     #  ======================== callbacks =======================================
     
-    def _cb_push_button(self, channel = 13):
-        self.gpio_handler.clear_cb(13)
-        # switch on all leds to let the user know the push button has been pressed and it got the signal.
-        self.gpio_handler.binary_counter(31, self.led_array_pins)
-        if not self.f_reset_button:
-            with self.dataLock:
-                self.start_experiment.set()
-            self.f_reset_button         = True
-
-        else:
-            logging.warning('RESET BUTTON PRESSED')
-            with self.dataLock:
-                self.end_experiment.set()
-                self.f_schedule.set()
-                self.f_reset.set()
-                self.f_cancel_exp   = True
-                logging.info('f_reset set to true?: {0}'.format(self.f_reset.isSet()))
-        time.sleep(1)
-        self.gpio_handler.add_cb(self._cb_push_button, self.push_button_pin)
+    def _cb_push_button(self, channel=13):
+        pass
+        # self.gpio_handler.clear_cb(13)
+        # # switch on all leds to let the user know the push button has been pressed and it got the signal.
+        # self.gpio_handler.binary_counter(31, self.led_array_pins)
+        # if not self.f_reset_button:
+        #     with self.dataLock:
+        #         self.start_experiment.set()
+        #     self.f_reset_button         = True
+        #
+        # else:
+        #     logging.warning('RESET BUTTON PRESSED')
+        #     with self.dataLock:
+        #         self.end_experiment.set()
+        #         self.f_schedule.set()
+        #         self.f_reset.set()
+        #         self.f_cancel_exp   = True
+        #         logging.info('f_reset set to true?: {0}'.format(self.f_reset.isSet()))
+        # time.sleep(1)
+        # self.gpio_handler.add_cb(self._cb_push_button, self.push_button_pin)
 
 #  ============================ main ==========================================
 
