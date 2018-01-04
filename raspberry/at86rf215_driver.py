@@ -197,14 +197,14 @@ class At86rf215(object):
         # self.radio_write_spi(defs.RG_RF09_CMD, defs.CMD_RF_SLEEP)
 
     # TX
-    def radio_load_packet(self, packet):
+    def radio_load_packet(self, packet, CRC_SIZE):
         """
         Sends a packet to the buffer of the radio.
         :param packet: the packet to be sent.
         :return: Nothing
         """
         # send the size of the packet + size of the CRC (4 bytes)
-        fifo_tx_len = defs.RG_BBC0_TXFLL[:] + [((len(packet) + 4) & 0xFF), (((len(packet) + 4) >> 8) & 0x07)]
+        fifo_tx_len = defs.RG_BBC0_TXFLL[:] + [((len(packet) + CRC_SIZE) & 0xFF), (((len(packet) + CRC_SIZE) >> 8) & 0x07)]
         fifo_tx_len[0] |= 0x80
         self.radio_write_spi(fifo_tx_len)
         # send the packet to the modem tx fifo
@@ -212,14 +212,14 @@ class At86rf215(object):
         frame[0] |= 0x80
         self.radio_write_spi(frame)
 
-    def radio_load_packet_2_4ghz(self, packet):
+    def radio_load_packet_2_4ghz(self, packet, CRC_SIZE):
         """
         Sends a packet to the buffer of the radio.
         :param packet: the packet to be sent.
         :return: Nothing
         """
         # send the size of the packet + size of the CRC (4 bytes)
-        fifo_tx_len = defs.RG_BBC1_TXFLL[:] + [((len(packet) + 2) & 0xFF), (((len(packet) + 2) >> 8) & 0x07)]
+        fifo_tx_len = defs.RG_BBC1_TXFLL[:] + [((len(packet) + CRC_SIZE) & 0xFF), (((len(packet) + CRC_SIZE) >> 8) & 0x07)]
         fifo_tx_len[0] |= 0x80
         self.radio_write_spi(fifo_tx_len)
         # send the packet to the modem tx fifo

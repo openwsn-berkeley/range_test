@@ -320,11 +320,11 @@ class ExperimentTx(threading.Thread):
 
                     # send frame
                     if item['modem'] == 'subGHz':
-                        self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE_4])
+                        self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE_4], CRC_SIZE_4)
                         self.radio_driver.radio_tx_now()
 
                     else:
-                        self.radio_driver.radio_load_packet_2_4ghz(frameToSend[:frame_length - CRC_SIZE_4])
+                        self.radio_driver.radio_load_packet_2_4ghz(frameToSend[:frame_length - CRC_SIZE_4], CRC_SIZE_4)
                         self.radio_driver.radio_tx_now_2_4ghz()
 
                     # IFS
@@ -357,7 +357,7 @@ class ExperimentTx(threading.Thread):
                     frame_counter += 1
 
                     # send frame
-                    self.radio_driver.radio_load_packet_2_4ghz(frameToSend[:frame_length - CRC_SIZE_2])
+                    self.radio_driver.radio_load_packet_2_4ghz(frameToSend[:frame_length - CRC_SIZE_2], CRC_SIZE_2)
                     self.radio_driver.radio_tx_now_2_4ghz()
 
                     # IFS
