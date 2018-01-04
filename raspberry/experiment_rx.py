@@ -140,6 +140,7 @@ class LoggerRx(threading.Thread):
             f.write(json.dumps(self.results.copy())+'\n')
 
     def _rx_frames_psize(self):
+        # TODO: fix this shit
         """
         It assigns the values to the result dictionary by separating the burst of 400 frames into 4 groups of 100 frames
         each, knowing the first 100 correspond to 8 bytes long, 100-199 frames number correspond to 127 bytes long,

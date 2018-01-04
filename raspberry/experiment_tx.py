@@ -102,8 +102,8 @@ class ExperimentTx(threading.Thread):
         self.minutes                    = 0
 
         self.scheduler                  = sched.scheduler(time.time, time.sleep)
-        self.list_events_sched          = [None for i in range(len(self.settings["test_settings"]) + 1)]
-        self.schedule_time              = ['time' for i in range(len(self.settings["test_settings"]) + 1)]
+        self.list_events_sched          = [None for i in range(len(self.settings["test_settings"]))]
+        self.schedule_time              = ['time' for i in range(len(self.settings["test_settings"]))]
         self.led_array_pins             = [29, 31, 33, 35, 37]
         self.TRX_frame_pin              = [36]
         self.radio_isr_pin              = 11
@@ -233,17 +233,7 @@ class ExperimentTx(threading.Thread):
                     time.mktime(self.time_to_start.timetuple()) + offset, 1, self._execute_experiment_tx, (item,))
                 self.schedule_time[self.settings['test_settings'].index(item)] = offset
                 offset += item['durationtx_s'] + SECURITY_TIME
-            # # add the 2.4GHz experiment at the end of the list
-            # self.list_events_sched[len(self.settings['test_settings'])] = self.scheduler.enterabs(
-            #     time.mktime(self.time_to_start.timetuple()) + offset, 1, self._modem_2ghz, ())
-            # self.schedule_time[len(self.settings['test_settings'])] = offset
-            # offset += 0.2
-            # for item2GHz in self.settings['test_settings_2.4GHz']:
-            #     self.list_events_sched[len(self.settings['test_settings']) + 1] = self.scheduler.enterabs(
-            #         time.mktime(self.time_to_start.timetuple()) + offset, 1, self._execute_experiment_tx, (item2GHz,))
-            #     self.schedule_time[len(self.settings['test_settings']) + 1 + self.settings['test_settings_2.4GHz'].index(
-            #         item2GHz)] = offset
-            #     offset += item2GHz['durationtx_s'] + SECURITY_TIME
+
             logging.debug('time for each set of settings: {0}'.format(self.schedule_time))
             self.scheduler.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self._stop_exp, ())
             logging.info('time left for the experiment to start: {0}'.format(time.mktime(self.time_to_start.timetuple())
@@ -256,6 +246,7 @@ class ExperimentTx(threading.Thread):
         self.modem_base_band_state = MODEM_2GHZ
 
     def _execute_experiment_tx(self, item):
+        # TODO: do this as in the experiment RX
         """"
         :param item
 
