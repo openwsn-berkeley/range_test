@@ -21,8 +21,8 @@ import GpsThread as gps
 import gpio_handler as gpio
 
 FRAME_LENGTH    = 2047
-CRC_SIZE_4      = 4
-CRC_SIZE_2      = 2
+CRC_SIZE_LEGACY = 2
+CRC_SIZE_154G   = 2
 SECURITY_TIME   = 5  # 3 seconds to give more time to TRX to complete the 400 frame bursts.
 START_OFFSET    = 6  # 4.5 seconds after the starting time arrives.
 MODEM_SUB_GHZ   = 0
@@ -77,7 +77,7 @@ class LoggerTx(threading.Thread):
                     self.results['frequency_0'] = item['frequency_0_kHz']
                     self.results['channel'] = item['channel']
                     self.results['radio_settings'] = item['modulation']
-                else :
+                else:
                     self.results['GPSinfo_at_start'] = item
             elif type(item) is float:
                 logging.info('Time {0}'.format(item))
@@ -322,11 +322,12 @@ class ExperimentTx(threading.Thread):
 
                     # send frame
                     if item['modem'] == 'subGHz':
-                        self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE_4], CRC_SIZE_4)
+                        self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE_154G], CRC_SIZE_154G)
                         self.radio_driver.radio_tx_now()
 
                     else:
-                        self.radio_driver.radio_load_packet_2_4ghz(frameToSend[:frame_length - CRC_SIZE_4], CRC_SIZE_4)
+                        self.radio_driver.radio_load_packet_2_4ghz(frameToSend[:frame_length - CRC_SIZE_154G],
+                                                                   CRC_SIZE_154G)
                         self.radio_driver.radio_tx_now_2_4ghz()
 
                     # IFS
@@ -359,7 +360,8 @@ class ExperimentTx(threading.Thread):
                     frame_counter += 1
 
                     # send frame
-                    self.radio_driver.radio_load_packet_2_4ghz(frameToSend[:frame_length - CRC_SIZE_2], CRC_SIZE_2)
+                    self.radio_driver.radio_load_packet_2_4ghz(frameToSend[:frame_length - CRC_SIZE_LEGACY],
+                                                               CRC_SIZE_LEGACY)
                     self.radio_driver.radio_tx_now_2_4ghz()
 
                     # IFS

@@ -25,9 +25,10 @@ CRC_SIZE            = 4
 SECURITY_TIME       = 5  # 5 seconds to give more time to TRX to complete the 400 frame bursts.
 START_OFFSET        = 1  # 1 second after the starting time arrives.
 FCS_VALID           = 1
-FRAME_MINIMUM_SIZE  = 7
+FRAME_MINIMUM_SIZE  = 123
 MODEM_SUB_GHZ       = 0
 MODEM_2GHZ          = 1
+FRAME_COUNT         = 1000
 
 
 class LoggerRx(threading.Thread):
@@ -85,7 +86,8 @@ class LoggerRx(threading.Thread):
                     if item[2] is FCS_VALID:  # check frame correctness.
                         if len(item[0]) > FRAME_MINIMUM_SIZE:
                             try:
-                                if item[0][0] * 256 + item[0][1] < 500 and (item[0][2], item[0][3]) == (0x00, 0x01):
+                                if item[0][0] * 256 + item[0][1] < FRAME_COUNT and (item[0][2], item[0][3]) == (0x00,
+                                                                                                                0x01):
                                     self.rx_string[item[0][0] * 256 + item[0][1]] = '.'
                                     self.rssi_values[item[0][0] * 256 + item[0][1]] = float(item[1])
                                     self.results['rx_frames_count'] += 1
@@ -151,18 +153,10 @@ class LoggerRx(threading.Thread):
         """
 
         self.results['RSSI_by_length'] = {
-                '20':    self.rssi_values[0:self.settings['numframes']],
-                '127':  self.rssi_values[self.settings['numframes']:2*self.settings['numframes']],
-                '250':  self.rssi_values[2*self.settings['numframes']:3*self.settings['numframes']],
-                '1000': self.rssi_values[3*self.settings['numframes']:4*self.settings['numframes']],
-                '2047': self.rssi_values[4*self.settings['numframes']:5*self.settings['numframes']]
+                '127':  self.rssi_values[0:self.settings['numframes']]
             },
         self.results['rx_string'] = {
-                '20':    ''.join(self.rx_string[0:self.settings['numframes']]),
-                '127':  ''.join(self.rx_string[self.settings['numframes']:2*self.settings['numframes']]),
-                '250': ''.join(self.rx_string[2*self.settings['numframes']:3*self.settings['numframes']]),
-                '1000': ''.join(self.rx_string[3*self.settings['numframes']:4*self.settings['numframes']]),
-                '2047': ''.join(self.rx_string[4*self.settings['numframes']:5*self.settings['numframes']])
+                '127':  ''.join(self.rx_string[0:self.settings['numframes']])
         }
 
 # ============================== public =======================================
