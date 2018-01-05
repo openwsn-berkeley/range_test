@@ -197,10 +197,15 @@ class ExperimentRx(object):
 
         # start all the drivers
         # self._gps_init()
+        logging.info('radio setup')
         self._radio_setup()
+        logging.info('logger init')
         self._logger_init()
+        logging.info('gpio handler init')
         self._gpio_handler_init()
+        logging.info('radio init')
         self._radio_init()
+        logging.info('start exp')
         self.start_exp()
         logging.debug('INIT COMPLETE')
 
@@ -235,15 +240,15 @@ class ExperimentRx(object):
         self.LoggerRx       = LoggerRx(self.queue_rx, self.settings)
 
     def _gpio_handler_init(self):
-        logging.info('gpio init!')
-        self.gpio_handler   = gpio.GPIO_handler(self.radio_isr_pin, self.push_button_pin, self.radio_driver.cb_radio_isr,
-                                           self._cb_push_button)
-        
+        logging.info('_gpio_handler_init!')
+        self.gpio_handler   = gpio.GPIO_handler(self.radio_isr_pin, self.push_button_pin,
+                                                self.radio_driver.cb_radio_isr, self._cb_push_button)
         self.gpio_handler.init_binary_pins(self.led_array_pins)
         self.gpio_handler.init_binary_pins(self.TRX_frame_pin)
         for led in self.led_array_pins:
             self.gpio_handler.led_off(led)
         self.gpio_handler.led_off(self.TRX_frame_pin)
+        logging.info('END GPIO INIT!')
 
     def _start_time_experiment(self):
         """
@@ -338,7 +343,7 @@ class ExperimentRx(object):
             logging.debug('radio listening!')
 
         self.gpio_handler.binary_counter(item['index'], self.led_array_pins)
-        logging.info('modulation: {0}'.format(item["modulation"]))
+        logging.info('modulation: {0}, channel: {1}'.format(item["modulation"], item["channel"]))
         # sends the signal to the logger class through queue, letting it know a new experiment just started.
         self.queue_rx.put('Start')
         # sends the config to the logger class through queue
@@ -453,7 +458,7 @@ def main():
     #     settings = f.read().replace('\n', ' ').replace('\r', '')
     #     settings = json.loads(settings)
 
-    logging.basicConfig(stream=sys.__stdout__, level=logging.DEBUG)
+    logging.basicConfig(stream=sys.__stdout__, level=logging.INFO)
     # experimentRx = ExperimentRx(settings)
 
     while True:

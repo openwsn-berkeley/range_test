@@ -24,7 +24,7 @@ FRAME_LENGTH    = 2047
 CRC_SIZE_LEGACY = 2
 CRC_SIZE_154G   = 2
 SECURITY_TIME   = 5  # 3 seconds to give more time to TRX to complete the 400 frame bursts.
-START_OFFSET    = 6  # 4.5 seconds after the starting time arrives.
+START_OFFSET    = 3  # 4.5 seconds after the starting time arrives.
 MODEM_SUB_GHZ   = 0
 MODEM_2GHZ      = 1
 COUNTER_LENGTH  = 2
@@ -128,12 +128,6 @@ class ExperimentTx(threading.Thread):
         self.end_experiment.clear()
         self.f_schedule.clear()
 
-        # start the thread
-        threading.Thread.__init__(self)
-        self.name = 'ExperimentTx_'
-        self.daemon = True
-        self.start()
-
         self.radio_driver               = None
         self.LoggerTx                   = None
         self.gps                        = None
@@ -141,14 +135,24 @@ class ExperimentTx(threading.Thread):
 
         # start all the drivers
         # self._gps_init()
+        logging.info('radio setup')
         self._radio_setup()
+        logging.info('logger init')
         self._logger_init()
+        logging.info('gpio handler init')
         self._gpio_handler_init()
+        logging.info('radio init')
         self._radio_init()
         logging.debug('INIT COMPLETE')
 
+        # start the thread
+        threading.Thread.__init__(self)
+        self.name = 'ExperimentTx_'
+        self.daemon = True
+        self.start()
+
         # configure the logging module
-        logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
+        # logging.basicConfig(stream=sys.__stdout__, level=logging.WARNING)
 
     #  ====================== private =========================================
 
@@ -188,6 +192,7 @@ class ExperimentTx(threading.Thread):
         self.gpio_handler.init_binary_pins(self.TRX_frame_pin)
         self.gpio_handler.led_off(self.TRX_frame_pin)
         self.gpio_handler.binary_counter(0, self.led_array_pins)
+        logging.info('GPIO INIT END')
 
     def _start_time_experiment(self):
         """
@@ -236,7 +241,7 @@ class ExperimentTx(threading.Thread):
                 self.schedule_time[self.settings['test_settings'].index(item)] = offset
                 offset += item['durationtx_s'] + SECURITY_TIME
 
-            logging.debug('time for each set of settings: {0}'.format(self.schedule_time))
+            logging.info('time for each set of settings: {0}'.format(self.schedule_time))
             self.scheduler.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self._stop_exp, ())
             logging.info('time left for the experiment to start: {0}'.format(time.mktime(self.time_to_start.timetuple())
                                                                              + START_OFFSET - time.time()))
@@ -287,7 +292,7 @@ class ExperimentTx(threading.Thread):
             logging.CRITICAL('ERROR')
 
         self.gpio_handler.binary_counter(item['index'], self.led_array_pins)
-        logging.info('modulation: {0}'.format(item["modulation"]))
+        logging.info('modulation: {0}, channel: {1}'.format(item["modulation"], item["channel"]))
         # let know to the informative class the beginning of a new experiment
         self.queue_tx.put('Start')
 
@@ -412,7 +417,7 @@ class ExperimentTx(threading.Thread):
     
     def run(self):
         # setup the radio
-        self._radio_setup()
+        # self._radio_setup()
         logging.info('WAITING FOR THE START BUTTON TO BE PRESSED')
 
         # push button signal
@@ -505,7 +510,7 @@ def load_experiment_details():
 
 def main():
     f_start = False
-    logging.basicConfig(stream=sys.__stdout__, level=logging.DEBUG)
+    logging.basicConfig(stream=sys.__stdout__, level=logging.INFO)
     # experimentTx = ExperimentTx(load_experiment_details())
 
     while True:
