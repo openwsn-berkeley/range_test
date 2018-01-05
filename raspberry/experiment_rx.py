@@ -42,7 +42,8 @@ class LoggerRx(threading.Thread):
                 'numframes'])]
         self.rssi_values    = [None for i in range(len(self.settings['frame_lengths_15.4g'])*self.settings[
                 'numframes'])]
-        self.name_file          = '/home/pi/range_test_raw_data/experiments_results_' + socket.gethostname() + '.json'
+        self.name_file          = '/home/pi/range_test_raw_data_ofdm_vs_oqpsk/experiments_results_' + \
+                                  socket.gethostname() + '.json'
         self.results            = {'type': 'end_of_cycle_rx', 'start_time_str': time.strftime(
             "%a, %d %b %Y %H:%M:%S UTC", time.gmtime()), 'start_time_epoch': time.time(), 'version': self.settings[
             'version'], 'position_description': None, 'radio_settings': None, 'rx_frames_count': 0, 'RSSI_by_length':

@@ -39,8 +39,10 @@ class LoggerTx(threading.Thread):
         self.settings = settings
 
         # local variables
-        self.name_file = '/home/pi/range_test_raw_data/experiments_results_' + socket.gethostname() + '.json'
-        self.results = {'type': 'end_of_cycle_tx', 'start_time_str': time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.gmtime()),
+        self.name_file = '/home/pi/range_test_raw_data_ofdm_vs_oqpsk/experiments_results_' + socket.gethostname() +\
+                         '.json'
+        self.results = {'type': 'end_of_cycle_tx', 'start_time_str': time.strftime("%a, %d %b %Y %H:%M:%S UTC",
+                                                                                   time.gmtime()),
                         'start_time_epoch': time.time(), 'radio_settings': None, 'GPSinfo_at_start': None,
                         'version': self.settings['version'], 'channel': None, 'frequency_0': None,
                         'burst_size': self.settings['numframes'], 'id': socket.gethostname()}

@@ -321,8 +321,8 @@ class At86rf215(object):
         # read from metadata
         rssi = self.radio_read_spi(defs.RG_RF24_EDV, 1)[0]
         crc = ((self.radio_read_spi(defs.RG_BBC1_PC, 1))[0] >> 5) & 0x01
-        # mcs = self.radio_read_spi(defs.RG_BBC0_OFDMPHRRX, 1)[0] & defs.OFDMPHRRX_MCS_MASK
-        mcs = 0
+        mcs = self.radio_read_spi(defs.RG_BBC1_OFDMPHRRX, 1)[0] & defs.OFDMPHRRX_MCS_MASK
+        # mcs = 0
         # representing the RSSI value in dBm
         if rssi == 127:
             rssi = 'not valid'
