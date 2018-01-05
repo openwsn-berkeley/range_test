@@ -414,17 +414,6 @@ class ExperimentRx(object):
 
     def _experiment_scheduling(self):
 
-        # if self.experiment_counter < (len(self.settings['test_settings']) + len(self.settings['test_settings_2.4GHz'])):
-        #     self._execute_experiment_rx()
-        #     if self.experiment_counter < (len(self.settings['test_settings'])):
-        #         self.time_next_experiment = self.settings['test_settings'][self.experiment_counter][
-        #                                    'durationtx_s'] + SECURITY_TIME
-        #     else:
-        #         self.time_next_experiment = self.settings['test_settings_2.4GHz'][self.experiment_counter - len(
-        #             self.settings['test_settings'])]['durationtx_s'] + SECURITY_TIME
-        #     self.experiment_scheduled = Timer(self.time_next_experiment, self._experiment_scheduling, ())
-        #     self.experiment_scheduled.start()
-        #     self.experiment_counter += 1
         if self.experiment_counter < (len(self.settings['test_settings'])):
             self._execute_experiment_rx(self.settings['test_settings'][self.experiment_counter])
             self.time_next_experiment = self.settings['test_settings'][self.experiment_counter][
