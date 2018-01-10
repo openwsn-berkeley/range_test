@@ -43,8 +43,8 @@ class LoggerRx(threading.Thread):
             'numframes'])]
         self.rssi_values = [None for i in range(len(self.settings['frame_lengths_15.4g']) * self.settings[
             'numframes'])]
-        self.name_file = '/home/pi/range_test_raw_data_ofdm_vs_oqpsk/experiments_results_' + \
-                         socket.gethostname() + '.json'
+        self.name_file = '/home/pi/sniffer/experiments_results_' + \
+                         socket.gethostname() + '_' + time.ctime() + '.json'
         self.results = {'type': 'end_of_cycle_rx', 'start_time_str': time.strftime(
             "%a, %d %b %Y %H:%M:%S UTC", time.gmtime()), 'start_time_epoch': time.time(), 'version': self.settings[
             'version'], 'position_description': None, 'radio_settings': None, 'rx_frames_count': 0, 'RSSI_by_length':
@@ -173,6 +173,7 @@ class ExperimentRx(object):
 
         self.hours = 0
         self.minutes = 0
+        self.count_frames_rx = 0
         self.queue_rx = Queue.Queue()
         self.started_time = None
         self.time_next_experiment = START_OFFSET
@@ -276,6 +277,7 @@ class ExperimentRx(object):
         it makes print the last modulation results
         """
         self.queue_rx.put('Print last')
+        logging.info('total frames received: {0}'.format(self.count_frames_rx))
 
     def _led_start_experiment_signal(self):
         """
@@ -360,20 +362,9 @@ class ExperimentRx(object):
         # self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
         self.radio_driver.radio_off()
         self.gpio_handler.led_off(self.TRX_frame_pin)
-        # self.gpio_handler.binary_counter(0, self.led_array_pins)
-        # if self.experiment_scheduled:
-        #     logging.debug('cancelling experiment')
-        #     self.experiment_scheduled.cancel()
-        #     self.experiment_counter = 0
-        # self.experiment_scheduled = Timer(
-        #     time.mktime(self.time_to_start.timetuple()) + START_OFFSET - time.time(),
-        #     self._experiment_scheduling, ())
-        # self.experiment_scheduled.start()
         # # here it is called the
         self._experiment_scheduling()
-        logging.info('time left for the experiment to start: {0}'.format(time.mktime(self.time_to_start.timetuple())
-                                                                         + START_OFFSET - time.time()))
-        logging.info('time to start experiment: {0}'.format(self.time_to_start.timetuple()))
+
         self.experiment_rx_thread = threading.Thread(target=self._led_start_experiment_signal)
         self.experiment_rx_thread.start()
         self.experiment_rx_thread.name = 'Experiment Rx thread start led signal'
@@ -385,9 +376,9 @@ class ExperimentRx(object):
 
     def _cb_rx_frame(self, frame_rcv, rssi, crc, mcs):
         self.gpio_handler.led_toggle(self.TRX_frame_pin)
-        # self.count_frames_rx += 1
+        self.count_frames_rx += 1
         self.queue_rx.put((frame_rcv, rssi, crc, mcs))
-        logging.debug('counter frame received: {0} , RSSI: {1}, MCS: {2}, length: {3}, FCS: {4}'
+        logging.info('counter frame received: {0} , RSSI: {1}, MCS: {2}, length: {3}, FCS: {4}'
                       .format(frame_rcv[:2], rssi, mcs, len(frame_rcv), crc))
 
         # re-arm the radio in RX mode
@@ -405,7 +396,9 @@ class ExperimentRx(object):
             self.experiment_scheduled = Timer(self.time_next_experiment, self._experiment_scheduling, ())
             self.experiment_scheduled.start()
             self.experiment_counter += 1
+            logging.info('self.time_next_experiment : {0}'.format(self.time_next_experiment))
         else:
+            logging.info('stopping experiment')
             self._stop_exp()
             self.radio_driver.radio_off()
             self.radio_driver.radio_off_2_4ghz()
