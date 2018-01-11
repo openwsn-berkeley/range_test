@@ -4,7 +4,7 @@
     "version": "2.1.0",
     "numframes": 1000,
     "test_settings":    [
-        {"channel_spacing_kHz":  1200, "frequency_0_kHz": 901200, "channel":  0, "modulation": "2400MHz_ofdm_100kbps_1200kHz_mcs0",    "durationtx_s":  60, "index": 10, "modem": "2.4GHz", "standard": "802.15.4g"}
+         {"channel_spacing_kHz": 1200, "frequency_0_kHz": 863625, "channel":   4, "modulation": "subGHz_ofdm_100kbps_1200kHz_mcs0",            "durationtx_s":  38, "index": 7, "modem": "subGHz", "standard": "802.15.4g"}
     ],
     "frame_lengths_15.4-2006":    [127]
 }
