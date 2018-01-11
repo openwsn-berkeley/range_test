@@ -1,5 +1,5 @@
 {
-    "IFS":                    0.02,
+    "IFS":                    1.0,
     "frame_lengths_15.4g":    [127],
     "version": "2.1.0",
     "numframes": 1000,
