@@ -329,7 +329,7 @@ class ExperimentRx(object):
             logging.debug('RADIO STATE: {0}'.format(self.radio_driver.check_radio_state_rf09()))
             logging.debug('radio listening!')
         else:
-            # logging.debug('LEGACY set up')
+            # logging.debug('LEGACY set up') or 802.15.4g at 2.4GHz
             self.modem_base_band_state = MODEM_2GHZ
             self.radio_driver.radio_set_frequency_2_4ghz((item['channel_spacing_kHz'],
                                                               item['frequency_0_kHz'],
