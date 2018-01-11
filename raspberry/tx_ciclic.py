@@ -328,7 +328,7 @@ class ExperimentTx(threading.Thread):
                     # send frame
                     if item['modem'] == 'subGHz':
                         self.radio_driver.radio_load_packet(frameToSend[:frame_length - CRC_SIZE_154G], CRC_SIZE_154G)
-                        logging.info('antes de enviar')
+                        logging.info('antes de enviar!')
                         self.radio_driver.radio_tx_now()
                         logging.info('dormir para siempre')
                         time.sleep(3600)
