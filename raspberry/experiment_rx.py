@@ -22,7 +22,7 @@ import gpio_handler as gpio
 
 PACKET_LENGTH       = 2047
 CRC_SIZE            = 4
-SECURITY_TIME       = 5  # 5 seconds to give more time to TRX to complete the 400 frame bursts.
+SECURITY_TIME       = 3  # 5 seconds to give more time to TRX to complete the 400 frame bursts.
 START_OFFSET        = 1  # 1 second after the starting time arrives.
 FCS_VALID           = 1
 FRAME_MINIMUM_SIZE  = 123
@@ -311,6 +311,7 @@ class ExperimentRx(threading.Thread):
             i += 1
 
     def _execute_experiment_rx(self, item):
+        logging.info('start time RX 1000 : {0}'.format(time.time()))
         logging.debug('item to configure the radio: {0}'.format(item))
         self.radio_driver.radio_off_2_4ghz()
         self.radio_driver.radio_off()
@@ -426,21 +427,23 @@ class ExperimentRx(threading.Thread):
 
     def _experiment_scheduling(self):
 
-        if self.experiment_counter < (len(self.settings['test_settings'])):
-            self._execute_experiment_rx(self.settings['test_settings'][self.experiment_counter])
-            self.time_next_experiment = self.settings['test_settings'][self.experiment_counter][
-                                            'durationtx_s'] + SECURITY_TIME
-            self.experiment_scheduled = Timer(self.time_next_experiment, self._experiment_scheduling, ())
-            self.experiment_scheduled.start()
-            self.experiment_counter += 1
-        else:
-            self._stop_exp()
-            self.radio_driver.radio_off()
-            self.radio_driver.radio_off_2_4ghz()
-            for led in self.led_array_pins:
-                self.gpio_handler.led_off(led)
-            self.gpio_handler.led_off(self.TRX_frame_pin)
-            self._led_end_experiment_signal()
+        # if self.experiment_counter < (len(self.settings['test_settings'])):
+        self._execute_experiment_rx(self.settings['test_settings'][self.experiment_counter % len(
+            self.settings['test_settings'])])
+        self.time_next_experiment = self.settings['test_settings'][self.experiment_counter % len(
+            self.settings['test_settings'])]['durationtx_s'] + SECURITY_TIME
+        logging.info('time of next experiment {0}'.format(self.time_next_experiment))
+        self.experiment_scheduled = Timer(self.time_next_experiment, self._experiment_scheduling, ())
+        self.experiment_scheduled.start()
+        self.experiment_counter += 1
+        # else:
+        #     self._stop_exp()
+        #     self.radio_driver.radio_off()
+        #     self.radio_driver.radio_off_2_4ghz()
+        #     for led in self.led_array_pins:
+        #         self.gpio_handler.led_off(led)
+        #     self.gpio_handler.led_off(self.TRX_frame_pin)
+        #     self._led_end_experiment_signal()
 
 #  ============================ public ========================================
 
@@ -461,7 +464,7 @@ def load_experiment_details():
 def main():
     f_start = False
 
-    logging.basicConfig(stream=sys.__stdout__, level=logging.DEBUG)
+    logging.basicConfig(stream=sys.__stdout__, level=logging.INFO)
     # experimentRx = ExperimentRx(settings)
 
     while True:

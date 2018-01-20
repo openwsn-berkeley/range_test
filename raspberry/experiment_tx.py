@@ -14,6 +14,7 @@ import json
 from datetime import datetime as dt
 import datetime
 import socket
+from threading import Timer
 
 import at86rf215_defs as defs
 import at86rf215_driver as radio
@@ -23,8 +24,8 @@ import gpio_handler as gpio
 FRAME_LENGTH    = 2047
 CRC_SIZE_LEGACY = 2
 CRC_SIZE_154G   = 2
-SECURITY_TIME   = 5  # 3 seconds to give more time to TRX to complete the 400 frame bursts.
-START_OFFSET    = 7  # 4.5 seconds after the starting time arrives.
+SECURITY_TIME   = 3  # 3 seconds to give more time to TRX to complete the 400 frame bursts.
+START_OFFSET    = 3  # 4.5 seconds after the starting time arrives.
 MODEM_SUB_GHZ   = 0
 MODEM_2GHZ      = 1
 COUNTER_LENGTH  = 2
@@ -114,6 +115,9 @@ class ExperimentTx(threading.Thread):
         self.time_to_start              = None
         self.started_time               = None
         self.experiment_tx_led_start    = None
+        self.experiment_scheduled       = None
+        self.experiment_tx_thread       = None
+        self.experiment_counter         = 0
         self.modem_base_band_state      = MODEM_SUB_GHZ
 
         self.dataLock                   = threading.RLock()
@@ -226,28 +230,49 @@ class ExperimentTx(threading.Thread):
         self._led_end_experiment_signal()
         logging.debug('END OF EXPERIMENTS')
 
+    # def _experiment_scheduling(self):
+    #
+    #     logging.debug('entering the _experiment_scheduling')
+    #     while True:
+    #         logging.debug('IN THE _experiment_scheduling WAITING FOR THE self.f_schedule.set')
+    #         self.f_schedule.wait()
+    #         self.f_schedule.clear()
+    #         logging.debug('START SCHEDULING STUFF')
+    #         offset = START_OFFSET
+    #         for item in self.settings['test_settings']:
+    #             self.list_events_sched[self.settings['test_settings'].index(item)] = self.scheduler.enterabs(
+    #                 time.mktime(self.time_to_start.timetuple()) + offset, 1, self._execute_experiment_tx, (item,))
+    #             self.schedule_time[self.settings['test_settings'].index(item)] = offset
+    #             offset += item['durationtx_s'] + SECURITY_TIME
+    #
+    #         logging.info('time for each set of settings: {0}'.format(self.schedule_time))
+    #         self.scheduler.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self._stop_exp, ())
+    #         logging.info('time left for the experiment to start: {0}'.format(time.mktime(self.time_to_start.timetuple())
+    #                                                                          + START_OFFSET - time.time()))
+    #         logging.info('time to start experiment: {0}'.format(self.time_to_start.timetuple()))
+    #         self.scheduler.run()
+    #         logging.info('END OF THE _experiment_scheduling')
     def _experiment_scheduling(self):
 
-        logging.debug('entering the _experiment_scheduling')
-        while True:
-            logging.debug('IN THE _experiment_scheduling WAITING FOR THE self.f_schedule.set')
-            self.f_schedule.wait()
-            self.f_schedule.clear()
-            logging.debug('START SCHEDULING STUFF')
-            offset = START_OFFSET
-            for item in self.settings['test_settings']:
-                self.list_events_sched[self.settings['test_settings'].index(item)] = self.scheduler.enterabs(
-                    time.mktime(self.time_to_start.timetuple()) + offset, 1, self._execute_experiment_tx, (item,))
-                self.schedule_time[self.settings['test_settings'].index(item)] = offset
-                offset += item['durationtx_s'] + SECURITY_TIME
-
-            logging.info('time for each set of settings: {0}'.format(self.schedule_time))
-            self.scheduler.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self._stop_exp, ())
-            logging.info('time left for the experiment to start: {0}'.format(time.mktime(self.time_to_start.timetuple())
-                                                                             + START_OFFSET - time.time()))
-            logging.info('time to start experiment: {0}'.format(self.time_to_start.timetuple()))
-            self.scheduler.run()
-            logging.info('END OF THE _experiment_scheduling')
+        # if self.experiment_counter < (len(self.settings['test_settings'])):
+        self.experiment_tx_thread = threading.Thread(target=self._execute_experiment_tx, args=[self.settings[
+            'test_settings'][self.experiment_counter % len(self.settings['test_settings'])]])
+        self.experiment_tx_thread.start()
+        self.experiment_tx_thread.name = 'TX 1000 packets'
+        self.time_next_experiment = self.settings['test_settings'][self.experiment_counter % len(
+            self.settings['test_settings'])]['durationtx_s'] + SECURITY_TIME
+        logging.info('time of next experiment {0}'.format(self.time_next_experiment))
+        self.experiment_scheduled = Timer(self.time_next_experiment, self._experiment_scheduling, ())
+        self.experiment_scheduled.start()
+        self.experiment_counter += 1
+        # else:
+        #     self._stop_exp()
+        #     self.radio_driver.radio_off()
+        #     self.radio_driver.radio_off_2_4ghz()
+        #     for led in self.led_array_pins:
+        #         self.gpio_handler.led_off(led)
+        #     self.gpio_handler.led_off(self.TRX_frame_pin)
+        #     self._led_end_experiment_signal()
 
     def _modem_2ghz(self):
         self.modem_base_band_state = MODEM_2GHZ
@@ -258,6 +283,7 @@ class ExperimentTx(threading.Thread):
         :param item
 
         """
+        logging.info('start time TX 1000 : {0}'.format(time.time()))
         total_time = time.time()
         # logging.debug('entering _execute_experiment_tx, time: {0}, {1}'.format(time.time(), item['modulation']))
         self.gpio_handler.led_off(self.TRX_frame_pin)
@@ -429,50 +455,68 @@ class ExperimentTx(threading.Thread):
         self.hours, self.minutes = self._start_time_experiment()
         self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
 
-        # it start the scheduler thread
-        self.scheduler_aux = threading.Thread(target=self._experiment_scheduling)
-        self.scheduler_aux.start()
-        self.scheduler_aux.name = 'Scheduler Tx'
-        logging.debug('waiting the end of the experiment')
+        self.radio_driver.radio_off()
+        self.gpio_handler.led_off(self.TRX_frame_pin)
+        # self.gpio_handler.binary_counter(0, self.led_array_pins)
+        if self.experiment_scheduled:
+            logging.debug('cancelling experiment')
+            self.experiment_scheduled.cancel()
+            self.experiment_counter = 0
+        self.experiment_scheduled = Timer(
+            time.mktime(self.time_to_start.timetuple()) + START_OFFSET - time.time(),
+            self._experiment_scheduling, ())
+        self.experiment_scheduled.start()
+        logging.info('time left for the experiment to start: {0}'.format(time.mktime(self.time_to_start.timetuple())
+                                                                    + START_OFFSET - time.time()))
+        logging.info('time to start experiment: {0}'.format(self.time_to_start.timetuple()))
+        self.experiment_tx_led_start = threading.Thread(target=self._led_start_experiment_signal)
+        self.experiment_tx_led_start.start()
+        self.experiment_tx_led_start.name = 'Experiment Rx thread start led signal'
+
+        # # it start the scheduler thread
+        # self.scheduler_aux = threading.Thread(target=self._experiment_scheduling)
+        # self.scheduler_aux.start()
+        # self.scheduler_aux.name = 'Scheduler Tx'
+        # logging.debug('waiting the end of the experiment')
 
         # gives the signal to the scheduler to start scheduling the 31 experiments
-        with self.dataLock:
-            self.f_schedule.set()
+        # with self.dataLock:
+        #     self.f_schedule.set()
 
         # it will switch on the LED frame_received_pin to let the user know the experiment will start the following
         # minute
-        self.experiment_tx_led_start = threading.Thread(target=self._led_start_experiment_signal)
-        self.experiment_tx_led_start.start()
-        self.experiment_tx_led_start.name = 'Experiment Tx thread start led signal'
-
-        while True:
-
-            # it waits for the self.end_experiment signal that can be triggered at the end of the 31st experiment
-            # or when the push button is pressed
-            self.end_experiment.wait()
-            self.end_experiment.clear()
-            logging.info('END of the experiment, is self.end_experiment set? {0}'.format(self.end_experiment.is_set()))
-
-            # if push button, removes all the experiments scheduled
-            self.f_reset.wait()
-            self.f_reset.clear()
-            logging.info('RESET experiment, is self.f_reset set? {0}'.format(self.f_reset.is_set()))
-
-            self.gpio_handler.led_off(self.TRX_frame_pin)
-            logging.info('button pressed')
-            logging.debug('RESETTING SCHEDULE')
-            self._remove_scheduled_experiment()
-            logging.debug('removed items in the queue')
-            self.started_time = time.time()
-
-            # determines the starting time for the new set of experiments
-            self.hours, self.minutes = self._start_time_experiment()
-            self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
-            logging.debug('WITHIN THE WHILE TRUE MAIN --->> self.time_to_start: {0}'.format(self.time_to_start))
-            # self.gpio_handler.binary_counter(0, self.led_array_pins)
-            self.experiment_tx_led_start = threading.Thread(target=self._led_start_experiment_signal)
-            self.experiment_tx_led_start.start()
-            self.experiment_tx_led_start.name = 'Experiment Tx thread start led signal'
+        # self.experiment_tx_led_start = threading.Thread(target=self._led_start_experiment_signal)
+        # self.experiment_tx_led_start.start()
+        # self.experiment_tx_led_start.name = 'Experiment Tx thread start led signal'
+        #
+        # while True:
+        #
+        #     # it waits for the self.end_experiment signal that can be triggered at the end of the 31st experiment
+        #     # or when the push button is pressed
+        #     self.end_experiment.wait()
+        #     self.end_experiment.clear()
+        #     logging.info('END of the experiment, is self.end_experiment set? {0}'.format(self.end_experiment.is_set()))
+        #
+        #     # if push button, removes all the experiments scheduled
+        #     self.f_reset.wait()
+        #     self.f_reset.clear()
+        #     logging.info('RESET experiment, is self.f_reset set? {0}'.format(self.f_reset.is_set()))
+        #
+        #     self.gpio_handler.led_off(self.TRX_frame_pin)
+        #     logging.info('button pressed')
+        #     logging.debug('RESETTING SCHEDULE')
+        #     self._remove_scheduled_experiment()
+        #     logging.debug('removed items in the queue')
+        #     self.started_time = time.time()
+        #
+        #     # determines the starting time for the new set of experiments
+        #     self.hours, self.minutes = self._start_time_experiment()
+        #     self.time_to_start = dt.combine(dt.now(), datetime.time(self.hours, self.minutes))
+        #     logging.debug('WITHIN THE WHILE TRUE MAIN --->> self.time_to_start: {0}'.format(self.time_to_start))
+        #     # self.gpio_handler.binary_counter(0, self.led_array_pins)
+        #     self.experiment_tx_led_start = threading.Thread(target=self._led_start_experiment_signal)
+        #     self.experiment_tx_led_start.start()
+        #     self.experiment_tx_led_start.name = 'Experiment Tx thread start led signal'
 
 
     #  ======================== callbacks =======================================
