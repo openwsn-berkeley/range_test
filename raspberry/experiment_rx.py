@@ -164,7 +164,7 @@ class LoggerRx(threading.Thread):
 
 # =============================================================================
 
-class ExperimentRx(object):
+class ExperimentRx(threading.Thread):
 
     def __init__(self, settings):
         # local variables
@@ -206,8 +206,14 @@ class ExperimentRx(object):
         logging.info('radio init')
         self._radio_init()
         logging.info('start exp')
-        self.start_exp()
-        logging.debug('INIT COMPLETE')
+        # self.start_exp()
+        # logging.debug('INIT COMPLETE')
+
+        # start the thread
+        threading.Thread.__init__(self)
+        self.name = 'ExperimentRx_'
+        self.daemon = True
+        self.start()
 
 #  ========================== private =========================================
 
@@ -350,7 +356,8 @@ class ExperimentRx(object):
         self.queue_rx.put(item)
         self.queue_rx.put(time.time())
 
-    def start_exp(self):
+    # def start_exp(self):
+    def run(self):
         self.gpio_handler.binary_counter(31, self.led_array_pins)
         logging.info('lights must be on')
         self.f_push_button = True
@@ -454,11 +461,7 @@ def load_experiment_details():
 def main():
     f_start = False
 
-    # with open('/home/pi/range_test/raspberry/experiment_settings.json', 'r') as f:
-    #     settings = f.read().replace('\n', ' ').replace('\r', '')
-    #     settings = json.loads(settings)
-
-    logging.basicConfig(stream=sys.__stdout__, level=logging.INFO)
+    logging.basicConfig(stream=sys.__stdout__, level=logging.DEBUG)
     # experimentRx = ExperimentRx(settings)
 
     while True:
