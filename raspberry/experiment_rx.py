@@ -427,23 +427,14 @@ class ExperimentRx(threading.Thread):
 
     def _experiment_scheduling(self):
 
-        # if self.experiment_counter < (len(self.settings['test_settings'])):
-        self._execute_experiment_rx(self.settings['test_settings'][self.experiment_counter % len(
-            self.settings['test_settings'])])
-        self.time_next_experiment = self.settings['test_settings'][self.experiment_counter % len(
+        self.time_next_experiment = self.settings['test_settings'][(self.experiment_counter + 1) % len(
             self.settings['test_settings'])]['durationtx_s'] + SECURITY_TIME
-        logging.info('time of next experiment {0}'.format(self.time_next_experiment))
+        # logging.info('time of next experiment {0}'.format(self.time_next_experiment))
         self.experiment_scheduled = Timer(self.time_next_experiment, self._experiment_scheduling, ())
         self.experiment_scheduled.start()
+        self._execute_experiment_rx(self.settings['test_settings'][self.experiment_counter % len(
+            self.settings['test_settings'])])
         self.experiment_counter += 1
-        # else:
-        #     self._stop_exp()
-        #     self.radio_driver.radio_off()
-        #     self.radio_driver.radio_off_2_4ghz()
-        #     for led in self.led_array_pins:
-        #         self.gpio_handler.led_off(led)
-        #     self.gpio_handler.led_off(self.TRX_frame_pin)
-        #     self._led_end_experiment_signal()
 
 #  ============================ public ========================================
 

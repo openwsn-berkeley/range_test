@@ -230,49 +230,18 @@ class ExperimentTx(threading.Thread):
         self._led_end_experiment_signal()
         logging.debug('END OF EXPERIMENTS')
 
-    # def _experiment_scheduling(self):
-    #
-    #     logging.debug('entering the _experiment_scheduling')
-    #     while True:
-    #         logging.debug('IN THE _experiment_scheduling WAITING FOR THE self.f_schedule.set')
-    #         self.f_schedule.wait()
-    #         self.f_schedule.clear()
-    #         logging.debug('START SCHEDULING STUFF')
-    #         offset = START_OFFSET
-    #         for item in self.settings['test_settings']:
-    #             self.list_events_sched[self.settings['test_settings'].index(item)] = self.scheduler.enterabs(
-    #                 time.mktime(self.time_to_start.timetuple()) + offset, 1, self._execute_experiment_tx, (item,))
-    #             self.schedule_time[self.settings['test_settings'].index(item)] = offset
-    #             offset += item['durationtx_s'] + SECURITY_TIME
-    #
-    #         logging.info('time for each set of settings: {0}'.format(self.schedule_time))
-    #         self.scheduler.enterabs(time.mktime(self.time_to_start.timetuple()) + offset, 1, self._stop_exp, ())
-    #         logging.info('time left for the experiment to start: {0}'.format(time.mktime(self.time_to_start.timetuple())
-    #                                                                          + START_OFFSET - time.time()))
-    #         logging.info('time to start experiment: {0}'.format(self.time_to_start.timetuple()))
-    #         self.scheduler.run()
-    #         logging.info('END OF THE _experiment_scheduling')
     def _experiment_scheduling(self):
 
-        # if self.experiment_counter < (len(self.settings['test_settings'])):
+        self.time_next_experiment = self.settings['test_settings'][(self.experiment_counter + 1) % len(
+            self.settings['test_settings'])]['durationtx_s'] + SECURITY_TIME
+        # logging.info('time of next experiment {0}'.format(self.time_next_experiment))
+        self.experiment_scheduled = Timer(self.time_next_experiment, self._experiment_scheduling, ())
+        self.experiment_scheduled.start()
         self.experiment_tx_thread = threading.Thread(target=self._execute_experiment_tx, args=[self.settings[
             'test_settings'][self.experiment_counter % len(self.settings['test_settings'])]])
         self.experiment_tx_thread.start()
         self.experiment_tx_thread.name = 'TX 1000 packets'
-        self.time_next_experiment = self.settings['test_settings'][self.experiment_counter % len(
-            self.settings['test_settings'])]['durationtx_s'] + SECURITY_TIME
-        logging.info('time of next experiment {0}'.format(self.time_next_experiment))
-        self.experiment_scheduled = Timer(self.time_next_experiment, self._experiment_scheduling, ())
-        self.experiment_scheduled.start()
         self.experiment_counter += 1
-        # else:
-        #     self._stop_exp()
-        #     self.radio_driver.radio_off()
-        #     self.radio_driver.radio_off_2_4ghz()
-        #     for led in self.led_array_pins:
-        #         self.gpio_handler.led_off(led)
-        #     self.gpio_handler.led_off(self.TRX_frame_pin)
-        #     self._led_end_experiment_signal()
 
     def _modem_2ghz(self):
         self.modem_base_band_state = MODEM_2GHZ
