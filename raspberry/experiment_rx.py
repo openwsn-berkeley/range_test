@@ -427,9 +427,10 @@ class ExperimentRx(threading.Thread):
 
     def _experiment_scheduling(self):
 
-        self.time_next_experiment = self.settings['test_settings'][(self.experiment_counter + 1) % len(
+        self.time_next_experiment = self.settings['test_settings'][self.experiment_counter % len(
             self.settings['test_settings'])]['durationtx_s'] + SECURITY_TIME
-        # logging.info('time of next experiment {0}'.format(self.time_next_experiment))
+        logging.info('time of next experiment {0}, setting: {1}'.format(self.time_next_experiment,  self.settings[
+            'test_settings'][self.experiment_counter % len(self.settings['test_settings'])]))
         self.experiment_scheduled = Timer(self.time_next_experiment, self._experiment_scheduling, ())
         self.experiment_scheduled.start()
         self._execute_experiment_rx(self.settings['test_settings'][self.experiment_counter % len(
