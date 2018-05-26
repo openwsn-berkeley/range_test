@@ -69,7 +69,8 @@ class LoggerRx(threading.Thread):
             item = self.queue.get()
             if item == 'Start':
                 if self.results['radio_settings']:  # to know if this is the first time I pass in the logger
-                    self._print_results()  # print to log file
+                    # self._print_results()  # print to log file
+                    pass
                 self.rx_string = ['!' for i in range(len(self.settings['frame_lengths_15.4g']) * self.settings['numframes'])]
                 self.rssi_values = [None for i in
                                     range(len(self.settings['frame_lengths_15.4g']) * self.settings['numframes'])]
@@ -114,7 +115,7 @@ class LoggerRx(threading.Thread):
                     logging.error('UNKNOWN OBJECT IN THE QUEUE: {0}'.format(item))
 
             elif item == 'Print last':
-                self._print_results()
+                # self._print_results()
                 self.results['radio_settings'] = None  # by doing this I won't print twice the last set of settings.
 
             elif type(item) == float:
@@ -456,7 +457,7 @@ def load_experiment_details():
 def main():
     f_start = False
 
-    logging.basicConfig(stream=sys.__stdout__, level=logging.INFO)
+    logging.basicConfig(stream=sys.__stdout__, level=logging.DEBUG)
     # experimentRx = ExperimentRx(settings)
 
     while True:
