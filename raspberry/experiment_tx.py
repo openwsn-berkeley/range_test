@@ -492,31 +492,31 @@ class ExperimentTx(threading.Thread):
     #  ======================== callbacks =======================================
     
     def _cb_push_button(self, channel=13):
-        pass
-        # self.gpio_handler.clear_cb(13)
-        # # switch on all leds to let the user know the push button has been pressed and it got the signal.
-        # self.gpio_handler.binary_counter(31, self.led_array_pins)
-        # if not self.f_reset_button:
-        #     with self.dataLock:
-        #         self.start_experiment.set()
-        #     self.f_reset_button         = True
-        #
-        # else:
-        #     logging.warning('RESET BUTTON PRESSED')
-        #     with self.dataLock:
-        #         self.end_experiment.set()
-        #         self.f_schedule.set()
-        #         self.f_reset.set()
-        #         self.f_cancel_exp   = True
-        #         logging.info('f_reset set to true?: {0}'.format(self.f_reset.isSet()))
-        # time.sleep(1)
-        # self.gpio_handler.add_cb(self._cb_push_button, self.push_button_pin)
+        # pass
+        self.gpio_handler.clear_cb(13)
+        # switch on all leds to let the user know the push button has been pressed and it got the signal.
+        self.gpio_handler.binary_counter(31, self.led_array_pins)
+        if not self.f_reset_button:
+            with self.dataLock:
+                self.start_experiment.set()
+            self.f_reset_button         = True
+        
+        else:
+            logging.warning('RESET BUTTON PRESSED')
+            with self.dataLock:
+                self.end_experiment.set()
+                self.f_schedule.set()
+                self.f_reset.set()
+                self.f_cancel_exp   = True
+                logging.info('f_reset set to true?: {0}'.format(self.f_reset.isSet()))
+        time.sleep(1)
+        self.gpio_handler.add_cb(self._cb_push_button, self.push_button_pin)
 
 #  ============================ main ==========================================
 
 
 def load_experiment_details():
-    with open('/home/pi/range_test/raspberry/experiment_settings.json', 'r') as f:
+    with open('/home/pi/range_test/raspberry/experiment_settings_outdoors_range_test.json', 'r') as f:
         settings = f.read().replace('\n', ' ').replace('\r', '')
         settings = json.loads(settings)
         return settings

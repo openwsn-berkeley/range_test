@@ -448,7 +448,7 @@ class ExperimentRx(threading.Thread):
 
 
 def load_experiment_details():
-    with open('/home/pi/range_test/raspberry/experiment_settings.json', 'r') as f:
+    with open('/home/pi/range_test/raspberry/experiment_settings_outdoors_range_test.json', 'r') as f:
         settings = f.read().replace('\n', ' ').replace('\r', '')
         settings = json.loads(settings)
         return settings
