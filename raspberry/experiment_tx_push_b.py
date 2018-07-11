@@ -449,8 +449,8 @@ class ExperimentTx(threading.Thread):
             logging.info('time to start experiment: {0}'.format(self.time_to_start))
             self.led_start_indicator = threading.Thread(target=self._led_start_experiment_signal)
             self.led_start_indicator.start()
-            self.led_start_indicator.name = 'start_led_signal'  
-            logging.info('Experiment loaded, now waiting for the push button')  
+            self.led_start_indicator.name = 'TX start led signal'  
+            logging.info('Experiment loaded')  
             logging.info('current thread: {0}'.format(threading.current_thread()))        
             logging.info('thread enumerate: {0}'.format(threading.enumerate()))
             self.f_reset.wait()
@@ -516,7 +516,7 @@ def main():
         if input == 'q':
             if f_start:
                 experimentTx.gpio_handler.clean_gpio()
-            sys.exit(0)
+            # sys.exit(0)
 
 if __name__ == '__main__':
     main()
