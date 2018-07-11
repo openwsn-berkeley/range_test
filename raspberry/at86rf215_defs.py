@@ -199,6 +199,40 @@ RG_BBC1_FBTXE =             [0x3F, 0xFE]
 
 OFDMPHRRX_MCS_MASK =        0x07
 
+modulations_settings_ch_spacing = {
+    '2fsk_50kbps_FEC_200kHz'     : [200, 863125],
+    '2fsk_100kbps_FEC_400kHz'    : [400, 863225],
+    '4fsk_200kbps_FEC_400kHz'    : [400, 863225],
+    '2fsk_50kbps_200kHz'         : [200,863125],
+    '2fsk_100kbps_400kHz'        : [400,863225],
+    '4fsk_200kbps_400kHz'        : [400,863225],
+    'ofdm_100kbps_1200kHz_mcs0'  : [1200,863625],
+    'ofdm_200kbps_1200kHz_mcs1'  : [1200,863625],
+    'ofdm_400kbps_1200kHz_mcs2'  : [1200,863625],
+    'ofdm_800kbps_1200kHz_mcs3'  : [1200,863625],
+    'ofdm_50kbps_800kHz_mcs0'    : [800,863425],
+    'ofdm_100kbps_800kHz_mcs1'   : [800,863425],
+    'ofdm_200kbps_800kHz_mcs2'   : [800,863425],
+    'ofdm_400kbps_800kHz_mcs3'   : [800,863425],
+    'ofdm_600kbps_800kHz_mcs4'   : [800,863425],
+    'ofdm_800kbps_800kHz_mcs5'   : [800,863425],
+    'ofdm_50kbps_400kHz_mcs1'    : [400,863225],
+    'ofdm_100kbps_400kHz_mcs2'   : [400,863225],
+    'ofdm_200kbps_400kHz_mcs3'   : [400,863225],
+    'ofdm_300kbps_400kHz_mcs4'   : [400,863225],
+    'ofdm_400kbps_400kHz_mcs5'   : [400,863225],
+    'ofdm_600kbps_400kHz_mcs6'   : [400,863225],
+    'ofdm_50kbps_200kHz_mcs2'    : [200,863125],
+    'ofdm_100kbps_200kHz_mcs3'   : [200,863125],
+    'ofdm_150kbps_200kHz_mcs4'   : [200,863125],
+    'ofdm_200kbps_200kHz_mcs5'   : [200,863125],
+    'ofdm_300kbps_200kHz_mcs6'   : [200,863125],
+    'oqpsk_6.25kbps_600kHz'      : [100,868300], # I had 600 kHz, but I think it is wrong
+    'oqpsk_12.5kbps_600kHz'      : [100,868300], #, I had 600 kHz, but I think it is wrong
+    'oqpsk_25kbps_600kHz'        : [100,868300], # I had 600 kHz, but I think it is wrong
+    'oqpsk_50kbps_600kHz'        : [100,868300]  # I had 600 kHz, but I think it is wrong
+    }
+
 modulations_settings = {
     # fsk_option1_FEC
     '2fsk_50kbps_FEC_200kHz': [
