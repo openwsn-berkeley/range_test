@@ -69,7 +69,7 @@ class LoggerRx(threading.Thread):
             item = self.queue.get()
             if item == 'Start':
                 if self.results['radio_settings']:  # to know if this is the first time I pass in the logger
-                    # self._print_results()  # print to log file
+                    self._print_results()  # print to log file
                     pass
                 self.rx_string = ['!' for i in range(len(self.settings['frame_lengths_15.4g']) * self.settings['numframes'])]
                 self.rssi_values = [None for i in
@@ -154,10 +154,12 @@ class LoggerRx(threading.Thread):
         """
 
         self.results['RSSI_by_length'] = {
-                '127':  self.rssi_values[0:self.settings['numframes']]
+                '127':  self.rssi_values[0:self.settings['numframes']],
+                '2047': self.rssi_values[self.settings['numframes']:2*self.settings['numframes']]
             },
         self.results['rx_string'] = {
-                '127':  ''.join(self.rx_string[0:self.settings['numframes']])
+                '127':  ''.join(self.rx_string[0:self.settings['numframes']]),
+                '2047': ''.join(self.rx_string[self.settings['numframes']:2*self.settings['numframes']])
         }
 
 # ============================== public =======================================

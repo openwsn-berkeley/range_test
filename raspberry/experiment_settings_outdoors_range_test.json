@@ -1,7 +1,7 @@
 {
     "IFS":                    0.02,
     "frame_lengths_15.4g":    [127, 2047],
-    "version": "3",
+    "version": "3.0.0",
     "numframes": 100,
     "test_settings":    [
         {"channel_spacing_kHz":  200,  "frequency_0_kHz": 863125, "channel": 27, "modulation": "2fsk_50kbps_FEC_200kHz",               "durationtx_s":  77, "index": 1,  "modem": "subGHz", "standard": "802.15.4g"},
