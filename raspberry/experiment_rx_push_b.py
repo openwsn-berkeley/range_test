@@ -427,7 +427,7 @@ class ExperimentRx(threading.Thread):
                 # self.experiment_scheduled.cancel()
 
             logging.info('f_reset set to true?: {0}'.format(self.f_reset.isSet()))
-            self.gpio_handler.clean_gpio()
+            
             # sys.exit(0)
         time.sleep(5)
         self.gpio_handler.add_cb(self._cb_push_button, self.push_button_pin)
@@ -483,6 +483,7 @@ def main():
     experimentRx.f_reset.wait()
     logging.info('PROGRAM FINISHING...')
     experimentRx.f_reset.clear()
+    self.gpio_handler.clean_gpio()
     sys.exit(0)
     logging.warning('......THIS LINE SHOULD NEVER BE READ...')
 
