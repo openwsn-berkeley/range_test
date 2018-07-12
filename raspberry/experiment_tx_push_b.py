@@ -139,7 +139,7 @@ class ExperimentTx(threading.Thread):
 
         # start all the drivers
         # gps should be enabled
-        # self._gps_init()
+        self._gps_init()
         # logging.debug('radio setup')
         self._radio_setup()
         # logging.info('logger init')
@@ -180,7 +180,7 @@ class ExperimentTx(threading.Thread):
         while self.gps.is_gps_time_valid() is False:
             time.sleep(1)
         logging.info('... time valid')
-        logging.debug('out of GPS init')
+        logging.info('out of GPS init')
 
     def _logger_init(self):
         # initializes the LoggerRx thread

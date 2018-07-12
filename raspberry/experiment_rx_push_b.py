@@ -208,7 +208,7 @@ class ExperimentRx(threading.Thread):
         self.gpio_handler           = None
 
         # start all the drivers
-        # self._gps_init()
+        self._gps_init()
         # logging.info('radio setup')
         self._radio_setup()
         # logging.info('logger init')
