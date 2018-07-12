@@ -507,7 +507,7 @@ def main():
     experimentTx.f_reset.wait()
     logging.info('PROGRAM FINISHING...')
     experimentTx.f_reset.clear()
-    self.gpio_handler.clean_gpio()
+    experimentTx.gpio_handler.clean_gpio()
     sys.exit(0)
     logging.warning('.........................THIS LINE SHOULD NEVER BE READ.......')
 
