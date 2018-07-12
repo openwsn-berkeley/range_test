@@ -43,7 +43,7 @@ class LoggerRx(threading.Thread):
                 'numframes'])]
         self.rssi_values    = [None for i in range(len(self.settings['frame_lengths_15.4g'])*self.settings[
                 'numframes'])]
-        self.name_file          = '/home/pi/range_test_raw_data_ofdm_vs_oqpsk/experiments_results_' + \
+        self.name_file          = '/home/pi/range_test_outdoors/experiments_results_' + \
                                   socket.gethostname() + '.json'
         self.results            = {'type': 'end_of_cycle_rx', 'start_time_str': time.strftime(
             "%a, %d %b %Y %H:%M:%S UTC", time.gmtime()), 'start_time_epoch': time.time(), 'version': self.settings[
@@ -428,7 +428,7 @@ class ExperimentRx(threading.Thread):
 
             logging.info('f_reset set to true?: {0}'.format(self.f_reset.isSet()))
             self.gpio_handler.clean_gpio()
-            sys.exit(0)
+            # sys.exit(0)
         time.sleep(5)
         self.gpio_handler.add_cb(self._cb_push_button, self.push_button_pin)
 
@@ -458,7 +458,6 @@ class ExperimentRx(threading.Thread):
         self._execute_experiment_rx(self.settings['test_settings'][self.experiment_counter % len(
             self.settings['test_settings'])])
         self.experiment_counter += 1
-
 #  ============================ public ========================================
 
     def getStats(self):
@@ -477,24 +476,30 @@ def load_experiment_details():
 
 def main():
     f_start = False
-    logging.basicConfig(stream=sys.__stdout__, level=logging.DEBUG)
+    logging.basicConfig(stream=sys.__stdout__, level=logging.INFO)
     logging.info('PROGRAM STARTING...')
     experimentRx = ExperimentRx(load_experiment_details())
 
-    while True:
-        # for item in
-        input = raw_input('>')
-        if input == 's':
-            if not f_start:
-                f_start = True
-                logging.info('PROGRAM STARTING...')
-                # experimentRx = ExperimentRx(load_experiment_details())
-                logging.info('PROGRAM RUNNING')
-            else:
-                logging.info('PROGRAM ALREADY STARTED')
-        elif input == 'q': 
-            if f_start:
-                experimentRx.gpio_handler.clean_gpio()
+    experimentRx.f_reset.wait()
+    logging.info('PROGRAM FINISHING...')
+    experimentRx.f_reset.clear()
+    sys.exit(0)
+    logging.warning('......THIS LINE SHOULD NEVER BE READ...')
+
+    # while True:
+    #     # for item in
+    #     input = raw_input('>')
+    #     if input == 's':
+    #         if not f_start:
+    #             f_start = True
+    #             logging.info('PROGRAM STARTING...')
+    #             # experimentRx = ExperimentRx(load_experiment_details())
+    #             logging.info('PROGRAM RUNNING')
+    #         else:
+    #             logging.info('PROGRAM ALREADY STARTED')
+    #     elif input == 'q': 
+    #         if f_start:
+    #             experimentRx.gpio_handler.clean_gpio()
             # sys.exit(0)
 
 if __name__ == '__main__':

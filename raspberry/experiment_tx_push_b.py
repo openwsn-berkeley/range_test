@@ -40,7 +40,7 @@ class LoggerTx(threading.Thread):
         self.settings = settings
 
         # local variables
-        self.name_file = '/home/pi/range_test_raw_data_ofdm_vs_oqpsk/experiments_results_' + socket.gethostname() +\
+        self.name_file = '/home/pi/range_test_outdoors/experiments_results_' + socket.gethostname() +\
                          '.json'
         self.results = {'type': 'end_of_cycle_tx', 'start_time_str': time.strftime("%a, %d %b %Y %H:%M:%S UTC",
                                                                                    time.gmtime()),
@@ -229,21 +229,6 @@ class ExperimentTx(threading.Thread):
         self._led_end_experiment_signal()
         logging.debug('END OF EXPERIMENTS')
 
-    def _experiment_scheduling(self):
-
-        logging.info('current thread in the scheduling: {0}'.format(threading.current_thread()))
-        self.time_next_experiment = self.settings['test_settings'][self.experiment_counter % len(
-            self.settings['test_settings'])]['durationtx_s'] + SECURITY_TIME
-        logging.info('time of next experiment: {0}, setting: {1}'.format(self.time_next_experiment,  self.settings[
-            'test_settings'][self.experiment_counter % len(self.settings['test_settings'])]['modulation']))
-        self.experiment_scheduled = Timer(self.time_next_experiment, self._experiment_scheduling, ())
-        self.experiment_scheduled.start()
-        self.experiment_tx_thread = threading.Thread(target=self._execute_experiment_tx, args=[self.settings[
-            'test_settings'][self.experiment_counter % len(self.settings['test_settings'])]])
-        self.experiment_tx_thread.start()
-        self.experiment_tx_thread.name = 'schedule TX _100 packets'
-        self.experiment_counter += 1
-
     def _modem_2ghz(self):
         self.modem_base_band_state = MODEM_2GHZ
 
@@ -425,6 +410,7 @@ class ExperimentTx(threading.Thread):
         # self._radio_setup()
         logging.info('current thread: {0}'.format(threading.current_thread()))
         logging.info('WAITING FOR THE START BUTTON TO BE PRESSED')
+        logging.info('thread enumerate: {0}'.format(threading.enumerate()))
 
         # push button signal
         self.start_experiment.wait()
@@ -483,9 +469,24 @@ class ExperimentTx(threading.Thread):
                 # self.experiment_scheduled.cancel()
             logging.info('f_reset set to true?: {0}'.format(self.f_reset.isSet()))
             self.gpio_handler.clean_gpio()
-            sys.exit(0)
+            # sys.exit(0)
         time.sleep(5)
         self.gpio_handler.add_cb(self._cb_push_button, self.push_button_pin)
+
+    def _experiment_scheduling(self):
+
+        logging.info('current thread in the scheduling: {0}'.format(threading.current_thread()))
+        self.time_next_experiment = self.settings['test_settings'][self.experiment_counter % len(
+            self.settings['test_settings'])]['durationtx_s'] + SECURITY_TIME
+        logging.info('time of next experiment: {0}, setting: {1}'.format(self.time_next_experiment,  self.settings[
+            'test_settings'][self.experiment_counter % len(self.settings['test_settings'])]['modulation']))
+        self.experiment_scheduled = Timer(self.time_next_experiment, self._experiment_scheduling, ())
+        self.experiment_scheduled.start()
+        self.experiment_tx_thread = threading.Thread(target=self._execute_experiment_tx, args=[self.settings[
+            'test_settings'][self.experiment_counter % len(self.settings['test_settings'])]])
+        self.experiment_tx_thread.start()
+        self.experiment_tx_thread.name = 'schedule TX _100 packets'
+        self.experiment_counter += 1
 
 #  ============================ main ==========================================
 
@@ -503,20 +504,26 @@ def main():
     logging.info('PROGRAM STARTING...')
     experimentTx = ExperimentTx(load_experiment_details())
 
-    while True:
-        input = raw_input('>')
-        if input == 's':
-            if not f_start:
-                f_start = True
-                logging.info('PROGRAM STARTING...')
-                # experimentTx = ExperimentTx(load_experiment_details())
-                logging.info('PROGRAM RUNNING')
-            else:
-                logging.info('PROGRAM ALREADY STARTED')
-        if input == 'q':
-            if f_start:
-                experimentTx.gpio_handler.clean_gpio()
-            # sys.exit(0)
+    experimentTx.f_reset.wait()
+    logging.info('PROGRAM FINISHING...')
+    experimentTx.f_reset.clear()
+    sys.exit(0)
+    logging.warning('.........................THIS LINE SHOULD NEVER BE READ.......')
+
+    # while True:
+    #     input = raw_input('>')
+    #     if input == 's':
+    #         if not f_start:
+    #             f_start = True
+    #             logging.info('PROGRAM STARTING...')
+    #             # experimentTx = ExperimentTx(load_experiment_details())
+    #             logging.info('PROGRAM RUNNING')
+    #         else:
+    #             logging.info('PROGRAM ALREADY STARTED')
+    #     if input == 'q':
+    #         if f_start:
+    #             experimentTx.gpio_handler.clean_gpio()
+    #         sys.exit(0)
 
 if __name__ == '__main__':
     main()

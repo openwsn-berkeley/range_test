@@ -35,5 +35,5 @@
         {"channel_spacing_kHz":  5000, "frequency_0_kHz": 850000, "channel": 11, "modulation": "oqpsk_250kbps_2000kHz",                "durationtx_s":   8, "index": 25, "modem": "2.4GHz", "standard": "802.15.4-2006"}
 
     ],
-    "frame_lengths_15.4-2006":    [20, 127]
+    "frame_lengths_15.4-2006":    [127]
 }
