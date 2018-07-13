@@ -450,6 +450,7 @@ class ExperimentTx(threading.Thread):
         logging.info('PUSH BUTTON PRESSED')
         # pass
         self.gpio_handler.clear_cb(13)
+        time.sleep(1)
         # switch on all leds to let the user know the push button has been pressed and it got the signal.
         self.gpio_handler.binary_counter(31, self.led_array_pins)
         if not self.f_reset_button:
@@ -457,6 +458,7 @@ class ExperimentTx(threading.Thread):
                 self.start_experiment.set()
             self.f_reset_button         = True
             logging.info('START BUTTON PRESSED')
+            self.gpio_handler.add_cb(self._cb_push_button, self.push_button_pin)
         
         else:
             
@@ -469,9 +471,8 @@ class ExperimentTx(threading.Thread):
                 # self.experiment_scheduled.cancel()
             logging.info('f_reset set to true?: {0}'.format(self.f_reset.isSet()))
             self.gpio_handler.clean_gpio()
-            # sys.exit(0)
-        time.sleep(5)
-        self.gpio_handler.add_cb(self._cb_push_button, self.push_button_pin)
+            sys.exit(0)
+       
 
     def _experiment_scheduling(self):
 
@@ -500,7 +501,7 @@ def load_experiment_details():
 
 def main():
     f_start = False
-    logging.basicConfig(stream=sys.__stdout__, level=logging.INFO)
+    logging.basicConfig(stream=sys.__stdout__, level=logging.DEBUG)
     logging.info('PROGRAM STARTING...')
     experimentTx = ExperimentTx(load_experiment_details())
 
