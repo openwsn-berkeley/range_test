@@ -468,6 +468,11 @@ class ExperimentTx(threading.Thread):
                 logging.info('RESET BUTTON PRESSED')
                 self.f_reset.set()
                 self.f_cancel_exp  = True
+                logging.warning('CLEANING GPIO')
+                self.gpio_handler.clean_gpio()
+                logging.warning('CLEANED GPIO')
+                logging.info('PROGRAM FINISHING in the ISR PUSH BUTTON...')
+                sys.exit(0)
                 # self.experiment_scheduled.cancel()
             logging.info('f_reset set to true?: {0}'.format(self.f_reset.isSet()))
             # self.gpio_handler.clean_gpio()

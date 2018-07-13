@@ -424,6 +424,11 @@ class ExperimentRx(threading.Thread):
                 # self.f_schedule.set()
                 logging.warning('RESET BUTTON PRESSED')
                 self.f_reset.set()
+                logging.warning('CLEANING GPIO')
+                self.gpio_handler.clean_gpio()
+                logging.warning('CLEANED GPIO')
+                logging.info('PROGRAM FINISHING in the ISR PUSH BUTTON...')
+                sys.exit(0)
                 # self.f_cancel_exp   = True
                 # self.experiment_scheduled.cancel()
 
