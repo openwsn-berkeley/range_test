@@ -418,14 +418,16 @@ class ExperimentRx(threading.Thread):
             logging.info('START BUTTON PRESSED')
             self.gpio_handler.add_cb(self._cb_push_button, self.push_button_pin)
         else:
-            
+
             with self.dataLock:
                 # self.end_experiment.set()
                 # self.f_schedule.set()
                 logging.warning('RESET BUTTON PRESSED')
+                logging.warning('CLEANING GPIO')
+                self.gpio_handler.clean_gpio()
+                logging.warning('CLEANED GPIO')
+                logging.info('EXIT ISR RESET BUTTON')
                 self.f_reset.set()
-                logging.info('PROGRAM FINISHING in the ISR PUSH BUTTON...')
-                sys.exit(0)
                 # self.f_cancel_exp   = True
                 # self.experiment_scheduled.cancel()
 
@@ -485,9 +487,6 @@ def main():
     experimentRx.f_reset.wait()
     logging.info('PROGRAM FINISHING...')
     experimentRx.f_reset.clear()
-    logging.warning('CLEANING GPIO')
-    experimentRx.gpio_handler.clean_gpio()
-    logging.warning('CLEANED GPIO')
     logging.info('PROGRAM FINISHING... BYE BYE')
     time.sleep(2)
     sys.exit(0)

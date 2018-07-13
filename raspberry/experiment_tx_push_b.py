@@ -465,14 +465,12 @@ class ExperimentTx(threading.Thread):
             with self.dataLock:
                 # self.end_experiment.set()
                 # self.f_schedule.set()
-                logging.info('RESET BUTTON PRESSED')
-                self.f_reset.set()
-                self.f_cancel_exp  = True
+                logging.warning('RESET BUTTON PRESSED')
                 logging.warning('CLEANING GPIO')
                 self.gpio_handler.clean_gpio()
                 logging.warning('CLEANED GPIO')
-                logging.info('PROGRAM FINISHING in the ISR PUSH BUTTON...')
-                sys.exit(0)
+                logging.info('EXIT ISR RESET BUTTON')
+                self.f_reset.set()
                 # self.experiment_scheduled.cancel()
             logging.info('f_reset set to true?: {0}'.format(self.f_reset.isSet()))
             # self.gpio_handler.clean_gpio()
