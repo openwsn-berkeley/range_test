@@ -302,7 +302,11 @@ class At86rf215(object):
             rssi = 'not valid'
 
         if rssi >= 128:
-            rssi = (((~rssi) & 0xFF) + 1) * -1
+            try:
+                rssi = (((~rssi) & 0xFF) + 1) * -1
+            except TypeError as e:
+                logging.warning('exception: {0}'.format(e))
+                logging.warning('Strange value: {0} in the RSSI sub-GHz'.format(rssi))
 
         return frame_rcv, rssi, crc, mcs
 
@@ -328,8 +332,10 @@ class At86rf215(object):
             rssi = 'not valid'
 
         if rssi >= 128:
-            rssi = (((~rssi) & 0xFF) + 1) * -1
-
+            try:
+                rssi = (((~rssi) & 0xFF) + 1) * -1
+            except TypeError:
+                logging.warning('Strange value: {0} in the RSSI 2.4 GHz'.format(rssi))
         return frame_rcv, rssi, crc, mcs
 
     def radio_write_config(self, settings):

@@ -470,8 +470,8 @@ class ExperimentTx(threading.Thread):
                 self.f_cancel_exp  = True
                 # self.experiment_scheduled.cancel()
             logging.info('f_reset set to true?: {0}'.format(self.f_reset.isSet()))
-            self.gpio_handler.clean_gpio()
-            sys.exit(0)
+            # self.gpio_handler.clean_gpio()
+            # sys.exit(0)
        
 
     def _experiment_scheduling(self):
@@ -508,6 +508,7 @@ def main():
     experimentTx.f_reset.wait()
     logging.info('PROGRAM FINISHING...')
     experimentTx.f_reset.clear()
+    experimentTx.gpio_handler.clean_gpio()
     sys.exit(0)
     logging.warning('.........................THIS LINE SHOULD NEVER BE READ.......')
 
