@@ -208,7 +208,7 @@ class ExperimentRx(threading.Thread):
         self.gpio_handler           = None
 
         # start all the drivers
-        # self._gps_init()
+        self._gps_init()
         # logging.info('radio setup')
         self._radio_setup()
         # logging.info('logger init')
@@ -480,7 +480,7 @@ def load_experiment_details():
 
 def main():
     f_start = False
-    logging.basicConfig(stream=sys.__stdout__, level=logging.DEBUG)
+    logging.basicConfig(stream=sys.__stdout__, level=logging.INFO)
     logging.info('PROGRAM STARTING...')
     experimentRx = ExperimentRx(load_experiment_details())
 

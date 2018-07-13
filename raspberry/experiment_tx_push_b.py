@@ -139,7 +139,7 @@ class ExperimentTx(threading.Thread):
 
         # start all the drivers
         # gps should be enabled
-        # self._gps_init()
+        self._gps_init()
         # logging.debug('radio setup')
         self._radio_setup()
         # logging.info('logger init')
@@ -504,7 +504,7 @@ def load_experiment_details():
 
 def main():
     f_start = False
-    logging.basicConfig(stream=sys.__stdout__, level=logging.DEBUG)
+    logging.basicConfig(stream=sys.__stdout__, level=logging.INFO)
     logging.info('PROGRAM STARTING...')
     experimentTx = ExperimentTx(load_experiment_details())
 
