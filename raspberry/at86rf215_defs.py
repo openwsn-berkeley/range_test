@@ -405,7 +405,7 @@ modulations_settings = {
         (RG_BBC0_FSKPHRTX,      0x00)],
 
     # oqpsk_rate0
-    'oqpsk_6.25kbps_600kHz': [
+    'oqpsk_6.25kbps': [
         (RG_BBC0_PC,            0x17),
         (RG_BBC0_OQPSKPHRTX,    0x00),  # MR-OQPSK, rate mode 0
         (RG_BBC0_OQPSKC0,       0x10),  # 100kchips/s, RC-0.8 shaping, direct-modulation enabled
@@ -426,7 +426,7 @@ modulations_settings = {
         (RG_RF09_PAC,           0x75)],  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x15~8 dBm
 
     # oqpsk_rate1
-    'oqpsk_12.5kbps_600kHz': [
+    'oqpsk_12.5kbps': [
         (RG_BBC0_PC,            0x17),
         (RG_BBC0_OQPSKPHRTX,    0x02),  #  MR-OQPSK, rate mode 1
         (RG_BBC0_OQPSKC0,       0x10),  #  100kchips/s, RC-0.8 shaping, direct-modulation enabled
@@ -447,7 +447,7 @@ modulations_settings = {
         (RG_RF09_PAC,           0x75)],  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x15~8 dBm
 
     # oqpsk_rate2
-    'oqpsk_25kbps_600kHz': [
+    'oqpsk_25kbps': [
         (RG_BBC0_PC,            0x17),
         (RG_BBC0_OQPSKPHRTX,    0x04),  # // MR-OQPSK, rate mode 2
         (RG_BBC0_OQPSKC0,       0x10),  # // 100kchips/s, RC-0.8 shaping, direct-modulation enabled
@@ -468,7 +468,7 @@ modulations_settings = {
         (RG_RF09_PAC,           0x75)],  # Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x15~8 dBm
 
     # oqpsk_rate3
-    'oqpsk_50kbps_600kHz': [
+    'oqpsk_50kbps': [
         (RG_BBC0_PC,            0x17),
         (RG_BBC0_OQPSKPHRTX,    0x06),  # # MR-OQPSK, rate mode 3
         (RG_BBC0_OQPSKC0,       0x10),  ## 100kchips/s, RC-0.8 shaping, direct-modulation enabled
