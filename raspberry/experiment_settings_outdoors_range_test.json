@@ -31,7 +31,10 @@
         {"channel_spacing_kHz":  200,  "frequency_0_kHz": 863125, "channel": 27, "modulation": "subGHz_ofdm_150kbps_200kHz_mcs4",      "durationtx_s":  19, "index": 25, "modem": "subGHz", "standard": "802.15.4g"},
         {"channel_spacing_kHz":  200,  "frequency_0_kHz": 863125, "channel": 27, "modulation": "subGHz_ofdm_200kbps_200kHz_mcs5",      "durationtx_s":  16, "index": 26, "modem": "subGHz", "standard": "802.15.4g"},
         {"channel_spacing_kHz":  200,  "frequency_0_kHz": 863125, "channel": 27, "modulation": "subGHz_ofdm_300kbps_200kHz_mcs6",      "durationtx_s":  13, "index": 27, "modem": "subGHz", "standard": "802.15.4g"},
-        {"channel_spacing_kHz":  600,  "frequency_0_kHz": 868300, "channel":  0, "modulation": "oqpsk_50kbps_600kHz",                  "durationtx_s":  49, "index": 31, "modem": "subGHz", "standard": "802.15.4g"},
+        {"channel_spacing_kHz":  600,  "frequency_0_kHz": 868300, "channel":  0, "modulation": "oqpsk_6.25kbps",                       "durationtx_s": 313, "index": 28, "modem": "subGHz", "standard": "802.15.4g"},
+        {"channel_spacing_kHz":  600,  "frequency_0_kHz": 868300, "channel":  0, "modulation": "oqpsk_12.5kbps",                       "durationtx_s": 163, "index": 29, "modem": "subGHz", "standard": "802.15.4g"},
+        {"channel_spacing_kHz":  600,  "frequency_0_kHz": 868300, "channel":  0, "modulation": "oqpsk_25kbps",                         "durationtx_s":  88, "index": 30, "modem": "subGHz", "standard": "802.15.4g"},
+        {"channel_spacing_kHz":  600,  "frequency_0_kHz": 868300, "channel":  0, "modulation": "oqpsk_50kbps",                         "durationtx_s":  49, "index": 31, "modem": "subGHz", "standard": "802.15.4g"},
         {"channel_spacing_kHz":  5000, "frequency_0_kHz": 850000, "channel": 11, "modulation": "oqpsk_250kbps_2000kHz",                "durationtx_s":   8, "index": 25, "modem": "2.4GHz", "standard": "802.15.4-2006"}
 
     ],
