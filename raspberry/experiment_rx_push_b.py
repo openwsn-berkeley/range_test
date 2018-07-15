@@ -368,6 +368,7 @@ class ExperimentRx(threading.Thread):
         # setup the radio
         # self._radio_setup()
         logging.info('current thread: {0}'.format(threading.current_thread()))
+        logging.info('thread enumerate: {0}'.format(threading.enumerate()))
         logging.info('WAITING FOR THE START BUTTON TO BE PRESSED')
 
         # push button signal
