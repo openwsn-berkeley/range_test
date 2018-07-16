@@ -367,6 +367,9 @@ class ExperimentRx(threading.Thread):
         self.queue_rx.put(item)
         self.queue_rx.put(time.time())
 
+        # sends the  GPS info to the logger class through queue
+        self.queue_rx.put(self.gps.gps_info_read())
+
     def run(self):
         # setup the radio
         # self._radio_setup()

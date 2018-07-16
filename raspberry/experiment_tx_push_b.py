@@ -282,7 +282,7 @@ class ExperimentTx(threading.Thread):
         self.queue_tx.put(item)
 
         # log GPS info
-        # self.queue_tx.put(self.gps.gps_info_read())
+        self.queue_tx.put(self.gps.gps_info_read())
 
         # if self.modem_base_band_state == MODEM_SUB_GHZ:
         if item['standard'] == '802.15.4g':
