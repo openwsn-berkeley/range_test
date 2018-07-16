@@ -443,7 +443,7 @@ class ExperimentRx(threading.Thread):
             logging.info('f_reset set to true?: {0}'.format(self.f_reset.isSet()))
             # self.gpio_handler.clean_gpio()
             # sys.exit(0)
-         time.sleep(1)
+        time.sleep(1)
         
 
 
