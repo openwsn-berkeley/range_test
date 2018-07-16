@@ -429,6 +429,8 @@ class ExperimentRx(threading.Thread):
             with self.dataLock:
                 # self.end_experiment.set()
                 # self.f_schedule.set()
+                # cleaning the cb of the TRX frame
+                self.gpio_handler.clear_cb(11)
                 logging.warning('RESET BUTTON PRESSED')
                 logging.warning('CLEANING GPIO')
                 self.gpio_handler.clean_gpio()
