@@ -415,7 +415,7 @@ class ExperimentRx(threading.Thread):
         logging.info('PUSH BUTTON PRESSED')
         # pass
         self.gpio_handler.clear_cb(13)
-        time.sleep(1)
+       
         # switch on all leds to let the user know the push button has been pressed and it got the signal.
         self.gpio_handler.binary_counter(31, self.led_array_pins)
         if not self.f_reset_button:
@@ -443,6 +443,7 @@ class ExperimentRx(threading.Thread):
             logging.info('f_reset set to true?: {0}'.format(self.f_reset.isSet()))
             # self.gpio_handler.clean_gpio()
             # sys.exit(0)
+         time.sleep(1)
         
 
 
