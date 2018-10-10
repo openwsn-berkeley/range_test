@@ -51,7 +51,12 @@ class LoggerRx(threading.Thread):
 
         while True:
             item = self.queue.get()
-            logging.warning('(frame_rcv, rssi, crc, mcs): {0}'.format(item))
+            # logging.warning('(frame_rcv, rssi, crc, mcs): {0}, type: {1}'.format(item, type(item[0])))
+            frame = [hex(x) for x in item[0]]
+            logging.debug('frame length: {0}'.format(len(frame)))
+            logging.debug('frame_rcv: {0}'.format(frame))
+            logging.debug('rssi, crc, mcs: {0}'.format(item[1:]))
+            logging.debug('-------------------------------------------------------------------------')
 
 # ============================== public =======================================
 

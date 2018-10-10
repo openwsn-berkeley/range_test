@@ -382,6 +382,9 @@ class ExperimentRx(threading.Thread):
         self.start_experiment.clear()
 
         while True:
+            with self.dataLock:
+                if self.f_reset.is_set():
+                    break
             # gets current time and determines the running time for the experiment to start
             self.started_time = time.time()
             self.hours, self.minutes = self._start_time_experiment()

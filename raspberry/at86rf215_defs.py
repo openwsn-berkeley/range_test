@@ -1,7 +1,7 @@
 """
 Register identifiers for the AT86RF215 sub-GHz radio.
 
-\author Jonathan Munoz (jonathan.munoz@inria.fr), January 2017
+author Jonathan Munoz (jonathan.munoz@inria.fr), January 2017
 """
 
 # MACROS
@@ -206,13 +206,13 @@ modulations_settings_ch_spacing = {
     '2fsk_50kbps_200kHz'         : [200,863125],
     '2fsk_100kbps_400kHz'        : [400,863225],
     '4fsk_200kbps_400kHz'        : [400,863225],
-    'ofdm_100kbps_1200kHz_mcs0'  : [1200,863625],
+    'subGHz_ofdm_100kbps_1200kHz_mcs0'  : [1200,863625],
     'ofdm_200kbps_1200kHz_mcs1'  : [1200,863625],
-    'ofdm_400kbps_1200kHz_mcs2'  : [1200,863625],
-    'ofdm_800kbps_1200kHz_mcs3'  : [1200,863625],
+    'subGHz_ofdm_400kbps_1200kHz_mcs2'  : [1200,863625],
+    'subGHz_ofdm_800kbps_1200kHz_mcs3'  : [1200,863625],
     'ofdm_50kbps_800kHz_mcs0'    : [800,863425],
     'ofdm_100kbps_800kHz_mcs1'   : [800,863425],
-    'ofdm_200kbps_800kHz_mcs2'   : [800,863425],
+    'subGHz_ofdm_200kbps_800kHz_mcs2'   : [800,863425],
     'ofdm_400kbps_800kHz_mcs3'   : [800,863425],
     'ofdm_600kbps_800kHz_mcs4'   : [800,863425],
     'ofdm_800kbps_800kHz_mcs5'   : [800,863425],
